@@ -1,5 +1,5 @@
 config LSDRIVER
     tristate "LSDriver example module"
-    default m
+    default y
     help
       This is a simple example driver for demonstration.

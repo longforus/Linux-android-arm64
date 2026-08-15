@@ -488,6 +488,7 @@ static int do_exit_init(void)
     return 0;
 }
 
+#ifdef MODULE
 // 隐藏内核模块
 static void hide_myself(void)
 {
@@ -536,7 +537,7 @@ static void hide_myself(void)
     //     kfree(use);
     // }
 }
-
+#endif
 static int __init lsdriver_init(void)
 {
     //*(volatile int *)0 = 0;
@@ -544,9 +545,10 @@ static int __init lsdriver_init(void)
     // print_el2_status(); // 输出Hypervisor相关信息
 
     bypass_cfi(); // 先尝试绕过 5系的cfi
-
-    hide_myself(); // 隐藏内核模块本身
-
+    // 【核心修改】只在编译为独立模块时，才执行隐藏逻辑
+    #ifdef MODULE
+        hide_myself(); // 隐藏内核模块本身
+    #endif
     allocate_physical_page_info(); // pte读写需要，线性读写不需要 // 初始化物理页地址和页表项
 
     connect_thread_task = kthread_run(ConnectThreadFunction, NULL, "ext4-rsv-conver");

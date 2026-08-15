@@ -11,7 +11,7 @@
 #endif
 
 #ifndef LS_LOG_TAG
-#define LS_LOG_TAG "ls"
+#define LS_LOG_TAG "xst-ls"
 #endif
 
 #ifndef LS_DEBUG_LOG
