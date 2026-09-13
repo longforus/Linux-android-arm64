@@ -55,7 +55,7 @@ public: // 共有结构体和锁
             {
                 while (__atomic_load_n(&locked, __ATOMIC_RELAXED))
                 {
-                    asm volatile("yield" ::: "memory");
+                    asm volatile("yield");
                 }
             }
         }
@@ -348,6 +348,9 @@ public: // 共有结构体和锁
         request_op_stepbp_set,    // 设置单步 PC breakpoint
         request_op_stepbp_remove, // 删除单步 PC breakpoint
 
+        request_op_dptdbg_set,    // 设置主线程 UDF shadow-PGD breakpoint
+        request_op_dptdbg_remove, // 删除主线程 UDF shadow-PGD breakpoint
+
         request_op_syscall_monitor_set,    // 监控指定进程的系统调用
         request_op_syscall_monitor_remove, // 取消指定进程的系统调用监控
 
@@ -371,10 +374,14 @@ public: // 共有结构体和锁
     isb:指令执行屏障,CPU流水线重新取址
     
     asm volatile("" ::: "memory") 是当前位置的编译器内存屏障，禁止其它内存访问跨越它重排，是编译时防止指令重排
-    但不会绕过硬件指令访问乱序
+    实际看汇编发现，这个编译器屏障作用并不大
+    C/C++ 语句本身有执行顺序，编译器必须保证最终程序符合 C/C++ 抽象的可观察行为。它不会无依据地改变程序语义。
+    并且kernel/user/op/status 被声明为 volatile，编译器不能把访问删除合并，优化时不会对volatile的访问进行重排
+    但不会绕过硬件指令访问乱序，对应到硬件屏障就是
     dmb:指令访问顺序屏障,load/store 内存访问指令的约束乱序访问
    
     然后dsb,isb,dmb指令操作数都是共享域范围:ish / nsh / osh / ishst
+    现在轮询标志位kernel和user的方式互相通知完美运行极速低功耗无任何问题，也有一种sev和wfe指令可以用于互相唤醒通知，暂时不变
     */
         volatile bool kernel;        // 由用户模式设置 true = 内核有待处理的请求, false = 请求已完成
         volatile bool user;          // 由内核模式设置 true = 用户模式有待处理的请求, false = 请求已完成
@@ -839,6 +846,14 @@ public: // 外部硬件断点接口
     {
         HandleStepbpEvent(request_op_stepbp_remove);
     }
+    int SetProcessDptdbgRef(std::span<const bp_point> points)
+    {
+        return HandleDptdbgEvent(request_op_dptdbg_set, points);
+    }
+    void RemoveProcessDptdbgRef()
+    {
+        HandleDptdbgEvent(request_op_dptdbg_remove);
+    }
 
 public: // 外部系统调用监控接口
     int StartSyscallMonitor(int pid)
@@ -881,39 +896,30 @@ private: // 私有实现，外部无需关系
 
     inline void StoreRequestOp(request_op op)
     {
-        asm volatile("" ::: "memory"); // 前边界:前面的读写不允许排这个后面，这里的读写也不允许排前面
         req->op = op;
-        asm volatile("" ::: "memory"); // 后边界:后面的读写不允许排前面，这里的读写也不允许排后面
     }
 
     inline void StoreRequestStatus(int status)
     {
-        asm volatile("" ::: "memory");
         req->status = status;
-        asm volatile("" ::: "memory");
     }
 
     inline int LoadRequestStatus()
     {
-        asm volatile("" ::: "memory");
         int status = req->status;
-        asm volatile("" ::: "memory");
         return status;
     }
 
     inline void IoCommitAndWait()
     {
-        asm volatile("" ::: "memory");
         req->kernel = true;
 
-        asm volatile("" ::: "memory");
         // 等内核完成
         while (!req->user)
         {
             asm volatile("yield");
         }
         // 消费完成标志
-        asm volatile("" ::: "memory");
         req->user = false;
     }
 
@@ -934,12 +940,10 @@ private: // 私有实现，外部无需关系
         LS_LOGI_TAG("Driver", "分配虚拟地址成功: 地址=%p 大小=%zu", req, sizeof(request_obj));
         LS_LOGI_TAG("Driver", "当前进程 PID=%d，等待驱动握手", getpid());
 
-        asm volatile("" ::: "memory");
         while (!req->user)
         {
             asm volatile("yield");
         }
-        asm volatile("" ::: "memory");
         req->user = false;
 
         LS_LOGI_TAG("Driver", "驱动已经连接");
@@ -1010,10 +1014,8 @@ private: // 私有实现，外部无需关系
                 break;
             }
         };
-        asm volatile("" ::: "memory");
         while (processed < size)
         {
-            asm volatile("" ::: "memory");
             const size_t chunk = std::min(size - processed, sizeof(req->vmemrw_info.user_buffer));
             StoreRequestOp(op);
             req->tgid = global_pid;
@@ -1021,10 +1023,10 @@ private: // 私有实现，外部无需关系
             req->vmemrw_info.size = chunk;
             StoreRequestStatus(0);
 
-            asm volatile("" ::: "memory");
             if (is_read)
             {
                 if (size > 8) __builtin_memset(req->vmemrw_info.user_buffer, 0, chunk);
+                // 小尺寸读取先保存调用方原值；内核读取失败且未覆盖共享缓冲区时，回拷仍保持原值。
                 else copy_virtual_memory_chunk(req->vmemrw_info.user_buffer, static_cast<uint8_t *>(buffer) + processed, chunk);
             }
             else
@@ -1033,17 +1035,14 @@ private: // 私有实现，外部无需关系
             }
             IoCommitAndWait();
 
-            asm volatile("" ::: "memory");
             const int requestStatus = LoadRequestStatus();
             lastStatus = requestStatus;
             if (requestStatus > 0) successfulBytes += std::min(static_cast<size_t>(requestStatus), chunk);
 
-            asm volatile("" ::: "memory");
             if (is_read) copy_virtual_memory_chunk(static_cast<uint8_t *>(buffer) + processed, req->vmemrw_info.user_buffer, chunk);
 
             processed += chunk;
         }
-        asm volatile("" ::: "memory");
         if (successfulBytes == 0) return lastStatus;
         return successfulBytes > static_cast<size_t>(INT_MAX) ? -EOVERFLOW : static_cast<int>(successfulBytes);
     }
@@ -1175,6 +1174,32 @@ private: // 私有实现，外部无需关系
         StoreRequestOp(op);
         StoreRequestStatus(0);
         if (op == request_op_stepbp_set)
+        {
+            req->tgid = global_pid;
+            req->bp_info.tgid = global_pid;
+            const size_t count = std::min(points.size(), std::size(req->bp_info.points));
+            for (size_t index = 0; index < count; ++index)
+            {
+                req->bp_info.points[index].hit_addr = points[index].hit_addr;
+                req->bp_info.points[index].bt = points[index].bt;
+                req->bp_info.points[index].bl = points[index].bl;
+                req->bp_info.points[index].bs = points[index].bs;
+            }
+        }
+
+        IoCommitAndWait();
+        return LoadRequestStatus();
+    }
+
+    // DPTDBG 复用 bp_info.points 和 records 存储命中现场
+    int HandleDptdbgEvent(request_op op, std::span<const bp_point> points = {})
+    {
+        std::scoped_lock<SpinLock> lock(m_mutex);
+        if (op != request_op_dptdbg_set && op != request_op_dptdbg_remove) return -1;
+
+        StoreRequestOp(op);
+        StoreRequestStatus(0);
+        if (op == request_op_dptdbg_set)
         {
             req->tgid = global_pid;
             req->bp_info.tgid = global_pid;
