@@ -40,11 +40,13 @@ ccflags-y += -flto
 # 开启 debug 输出；需要 pr_debug 时手动启用。
 # ccflags-y += -DDEBUG
 
-# 全模块统一启用模板显式汇编需要的 ARMv8.6、FP16、LSE、RCpc、CRC、
-# Dot Product、FP16FML、FCMA、BF16 和 I8MM，让 Clang 集成汇编器识别对应助记符。
-# 统一启用对应指令集后，汇编字符串无需再重复声明局部架构扩展(.arch_extension)。
+# 普通 C/CFI 入口以 Pixel 6 的 ARMv8.2 为基线，不能全局声明 ARMv8.6。
+# 否则 Clang 会在初始化跳板自动生成 PACIA/RETAA 等非 HINT 指令，
+# 在没有对应指针认证能力的 CPU 上，尚未进入 lsdriver_init 就会崩溃回退槽位。
+# BF16/I8MM 等扩展供显式 SIMD 汇编模板使用；下面禁止自动 FP/SIMD 生成，
+# 模板调用仍必须经过已有 CPU 特性守卫。较新指令不能仅凭编译成功就直接执行。
 # Clang 12 仍无法识别的更新指令继续在模板中使用机器码。
-ccflags-y += -march=armv8.6-a+bf16+i8mm+fp16fml+fp16+lse+rcpc+crc
+ccflags-y += -march=armv8.2-a+bf16+i8mm+fp16fml+fp16+lse+rcpc+crc+dotprod
 
 # 禁止优化器从普通 C 循环和基本块主动生成 Advanced SIMD 向量代码。
 # 移除 -mgeneral-regs-only 的对象还会额外使用 -mno-implicit-float。

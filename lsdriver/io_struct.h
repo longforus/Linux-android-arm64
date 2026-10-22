@@ -311,6 +311,7 @@ enum request_op
     request_op_env_get_params, // 获取指定task环境参数
 
     request_op_kernel_exit, // 内核线程退出
+    request_op_monitor_log_read, // 读取驱动有界监控日志（追加，旧操作编号不变）
 
 };
 

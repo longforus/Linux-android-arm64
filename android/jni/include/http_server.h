@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <nlohmann/json.hpp>
@@ -1191,7 +1191,9 @@ namespace
 
         if (op == "syscall.read")
         {
-            const std::string log = SyscallLog::ReadDmesg("sysmon");
+            int status = 0;
+            const std::string log = SyscallLog::ReadDmesg("sysmon", &status);
+            if (status < 0) return fail(std::format("读取驱动监控日志失败 status={}，请使用配套新版内核", status));
             return okData({{"log", log}, {"line_count", std::ranges::count(log, '\n')}});
         }
 
@@ -1206,7 +1208,9 @@ namespace
 
         if (op == "cntvct.read")
         {
-            const std::string log = SyscallLog::ReadDmesg("cntvct");
+            int status = 0;
+            const std::string log = SyscallLog::ReadDmesg("cntvct", &status);
+            if (status < 0) return fail(std::format("读取驱动监控日志失败 status={}，请使用配套新版内核", status));
             return okData({{"log", log}, {"line_count", std::ranges::count(log, '\n')}});
         }
 

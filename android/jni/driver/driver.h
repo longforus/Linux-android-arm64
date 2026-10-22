@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <algorithm>
 #include <atomic>
 #include <cerrno>
@@ -360,6 +360,7 @@ public: // 共有结构体和锁
         request_op_env_get_params, // 获取指定task环境参数
 
         request_op_kernel_exit, // 内核线程退出
+        request_op_monitor_log_read, // 读取驱动有界监控日志（追加，旧操作编号不变）
 
     };
 
@@ -866,6 +867,25 @@ public: // 外部系统调用监控接口
         return HandleSyscallMonitorEvent(request_op_syscall_monitor_remove, pid);
     }
 
+public: // 有界日志读取，不依赖应用执行 dmesg 的权限
+    int ReadMonitorLog(std::string_view tag, std::string &output)
+    {
+        output.clear();
+        const uint64_t selector = tag == "sysmon" ? 1 : tag == "cntvct" ? 2 : 0;
+        if (!selector) return -EINVAL;
+        std::scoped_lock<SpinLock> lock(m_mutex);
+        StoreRequestOp(request_op_monitor_log_read);
+        req->vmemrw_info.rw_addr = selector;
+        req->vmemrw_info.size = sizeof(req->vmemrw_info.user_buffer);
+        StoreRequestStatus(-EOPNOTSUPP); // 旧内核不识别新增操作时显式报错，不能伪装为空日志。
+        IoCommitAndWait();
+        const int size = LoadRequestStatus();
+        if (size < 0) return size;
+        if (size > static_cast<int>(sizeof(req->vmemrw_info.user_buffer))) return -EIO;
+        output.assign(reinterpret_cast<const char *>(req->vmemrw_info.user_buffer), size);
+        return 0;
+    }
+
 public: // 外部 CNTVCT_EL0 读取监控接口
     int StartCntvctMonitor(int pid)
     {
@@ -1218,7 +1238,7 @@ private: // 私有实现，外部无需关系
     }
 
     // 系统调用监控事件；取消时仍使用启动监控时保存的 PID。
-    // 此接口只负责启停监控，系统调用日志由驱动写入内核 printk 环形缓冲区，不通过 req 返回。
+    // 此接口只负责启停监控；日志仍写 printk，也可经 ReadMonitorLog 获取有界快照。
     // Android shell 查看已有输出：su -c "dmesg | grep -E 'lsdriver'"
     // Android shell 实时查看输出：su -c "dmesg -w | grep -E 'lsdriver'"
     int HandleSyscallMonitorEvent(request_op op, int tgid)

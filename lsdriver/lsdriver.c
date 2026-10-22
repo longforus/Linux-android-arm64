@@ -130,6 +130,9 @@ static int DispatchThreadFunction(void *data)
                 case request_op_env_get_params:
                     req->status = get_env_params(req->tgid, req->env_info.thread_name, &req->env_info.tpidr_el0, &req->env_info.pacga_lo, &req->env_info.pacga_hi, &req->env_info.tls_status, &req->env_info.pacga_status);
                     break;
+                case request_op_monitor_log_read:
+                    req->status = ls_monitor_log_read(req->vmemrw_info.rw_addr, req->vmemrw_info.user_buffer, req->vmemrw_info.size);
+                    break;
                 case request_op_kernel_exit:
                     hide_task_remove(connect_thread_task->pid);
                     hide_task_remove(dispatch_thread_task->pid);

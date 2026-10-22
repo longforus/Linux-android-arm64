@@ -3,7 +3,8 @@
 
 #include <linux/types.h>
 
-#define ARM64_HW_TEMPLATE static __attribute__((__naked__, __noinline__, __unused__, __section__(".text.arm64_hw_templates")))
+/* FCMA/RCpc2 只开放给显式汇编模板，避免扩大普通 C 和初始化入口的 ISA。 */
+#define ARM64_HW_TEMPLATE static __attribute__((__naked__, __noinline__, __unused__, __target__("complxnum,rcpc-immo"), __section__(".text.arm64_hw_templates")))
 
 /*
 快速解释硬件汇编模板执行模型：
@@ -38,7 +39,9 @@
 模板函数必须保持 naked、noinline，只允许包含 basic asm，并由模板显式 ret；
 禁止在模板函数体内声明局部变量、访问 C 参数或加入任何 C 控制流。
 
-Makefile 全局启用模板显式汇编需要的 ISA 扩展，并禁止普通 C 自动向量化；
+Makefile 以 ARMv8.2 为基线，另启用模板显式汇编需要的 SIMD 扩展，并禁止普通 C 自动向量化；
+不能把整个驱动提升到 ARMv8.6，否则 C/CFI 入口也可能生成目标 CPU 不支持的指令。
+FCMA/RCpc2 由 ARM64_HW_TEMPLATE 的 target 属性局部启用，确保 LTO 汇编阶段也能识别。
 Clang 12 无法识别的助记符继续使用 .inst。编译配置不提供运行时 CPU 特性检查。
 
 说一下后续新指令添加到文件，

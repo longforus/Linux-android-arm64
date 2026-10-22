@@ -131,6 +131,17 @@ static int stepbp_apply_info_tasks(struct break_point *info, bool enable)
     target_tgid = READ_ONCE(info->tgid);
 
     rcu_read_lock();
+    if (enable)
+    {
+        for_each_process_thread(process, task)
+        {
+            if (bp_info_targets_task(info, task) && READ_ONCE(task->ptrace))
+            {
+                touched_count = -EBUSY; // 不接管已经被 ptrace 控制的线程。
+                goto out_unlock;
+            }
+        }
+    }
     target_task = find_task_by_vpid(target_tgid);
     if (!target_task)
     {
@@ -260,60 +271,39 @@ static int work_trampoline_stepbp_switch(struct pt_regs *hook_regs)
     return 0;
 }
 
-static int __attribute__((used, __noinline__)) stepbp_finish_call_step_hook(int native_result, struct stepbp_return_frame *frame);
-__attribute__((naked, used)) void ret_trampoline_stepbp_call_step_hook(void)
-{
-    asm volatile("mov x1, sp\n"
-                 "bl stepbp_finish_call_step_hook\n"
-                 "ldp x16, xzr, [sp], #304\n"
-                 "ret x16\n");
-}
+// 使用内核原生 user_step_hook 链表；call_step_hook 可能被 LTO 内联，不能只 patch 独立函数体。
+static void (*fn_stepbp_register_user_hook)(struct step_hook *hook);
+static void (*fn_stepbp_unregister_user_hook)(struct step_hook *hook);
+static bool g_stepbp_user_hook_registered;
 
-static int __attribute__((used, __noinline__)) stepbp_finish_call_step_hook(int native_result, struct stepbp_return_frame *frame)
+static int stepbp_user_single_step(struct pt_regs *regs, unsigned int esr)
 {
-    size_t hit_slot = 0;
-    int result = native_result;
-    unsigned long flags;
-    struct bp_point *hit_point = NULL;
     struct break_point *info;
-    void (*hit_callback)(void *regs, void *fp_regs, void *hit_point) = NULL;
-    uint64_t hit_addr = 0;
-    unsigned long hit_generation = 0;
-    bool generation_matches;
-    bool target_task = false;
-    bool stopping = false;
-    struct pt_regs *regs;
+    struct bp_point *hit_point = NULL;
+    void (*hit_callback)(void *, void *, void *) = NULL;
+    unsigned long flags, generation;
+    bool target_task;
 
-    regs = frame->regs;
+    (void)esr;
+    if (!regs || !user_mode(regs)) return DBG_HOOK_ERROR;
+
     spin_lock_irqsave(&g_stepbp_lock, flags);
-    generation_matches = frame->generation == g_stepbp_generation;
-    if (generation_matches)
+    info = g_stepbp_info;
+    target_task = g_stepbp_stopping ? bp_info_targets_task(info, current) : !!bp_info_find_type_for_task(info, BP_BREAKPOINT_X, current);
+    generation = g_stepbp_generation;
+    if (target_task && !g_stepbp_stopping)
     {
-        info = g_stepbp_info;
-        stopping = g_stepbp_stopping;
-        target_task = stopping ? bp_info_targets_task(info, current) : !!bp_info_find_type_for_task(info, BP_BREAKPOINT_X, current);
-        if (target_task && !stopping && native_result != DBG_HOOK_HANDLED)
-        {
-            hit_point = bp_info_find_point_by_pc_for_task(info, regs->pc, current);
-            if (hit_point)
-            {
-                hit_slot = hit_point - info->points;
-                hit_callback = READ_ONCE(hit_point->on_hit);
-                hit_addr = READ_ONCE(hit_point->hit_addr);
-                hit_generation = g_stepbp_generation;
-            }
-        }
+        hit_point = bp_info_find_point_by_pc_for_task(info, regs->pc, current);
+        if (hit_point) hit_callback = READ_ONCE(hit_point->on_hit);
     }
     spin_unlock_irqrestore(&g_stepbp_lock, flags);
+    if (!target_task) return DBG_HOOK_ERROR; // 非目标单步仍交给 ptrace/uprobe 等原生 handler。
 
-    if (!generation_matches || target_task) result = DBG_HOOK_HANDLED;
-
-    if (generation_matches && target_task && !stopping && native_result != DBG_HOOK_HANDLED && hit_point && hit_callback)
+    if (hit_point && hit_callback)
     {
         spin_lock_irqsave(&g_stepbp_hit_lock, flags);
-        if (!READ_ONCE(g_stepbp_stopping) && READ_ONCE(g_stepbp_generation) == hit_generation)
+        if (!READ_ONCE(g_stepbp_stopping) && READ_ONCE(g_stepbp_generation) == generation)
         {
-            STEPBP_LOG_LIMITED(g_stepbp_log_hit, 8, "hit slot=%zu pid=%d tgid=%d pc=0x%llx hit_addr=0x%llx record_count=%d\n", hit_slot, current->pid, current->tgid, (unsigned long long)regs->pc, (unsigned long long)hit_addr, READ_ONCE(hit_point->record_count));
             struct fp_regs fp_regs __attribute__((__uninitialized__));
             read_all_q_regs(&fp_regs);
             hit_callback(regs, &fp_regs, hit_point);
@@ -323,56 +313,20 @@ static int __attribute__((used, __noinline__)) stepbp_finish_call_step_hook(int 
     }
 
     spin_lock_irqsave(&g_stepbp_lock, flags);
-    if (frame->generation == g_stepbp_generation)
-    {
-        info = g_stepbp_info;
-        if (!g_stepbp_stopping && bp_info_find_type_for_task(info, BP_BREAKPOINT_X, current)) stepbp_enable_task_single_step(current);
-        else stepbp_disable_current_hardware_step(frame->regs);
-    }
+    if (generation == g_stepbp_generation && !g_stepbp_stopping &&
+        bp_info_find_type_for_task(g_stepbp_info, BP_BREAKPOINT_X, current))
+        stepbp_enable_task_single_step(current);
+    else
+        stepbp_disable_current_hardware_step(regs);
     spin_unlock_irqrestore(&g_stepbp_lock, flags);
-
-    if (atomic_dec_and_test(&g_stepbp_returns_inflight)) wake_up_all(&g_stepbp_return_wait);
-    return result;
+    return DBG_HOOK_HANDLED; // 即使 PC 未命中，也消费本监控产生的单步，避免向应用发送 SIGTRAP。
 }
 
-// call_step_hook 入口只安装返回后处理；原生 uprobe/perf step hook 先完整执行。
-static int work_trampoline_stepbp_single_step(struct pt_regs *hook_regs)
-{
-    unsigned long flags;
-    unsigned long generation;
-    bool target_task;
-    struct stepbp_return_frame *frame;
-    struct pt_regs *regs;
-    struct break_point *info;
-
-    if (!hook_regs) return 0;
-
-    regs = (struct pt_regs *)hook_regs->regs[0];
-    if (!regs) return 0;
-
-    // user_mode() 判断异常现场是否来自 EL0；STEPBP 只接管用户态单步，不碰 EL1 内核态异常。
-    if (!user_mode(regs)) return 0;
-
-    spin_lock_irqsave(&g_stepbp_lock, flags);
-    info = g_stepbp_info;
-    target_task = g_stepbp_stopping ? bp_info_targets_task(info, current) : !!bp_info_find_type_for_task(info, BP_BREAKPOINT_X, current);
-    generation = g_stepbp_generation;
-    if (target_task)
-    {
-        frame = hook_frame_metadata(hook_regs);
-        frame->return_addr = hook_regs->regs[30];
-        frame->generation = generation;
-        frame->regs = regs;
-        atomic_inc(&g_stepbp_returns_inflight);
-        hook_regs->sp = (unsigned long)frame;
-        hook_regs->regs[30] = (unsigned long)ret_trampoline_stepbp_call_step_hook;
-    }
-    spin_unlock_irqrestore(&g_stepbp_lock, flags);
-    return 0;
-}
+static struct step_hook g_stepbp_user_hook = {
+    .fn = stepbp_user_single_step,
+};
 
 static struct hook_entry g_stepbp_required_hooks[] = {
-    HOOK_ENTRY("call_step_hook", work_trampoline_stepbp_single_step),
     HOOK_ENTRY("syscall_trace_exit", work_trampoline_stepbp_syscall_trace_exit),
 };
 
@@ -447,6 +401,12 @@ static void stepbp_stop_monitor_locked(void)
     spin_unlock_irqrestore(&g_stepbp_hit_lock, flags);
 
     if (info) stepbp_apply_info_tasks(info, false);
+    if (g_stepbp_user_hook_registered)
+    {
+        // 内核 unregister 内部 synchronize_rcu，返回后不会再访问旧 info/callback。
+        fn_stepbp_unregister_user_hook(&g_stepbp_user_hook);
+        g_stepbp_user_hook_registered = false;
+    }
 
     inline_hook_remove_count(g_stepbp_switch_hook, sizeof(g_stepbp_switch_hook) / sizeof(g_stepbp_switch_hook[0]));
     stepbp_remove_required_hooks();
@@ -465,7 +425,7 @@ static inline void stop_stepbp_monitor(void)
     mutex_unlock(&g_stepbp_mutex);
 }
 
-// 安装 STEPBP：直接持有共享配置指针、hook call_step_hook，并启用目标线程单步。
+// 安装 STEPBP：注册原生单步回调，保留 syscall 返回补 arm，并启用目标线程单步。
 static inline int start_stepbp_monitor(struct break_point *info)
 {
     pid_t target_tgid;
@@ -483,11 +443,23 @@ static inline int start_stepbp_monitor(struct break_point *info)
     target_tgid = READ_ONCE(info->tgid);
 
     mutex_lock(&g_stepbp_mutex);
+    if (g_stepbp_info || g_stepbp_user_hook_registered) {
+        status = -EBUSY;
+        goto out_unlock;
+    }
     atomic_set(&g_stepbp_log_enable, 0);
     atomic_set(&g_stepbp_log_switch, 0);
     atomic_set(&g_stepbp_log_syscall, 0);
     atomic_set(&g_stepbp_log_hit, 0);
     stepbp_dump_hook_symbols();
+
+    fn_stepbp_register_user_hook = (void *)generic_kallsyms_lookup_name("register_user_step_hook");
+    fn_stepbp_unregister_user_hook = (void *)generic_kallsyms_lookup_name("unregister_user_step_hook");
+    if (!fn_stepbp_register_user_hook || !fn_stepbp_unregister_user_hook)
+    {
+        status = -EOPNOTSUPP;
+        goto out_unlock;
+    }
 
     status = stepbp_install_required_hooks();
     if (status)
@@ -497,12 +469,21 @@ static inline int start_stepbp_monitor(struct break_point *info)
     }
 
     stepbp_install_optional_switch_hook();
+    fn_stepbp_register_user_hook(&g_stepbp_user_hook);
+    g_stepbp_user_hook_registered = true;
 
     spin_lock_irqsave(&g_stepbp_lock, flags);
     stepbp_publish_monitor(info, false);
     spin_unlock_irqrestore(&g_stepbp_lock, flags);
 
     status = stepbp_apply_info_tasks(info, true);
+    if (status <= 0)
+    {
+        int error = status < 0 ? status : -ESRCH;
+        stepbp_stop_monitor_locked();
+        status = error;
+        goto out_unlock;
+    }
     STEPBP_LOG_LIMITED(g_stepbp_log_enable, 2, "enable tgid=%d armed_tasks=%d current pid=%d tgid=%d comm=%s\n", target_tgid, status, current->pid, current->tgid, current->comm);
 
     ls_log_tag("stepbp", "start ok tgid=%d first_addr=0x%llx bt=0x%x bs=0x%x\n", target_tgid, (unsigned long long)READ_ONCE(first_point->hit_addr), READ_ONCE(first_point->bt), READ_ONCE(first_point->bs));

@@ -51,13 +51,14 @@ saved_inst[] 继续保留目标入口的 BRK 现场，供卸载 inline hook 时�
 #define HOOK_REGS_BYTES     272
 #define HOOK_FRAME_BYTES    (HOOK_METADATA_BYTES + HOOK_REGS_BYTES)
 
-#define TRAMP_WORDS             120
+#define TRAMP_WORDS             124
 #define TRAMP_BYTES             (TRAMP_WORDS * 4)
 #define TRAMP_SLOT_COUNT        32
 #define TRAMP_REPLAY_INST_INDEX 57
 #define TRAMP_RET_TO_ORIG_INDEX 61
 #define TRAMP_RET_SLOT_INDEX    116
 #define TRAMP_WORK_SLOT_INDEX   118
+#define TRAMP_BRANCH_SLOT_INDEX 120
 
 #define HOOK_STR_1(x) #x
 #define HOOK_STR(x)   HOOK_STR_1(x)
@@ -128,7 +129,43 @@ static void hook_save_orig_insts(uint64_t addr, uint32_t *insts, int count)
     for (int i = 0; i < count; i++) insts[i] = READ_ONCE(*(uint32_t *)(uintptr_t)(addr + i * 4));
 }
 
-// ADR/ADRP 按跳板 PC 原地重编码，其余 PC 相对指令仍拒绝安装。
+// 条件分支先跳到本槽近端 B 跳板，保持寄存器/NZCV 和原分支语义；不使用 scratch 寄存器。
+static int hook_relocate_cond_branch(uint64_t source_addr, uint64_t replay_addr,
+                                    uint32_t *insts, int count, int index,
+                                    const struct arm64_decoded_instruction *decoded)
+{
+    uint64_t source_pc = source_addr + index * sizeof(uint32_t);
+    uint64_t replay_pc = replay_addr + index * sizeof(uint32_t);
+    uint64_t target = source_pc + decoded->offset;
+    int island_index = TRAMP_BRANCH_SLOT_INDEX - TRAMP_REPLAY_INST_INDEX + index;
+    uint64_t island_pc = replay_addr + island_index * sizeof(uint32_t);
+    int ret;
+
+    // 分支落在被覆盖入口内时，必须进入回放副本，不能跳回已经改成 hook 的原入口。
+    if (target >= source_addr && target < source_addr + count * sizeof(uint32_t))
+        target = replay_addr + (target - source_addr);
+
+    ret = arm64_encode_b(island_pc, target, &insts[island_index]);
+    if (ret) return ret; // 超过 B 的 +/-128MiB 范围时拒绝安装，绝不截断偏移。
+
+    switch (decoded->instruction)
+    {
+    case ARM64_INST_B_COND:
+        return arm64_encode_b_cond(replay_pc, island_pc, decoded->condition, &insts[index]);
+    case ARM64_INST_CBZ:
+        return arm64_encode_cbz(replay_pc, island_pc, decoded->operand_width == 64, decoded->rt, &insts[index]);
+    case ARM64_INST_CBNZ:
+        return arm64_encode_cbnz(replay_pc, island_pc, decoded->operand_width == 64, decoded->rt, &insts[index]);
+    case ARM64_INST_TBZ:
+        return arm64_encode_tbz(replay_pc, island_pc, decoded->immediate, decoded->rt, &insts[index]);
+    case ARM64_INST_TBNZ:
+        return arm64_encode_tbnz(replay_pc, island_pc, decoded->immediate, decoded->rt, &insts[index]);
+    default:
+        return -EOPNOTSUPP;
+    }
+}
+
+// ADR/ADRP 和条件分支按实际 PC 重定位；B/BL 及 literal load 仍拒绝安装。
 static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr, uint32_t *insts, int count)
 {
     if (!insts || count <= 0 || count > HOOK_STUB_WORDS) return -EINVAL;
@@ -229,14 +266,18 @@ static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr
                 // B使用当前PC计算目标，原样搬到回放区会跳到错误地址，因此拒绝安装。然后也是暂时不做适配和重编码
             case ARM64_INST_BL:
                 // 无条件带链接立即数跳转BL，同样依赖当前PC；正常函数会出现这种情况，然后也是暂时不做适配
+                ls_log_always_tag("hook", "pc-relative instruction cannot be replayed addr=0x%llx inst=%08x\n", (unsigned long long)source_pc, insts[i]);
+                return -EOPNOTSUPP;
             case ARM64_INST_B_COND:
             case ARM64_INST_CBZ:
             case ARM64_INST_CBNZ:
             case ARM64_INST_TBZ:
             case ARM64_INST_TBNZ:
-                // 条件直接跳转同样使用当前PC计算目标，必须完成重定位后才能安全回放；这里我先暂时不写
-                ls_log_always_tag("hook", "pc-relative instruction cannot be replayed addr=0x%llx inst=%08x\n", (unsigned long long)source_pc, insts[i]);
-                return -EOPNOTSUPP;
+            {
+                int status = hook_relocate_cond_branch(source_addr, replay_addr, insts, count, i, &decoded);
+                if (status) return status;
+                continue;
+            }
             default:
                 continue;
             }
@@ -434,6 +475,10 @@ static void trampoline_build(uint32_t *buf, const uint32_t saved_inst[HOOK_STUB_
         0x00000000, // [117] RET_SLOT high32
         0x00000000, // [118] WORK_SLOT low32      < work_fn
         0x00000000, // [119] WORK_SLOT high32
+        0xD503201F, // [120..123] 每条回放指令各有一个近端条件分支 B 跳板
+        0xD503201F,
+        0xD503201F,
+        0xD503201F,
     };
 
     /*
@@ -447,6 +492,7 @@ static void trampoline_build(uint32_t *buf, const uint32_t saved_inst[HOOK_STUB_
     BUILD_BUG_ON(offsetof(struct pt_regs, orig_x0) != HOOK_REGS_BYTES);
     // 被覆盖的4个word回放完后，必须紧跟跳回原函数后续地址的ldr/ret序列。
     BUILD_BUG_ON(TRAMP_RET_TO_ORIG_INDEX != TRAMP_REPLAY_INST_INDEX + HOOK_STUB_WORDS);
+    BUILD_BUG_ON(TRAMP_BRANCH_SLOT_INDEX + HOOK_STUB_WORDS > TRAMP_WORDS);
 
     // 将模板数组放到可执行段
     __builtin_memcpy(buf, tramp_template, TRAMP_BYTES);
