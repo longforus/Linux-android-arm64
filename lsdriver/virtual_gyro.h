@@ -6,7 +6,7 @@
 #include <linux/types.h>
 #include <linux/uaccess.h>
 #include "inline_hook_frame.h"
-#include "lsdriver_log.h"
+#include "klog/lsdriver_log.h"
 
 /*
   Android sensors_event_t / ASensorEvent:
@@ -26,7 +26,7 @@
     1. inline_hook_install() 挂钩 __arm64_sys_sendto 或 __sys_sendto
     2. AOSP BitTube 使用 send() 写入本地 socket；arm64 Linux 上 send() 通常进入 sendto 路径，因此在 sendto hook 中拦截用户缓冲区
     3. 在 104 字节 ASensorEvent 中找到 gyro/gyro_uncalibrated
-    4. 修改 data[0]/data[1]/data[2] 后 copy_to_user 写回
+    4. 修改 data[0]/data[1]/data[2] 后 copy_to_user_inatomic_nofault 写回
 
 在 Android 系统中，传感器数据的传输路径如下：
     Sensor HAL（硬件抽象层） 从硬件获取到陀螺仪等数据。
@@ -206,15 +206,16 @@ static int vgyro_handle_sendto(struct pt_regs *regs, enum vgyro_sendto_arg_mode 
     uint32_t fy = READ_ONCE(vg.fy_bits);
     uint32_t fz = READ_ONCE(vg.fz_bits);
 
+    if (!(fx | fy | fz)) return 0;
+
     char chunk[VGYRO_CHUNK_BYTES];
     size_t processed = 0;
-    int patched = 0;
 
     // 零堆内存分配（Zero Alloc）分块处理
     while (processed < len)
     {
         size_t cur_chunk_len = min_t(size_t, len - processed, VGYRO_CHUNK_BYTES);
-        if (copy_from_user(chunk, ubuf + processed, cur_chunk_len)) break;
+        if (copy_from_user_inatomic_nofault(chunk, ubuf + processed, cur_chunk_len)) break;
 
         for (size_t off = 0; off + VGYRO_ASENSOR_EVENT_SIZE <= cur_chunk_len; off += VGYRO_ASENSOR_EVENT_SIZE)
         {
@@ -232,17 +233,9 @@ static int vgyro_handle_sendto(struct pt_regs *regs, enum vgyro_sendto_arg_mode 
             patch_data[2] = vgyro_float_bits_add(data[2], fz);
 
             // 精准覆写 12 字节到用户空间，避免回写整个 Buffer
-            if (!copy_to_user(ubuf + processed + off + VGYRO_ASENSOR_DATA_OFFSET, patch_data, sizeof(patch_data)))
-            {
-                patched++;
-            }
+            copy_to_user_inatomic_nofault(ubuf + processed + off + VGYRO_ASENSOR_DATA_OFFSET, patch_data, sizeof(patch_data));
         }
         processed += cur_chunk_len;
-    }
-
-    if (patched > 0)
-    {
-        ls_log_tag("vgyro", "sendto patched %d gyro event(s) len=%zu mrad=%d/%d/%d\n", patched, len, READ_ONCE(vg.gyro_x_mrad_s), READ_ONCE(vg.gyro_y_mrad_s), READ_ONCE(vg.gyro_z_mrad_s));
     }
 
     return 0;
@@ -263,15 +256,6 @@ static struct hook_entry vgyro_sendto_hook_targets[][1] = {
     {HOOK_ENTRY("__sys_sendto", vgyro_direct_sendto_hook)},
 };
 
-static bool vgyro_sendto_hook_installed(void)
-{
-    for (int i = 0; i < ARRAY_SIZE(vgyro_sendto_hook_targets); i++)
-    {
-        if (vgyro_sendto_hook_targets[i][0].installed) return true;
-    }
-    return false;
-}
-
 static int vgyro_install_hook_locked(void)
 {
     int ret = -ENOENT;
@@ -280,7 +264,6 @@ static int vgyro_install_hook_locked(void)
         ret = inline_hook_install(vgyro_sendto_hook_targets[i]);
         if (!ret)
         {
-            ls_log_tag("vgyro", "inline hook on %s registered\n", vgyro_sendto_hook_targets[i][0].target_sym);
             return 0;
         }
     }
@@ -288,27 +271,27 @@ static int vgyro_install_hook_locked(void)
 }
 
 // 初始化虚拟陀螺仪状态
-static inline int v_gyro_init(void)
+static int v_gyro_init(void)
 {
     mutex_lock(&vgyro_lock);
 
+    smp_store_release(&vg.active, false);
     WRITE_ONCE(vg.gyro_x_mrad_s, 0);
     WRITE_ONCE(vg.gyro_y_mrad_s, 0);
     WRITE_ONCE(vg.gyro_z_mrad_s, 0);
     WRITE_ONCE(vg.fx_bits, 0);
     WRITE_ONCE(vg.fy_bits, 0);
     WRITE_ONCE(vg.fz_bits, 0);
-    smp_store_release(&vg.active, true);
 
     int ret = vgyro_install_hook_locked();
     mutex_unlock(&vgyro_lock);
 
-    ls_log_tag("vgyro", "init sendto_inline_hook=%d active=1\n", ret);
+    if (ret) ls_log_always_tag("vgyro", "init sendto inline hook failed: %d\n", ret);
     return ret;
 }
 
 // 更新虚拟陀螺仪三轴偏移值（单位: rad/s * 1000）
-static inline int v_gyro_report(int gyro_x_mrad_s, int gyro_y_mrad_s, int gyro_z_mrad_s)
+static int v_gyro_report(int gyro_x_mrad_s, int gyro_y_mrad_s, int gyro_z_mrad_s)
 {
     // 提前计算浮点 Bits，移出热路径
     uint32_t fx = vgyro_milli_to_float_bits(gyro_x_mrad_s);
@@ -321,14 +304,13 @@ static inline int v_gyro_report(int gyro_x_mrad_s, int gyro_y_mrad_s, int gyro_z
     WRITE_ONCE(vg.fx_bits, fx);
     WRITE_ONCE(vg.fy_bits, fy);
     WRITE_ONCE(vg.fz_bits, fz);
-    smp_store_release(&vg.active, true);
+    smp_store_release(&vg.active, (fx | fy | fz) != 0);
 
-    ls_log_tag("vgyro", "report mrad=%d/%d/%d hook=%d\n", gyro_x_mrad_s, gyro_y_mrad_s, gyro_z_mrad_s, vgyro_sendto_hook_installed());
     return 0;
 }
 
 // 停用虚拟陀螺仪并卸载 hook
-static inline void v_gyro_destroy(void)
+static void v_gyro_destroy(void)
 {
     mutex_lock(&vgyro_lock);
 
@@ -345,6 +327,5 @@ static inline void v_gyro_destroy(void)
         inline_hook_remove(vgyro_sendto_hook_targets[i]);
     }
 
-    ls_log_tag("vgyro", "destroy\n");
     mutex_unlock(&vgyro_lock);
 }

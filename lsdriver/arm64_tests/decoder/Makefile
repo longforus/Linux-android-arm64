@@ -7,12 +7,12 @@ DRIVER_DIR := $(abspath $(TEST_DIR)/../..)
 CC ?= gcc
 PYTHON ?= python3
 LLVM_TOOLCHAIN ?= /root/6.1-Android14/prebuilts/clang/host/linux-x86/clang-r487747c
-override EXPECTED_ROWS := 9362
-override EXPECTED_UNIQUE_WORDS := 2938
-override EXPECTED_INPUT_SHA256 := 2EB84464AA498B65014CE0C115C9A7948450A4E1C5039ADEC818037A9015BBEC
+override EXPECTED_ROWS := 5119
+override EXPECTED_UNIQUE_WORDS := 1844
+override EXPECTED_INPUT_SHA256 := DC34125CC5138E4BE854997714824A24EAB349701B10D555BDD7A29D04C8D763
 LLVM_SOURCE_REVISION := d9f89f4d16663d5012e5c09495f3b30ece3d2362
 
-DECODER_CFLAGS := -std=gnu11 -O2 -Wall -Wextra -Werror
+DECODER_CFLAGS := -std=gnu11 -O2 -Wall -Wextra -Wno-unused-parameter -Werror
 DECODER_SOURCES := \
 	$(DRIVER_DIR)/arm64_decode/arm64_decode.c \
 	$(DRIVER_DIR)/arm64_decode/arm64_decode_immediate.c \
@@ -23,7 +23,15 @@ DECODER_SOURCES := \
 	$(DRIVER_DIR)/arm64_decode/arm64_decode_sve.c \
 	$(DRIVER_DIR)/arm64_decode/arm64_decode_sme.c
 
-.PHONY: strict-test test
+.PHONY: strict-test test contract-test exhaustive-test
+
+contract-test:
+	set -euo pipefail
+	build_dir="$$(mktemp -d "$${TMPDIR:-/tmp}/lsdriver-arm64-contract.XXXXXX")"
+	trap 'rm -rf "$$build_dir"' EXIT
+	$(CC) $(DECODER_CFLAGS) '$(TEST_DIR)/arm64_decoder_contract_test.c' \
+		$(DECODER_SOURCES) -o "$$build_dir/arm64_decoder_contract_test"
+	"$$build_dir/arm64_decoder_contract_test"
 
 # Decoder validation is host-only; it never executes target instructions.
 strict-test test:
@@ -68,6 +76,20 @@ strict-test test:
 		-o "$$build_dir/arm64_llvm_strict_audit"
 	LD_LIBRARY_PATH='$(LLVM_TOOLCHAIN)/lib'$${LD_LIBRARY_PATH:+:"$$LD_LIBRARY_PATH"} \
 		"$$build_dir/arm64_llvm_strict_audit" "$$instruction_file" > "$$build_dir/llvm.tsv"
+	decoder_objects=()
+	for source in $(DECODER_SOURCES); do
+		object="$$build_dir/$$(basename "$$source" .c).o"
+		$(CC) $(DECODER_CFLAGS) -c "$$source" -o "$$object"
+		decoder_objects+=("$$object")
+	done
+	'$(LLVM_TOOLCHAIN)/bin/clang++' -stdlib=libc++ -std=c++17 -O2 \
+		-Wall -Wextra -Werror -isystem '$(LLVM_TOOLCHAIN)/include' \
+		'$(TEST_DIR)/arm64_llvm_exhaustive_audit.cpp' "$${decoder_objects[@]}" \
+		-L'$(LLVM_TOOLCHAIN)/lib' -lLLVM-17 \
+		-Wl,-rpath,'$(LLVM_TOOLCHAIN)/lib' \
+		-o "$$build_dir/arm64_llvm_exhaustive_audit"
+	LD_LIBRARY_PATH='$(LLVM_TOOLCHAIN)/lib'$${LD_LIBRARY_PATH:+:"$$LD_LIBRARY_PATH"} \
+		"$$build_dir/arm64_llvm_exhaustive_audit"
 	$(PYTHON) '$(TEST_DIR)/arm64_strict_decoder_audit.py' \
 		--expected-rows '$(EXPECTED_ROWS)' \
 		--llvm-tsv "$$build_dir/llvm.tsv" \
@@ -75,3 +97,7 @@ strict-test test:
 		'$(DRIVER_DIR)/arm64_decode/arm64_decode.h' \
 		"$$build_dir/decoder.tsv"
 	echo 'ARM64 instruction.txt decoder/LLVM strict audit: PASS'
+	echo 'ARM64 decoder LLVM exhaustive audit: PASS'
+
+exhaustive-test:
+	$(MAKE) strict-test

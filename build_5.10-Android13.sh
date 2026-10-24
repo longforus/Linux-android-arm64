@@ -18,7 +18,7 @@ AOSP_ROOT="/home/void/lineageos/pixel6_20"
 KERNEL_OUT="/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ"
 
 # 驱动源码路径 
-DRIVER_SRC="/home/void/reverse/Linux-android-arm64/lsdriver"
+DRIVER_SRC="$BUILD_ROOT/lsdriver"
 
 # Clang 工具链路径
 CLANG_PATH="$AOSP_ROOT/prebuilts/clang/host/linux-x86/clang-r450784d"

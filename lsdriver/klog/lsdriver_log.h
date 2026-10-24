@@ -35,7 +35,7 @@ static void ls_monitor_log_append(int index, const char *text, size_t size)
     spin_unlock_irqrestore(&g_ls_monitor_log_lock, flags);
 }
 
-static int ls_monitor_log_read(uint64_t selector, void *output, int capacity)
+static __attribute__((unused)) int ls_monitor_log_read(uint64_t selector, void *output, int capacity)
 {
     struct ls_monitor_log_buffer *log;
     unsigned int size, start;
