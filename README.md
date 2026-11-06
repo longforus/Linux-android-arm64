@@ -563,3 +563,15 @@ make -C lsdriver/arm64_tests/executor device-binaries
 ```
 
 脚本支持用 `-Serial` 选择设备。对拍、跳过项目和清理结果的判定见 [lsdriver/arm64_tests/executor/KERNEL_EXECUTOR_VALIDATION.md](lsdriver/arm64_tests/executor/KERNEL_EXECUTOR_VALIDATION.md)。修改共享指令语料后，需要重新构建测试模块和 runner。
+
+
+## 调试扩展 v1：读取完整性、能力、事件与 Trace
+
+详细契约及示例见 [DEBUG_RPC_V1.md](DEBUG_RPC_V1.md)。
+内核 wire、采集和同步维护说明见 [lsdriver/DEBUG_V1.md](lsdriver/DEBUG_V1.md)。
+
+- `bridge.capabilities`：实际扩展 ABI、驱动版本与功能前提；旧内核明确降级。
+- `memory.read` 增加 `allow_partial`，返回有效区段；默认仍拒绝不完整读取。
+- `breakpoint.events.start/status/read/stop`：命中事件环、序号和缺口；`breakpoint.backtrace` 查询命中时保存的有界 FP 链。
+- `trace.configure/start/status/stop/list/read`：主线程软件单步、有限时长/步数/文件预算、持久分页与丢失计数。
+- 本扩展复用既有共享缓冲，不改变原操作号与 request_obj 布局；不依赖 KPM。使用前查询能力，按返回的完整性、丢失计数和清理状态判断结果。

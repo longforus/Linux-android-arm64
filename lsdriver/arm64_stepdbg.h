@@ -59,7 +59,7 @@ static inline void stepbp_clear_regs_single_step(struct pt_regs *regs)
 
 static inline void stepbp_enable_task_single_step(struct task_struct *task)
 {
-    if (!task) return;
+    if (!task || ls_debug_trace_finished(task)) return;
 
     // TIF_SINGLESTEP 是线程级状态，必须对每个目标 task 单独设置。
     // ret_to_user 看到该 flag 后会打开当前 CPU 的 MDSCR.SS。
@@ -133,6 +133,7 @@ static int stepbp_apply_info_tasks(struct break_point *info, bool enable)
         }
     }
     target_task = find_task_by_vpid(target_tgid);
+    if (target_task && !ls_debug_info_matches(info, target_task)) goto out_unlock;
     if (!target_task)
     {
         for_each_process_thread(process, task)
@@ -285,6 +286,8 @@ static int stepbp_user_single_step(struct pt_regs *regs, unsigned int esr)
     spin_unlock_irqrestore(&g_stepbp_lock, flags);
     if (!target_task) return DBG_HOOK_ERROR; // 非目标单步仍交给 ptrace/uprobe 等原生 handler。
 
+    ls_debug_capture(regs, true);
+
     if (hit_point && hit_callback)
     {
         spin_lock_irqsave(&g_stepbp_hit_lock, flags);
@@ -299,7 +302,7 @@ static int stepbp_user_single_step(struct pt_regs *regs, unsigned int esr)
     }
 
     spin_lock_irqsave(&g_stepbp_lock, flags);
-    if (generation == g_stepbp_generation && !g_stepbp_stopping &&
+    if (generation == g_stepbp_generation && !g_stepbp_stopping && !ls_debug_trace_finished(current) &&
         bp_info_find_type_for_task(g_stepbp_info, BP_BREAKPOINT_X, current))
         stepbp_enable_task_single_step(current);
     else

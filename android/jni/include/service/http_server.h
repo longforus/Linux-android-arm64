@@ -841,7 +841,7 @@ namespace
         return std::nullopt;
     }
 
-    json dispatchStructuredOperationDirect(ApplicationRuntime &application, std::string_view operation, const json &params)
+    json dispatchStructuredOperationDirect(ApplicationRuntime &application, std::string_view operation, const json &params) try
     {
         auto &runtime = application.resources();
         const std::string op(operation);
@@ -1015,7 +1015,94 @@ namespace
 
         std::lock_guard<std::mutex> requestLock(gRequestMutex);
 
-        if (op == "bridge.ping") return okData({{"protocol_version", 1}, {"target_operations", true}});
+        if (op == "bridge.ping")
+        {
+            auto data = runtime.debug.capabilities();
+            data["target_operations"] = true;
+            return okData(std::move(data));
+        }
+        if (op == "bridge.capabilities") return okData(runtime.debug.capabilities());
+        if (op.starts_with("trace."))
+        {
+            if (op == "trace.configure") return okData(runtime.debug.configure(params.at("directory").get<std::string>()));
+            if (op == "trace.status") return okData(runtime.debug.status());
+            if (op == "trace.list") return okData(runtime.debug.list());
+            if (op == "trace.stop") { runtime.debug.stop(); return okData(runtime.debug.status()); }
+            if (op == "trace.read")
+            {
+                const auto after = requiredUInt64("after", "after");
+                const auto count = requiredInt("count", "count");
+                if (std::holds_alternative<json>(after)) return std::get<json>(after);
+                if (std::holds_alternative<json>(count)) return std::get<json>(count);
+                const int limit = std::get<int>(count);
+                if (limit < 1 || limit > 500) return fail("count 范围 1-500");
+                return okData(runtime.debug.read(params.at("session_id").get<std::string>(), std::get<uint64_t>(after), limit));
+            }
+            if (op == "trace.start")
+            {
+                std::lock_guard targetLock(Config::TargetMutex);
+                if (!runtime.hwbpMode.empty() || runtime.scanner.isScanning() || runtime.pointer.isBusy())
+                    return fail("目标有活动断点或扫描，请先停止");
+                const auto pc = requiredUInt64("start_pc", "start_pc");
+                const auto steps = requiredUInt64("max_steps", "max_steps");
+                const auto duration = requiredUInt64("duration_ms", "duration_ms");
+                if (std::holds_alternative<json>(pc)) return std::get<json>(pc);
+                if (std::holds_alternative<json>(steps)) return std::get<json>(steps);
+                if (std::holds_alternative<json>(duration)) return std::get<json>(duration);
+                if (dr->GetGlobalPid() <= 0) return fail("先选择目标进程");
+                return okData(runtime.debug.start(dr->GetGlobalPid(), std::get<uint64_t>(pc), std::get<uint64_t>(steps), std::get<uint64_t>(duration)));
+            }
+            return fail("未知 trace operation");
+        }
+        if (op == "breakpoint.backtrace")
+        {
+            if (runtime.debug.busy()) return fail("Trace 正在独占事件流");
+            const auto stream = requiredUInt64("stream", "stream");
+            const auto sequence = requiredUInt64("event_seq", "event_seq");
+            if (std::holds_alternative<json>(stream)) return std::get<json>(stream);
+            if (std::holds_alternative<json>(sequence)) return std::get<json>(sequence);
+            const uint64_t seq = std::get<uint64_t>(sequence);
+            if (!seq || !std::get<uint64_t>(stream)) return fail("stream 和 event_seq 必须大于零");
+            ls_debug_message message{}; message.command = LS_DEBUG_READ;
+            message.stream = std::get<uint64_t>(stream); message.after = seq - 1; message.count = 1;
+            const int status = dr->DebugCall(message);
+            if (status) return fail("回溯请求失败 status=" + std::to_string(status));
+            if (!message.count || message.events[0].seq != seq) return fail("命中事件不存在或已被覆盖");
+            return okData({{"stream", std::to_string(message.stream)}, {"event", lsdebug::EventJson(message.events[0])}});
+        }
+        if (op.starts_with("breakpoint.events."))
+        {
+            if (runtime.debug.busy()) return fail("Trace 正在独占事件流");
+            ls_debug_message message{};
+            uint64_t cursor = 0;
+            if (op == "breakpoint.events.start") { message.command = LS_DEBUG_EVENTS_START; message.tgid = dr->GetGlobalPid(); }
+            else if (op == "breakpoint.events.stop") message.command = LS_DEBUG_EVENTS_STOP;
+            else if (op == "breakpoint.events.read" || op == "breakpoint.events.status")
+            {
+                const auto stream = requiredUInt64("stream", "stream");
+                if (std::holds_alternative<json>(stream)) return std::get<json>(stream);
+                message.stream = std::get<uint64_t>(stream);
+                if (!message.stream) return fail("stream 必须为有效的非零会话 ID");
+                message.command = LS_DEBUG_STATUS;
+                if (op == "breakpoint.events.read")
+                {
+                    const auto after = requiredUInt64("after", "after");
+                    const auto count = requiredInt("count", "count");
+                    if (std::holds_alternative<json>(after)) return std::get<json>(after);
+                    if (std::holds_alternative<json>(count)) return std::get<json>(count);
+                    const int limit = std::get<int>(count);
+                    if (limit < 1 || limit > LS_DEBUG_BATCH) return fail("count 范围 1-8");
+                    cursor = message.after = std::get<uint64_t>(after);
+                    message.count = limit; message.command = LS_DEBUG_READ;
+                }
+            }
+            else return fail("未知 breakpoint.events operation");
+            const int status = dr->DebugCall(message);
+            if (status) return fail("事件请求失败 status=" + std::to_string(status));
+            if (message.command == LS_DEBUG_EVENTS_START || message.command == LS_DEBUG_EVENTS_STOP)
+            { message.command = LS_DEBUG_STATUS; message.count = 0; const int s = dr->DebugCall(message); if (s) return fail("事件状态失败 status=" + std::to_string(s)); }
+            return okData(lsdebug::MessageJson(message, cursor));
+        }
 
         if (op == "target.find")
         {
@@ -1369,6 +1456,7 @@ namespace
             if (std::holds_alternative<json>(mode)) return std::get<json>(mode);
             const std::string modeName = toLowerAscii(std::get<std::string>(mode));
             if (modeName != "hwbp" && modeName != "ptebp" && modeName != "stepbp") return fail("mode 无效，支持: hwbp/ptebp/stepbp");
+            if (runtime.debug.busy()) return fail("先停止 Trace");
             if (!runtime.hwbpMode.empty()) return fail(std::format("{} 设置前请先移除当前断点", modeName));
 
             const int pid = dr->GetGlobalPid();
@@ -1566,13 +1654,29 @@ namespace
             constexpr int MAX_TRANSFER_SIZE = 1024 * 1024;
             const int byteCount = std::get<int>(size);
             if (byteCount <= 0 || byteCount > MAX_TRANSFER_SIZE) return fail("size 范围 1-1048576");
-            std::vector<std::uint8_t> bytes(static_cast<size_t>(byteCount));
-            const int readBytes = dr->Read(std::get<std::uint64_t>(address), bytes.data(), bytes.size());
-            if (readBytes != byteCount) return fail(std::format("读取失败 status={}", readBytes));
+            auto result = dr->ReadDetailed(std::get<std::uint64_t>(address), static_cast<size_t>(byteCount));
+            if (!result.complete() && !params.value("allow_partial", false))
+            {
+                auto response = fail("读取不完整；设置 allow_partial=true 获取有效区段");
+                response["read_bytes"] = result.validBytes;
+                response["requested_bytes"] = byteCount;
+                response["complete"] = false;
+                return response;
+            }
+            json segments = json::array();
+            for (const auto &segment : result.segments)
+            {
+                json item{{"address", lsdebug::Hex(segment.address)}, {"offset", segment.offset}, {"size", segment.size},
+                    {"status", segment.status}, {"valid", segment.valid}};
+                if (segment.valid) item["data_hex"] = bytesToHex(result.bytes.data() + segment.offset, segment.size);
+                segments.push_back(std::move(item));
+            }
             return okData({
-                {"address", std::format("0x{:X}", std::get<std::uint64_t>(address))},
-                {"size", byteCount},
-                {"data_hex", bytesToHex(bytes.data(), bytes.size())},
+                {"address", lsdebug::Hex(std::get<std::uint64_t>(address))}, {"size", byteCount},
+                {"requested_bytes", byteCount}, {"read_bytes", result.validBytes}, {"complete", result.complete()},
+                // Legacy clients receive flat data only when every byte is valid.
+                {"data_hex", result.complete() ? bytesToHex(result.bytes.data(), result.bytes.size()) : ""},
+                {"segments", std::move(segments)},
             });
         }
 
@@ -1601,7 +1705,11 @@ namespace
         }
 
         return fail(std::format("未知 operation: {}", op));
+    } catch (const std::exception &error)
+    {
+        return {{"ok", false}, {"operation", std::string(operation)}, {"error", error.what()}};
     }
+
 
     // 统一命令派发入口：网络层仅接受 JSON 请求并返回 JSON 响应。
     std::string DispatchCommandUnified(ApplicationRuntime &application, const std::string &request)
@@ -1642,7 +1750,7 @@ namespace
         return makeProtocolError("请求缺少 operation 字段").dump();
     }
 
-    void HandleClientConnection(ApplicationRuntime &application, int clientFd, sockaddr_in clientAddr)
+    void HandleClientConnection(ApplicationRuntime &application, int clientFd, sockaddr_in clientAddr, const std::string &healthResponse)
     {
         char clientIp[INET_ADDRSTRLEN]{};
         if (inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, sizeof(clientIp)) == nullptr)
@@ -1672,7 +1780,7 @@ namespace
         }
         else if (method == "GET" && path == "/health")
         {
-            sendHttpResponse(clientFd, 200, "OK", R"({"ok":true,"service":"LS_KTool","transport":"http"})");
+            sendHttpResponse(clientFd, 200, "OK", healthResponse);
         }
         else if (method == "POST" && path == "/api/rpc")
         {
@@ -1727,6 +1835,12 @@ int http_server(ApplicationRuntime &application)
         return 1;
     }
 
+    // Query the running kernel once; passive health polling must not send driver requests.
+    const auto capabilities = application.resources().debug.capabilities();
+    const std::string healthResponse = json{{"ok", true}, {"service", "LS_KTool"}, {"transport", "http"},
+        {"kernel_version", capabilities.value("kernel_version", std::string{})},
+        {"debug_abi", capabilities.at("debug_abi")}, {"debug_status", capabilities.at("debug_status")}}.dump();
+
     LS_LOGI_TAG_FMT("HTTP", "服务端已监听 http://0.0.0.0:{}", kServerPort);
     PrintLanHttpAddresses();
     StartCloudflared();
@@ -1743,6 +1857,6 @@ int http_server(ApplicationRuntime &application)
             continue;
         }
 
-        Config::ActiveThreadPools().client().detach_task([&application, clientFd, clientAddr] { HandleClientConnection(application, clientFd, clientAddr); });
+        Config::ActiveThreadPools().client().detach_task([&application, clientFd, clientAddr, healthResponse] { HandleClientConnection(application, clientFd, clientAddr, healthResponse); });
     }
 }

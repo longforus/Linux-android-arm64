@@ -310,6 +310,7 @@ enum request_op
 
     request_op_kernel_exit, // 内核线程退出
     request_op_monitor_log_read, // 读取驱动有界监控日志（追加，旧操作编号不变）
+    request_op_debug_v1, // 追加，扩展消息不改变既有共享结构
 };
 
 // 将在队列中使用的请求实例结构体

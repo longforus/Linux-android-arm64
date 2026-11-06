@@ -1,4 +1,4 @@
-﻿#ifndef BREAK_POINT_H
+#ifndef BREAK_POINT_H
 #define BREAK_POINT_H
 
 #include <linux/kernel.h>
@@ -7,6 +7,7 @@
 #include <asm/ptrace.h>
 
 #include "io_version/io_struct.h"
+#include "debug_capture.h"
 
 // 校验断点配置存在，并且目标线程组 ID 有效。
 static inline bool bp_info_is_valid(const struct break_point *info)
@@ -23,7 +24,7 @@ static inline bool bp_info_targets_tgid(const struct break_point *info, pid_t tg
 // 判断断点配置是否属于指定任务所在的线程组。
 static inline bool bp_info_targets_task(const struct break_point *info, struct task_struct *task)
 {
-    return task && bp_info_targets_tgid(info, READ_ONCE(task->tgid));
+    return task && ls_debug_info_matches(info, task) && bp_info_targets_tgid(info, READ_ONCE(task->tgid));
 }
 
 // 判断断点槽位是否配置了非零命中地址。
@@ -601,6 +602,7 @@ static inline void sample_hbp_handler(struct pt_regs *regs, struct fp_regs *fp_r
 
 static void sample_hbp_handler_entry(void *regs, void *fp_regs, void *hit_point)
 {
+    ls_debug_capture((struct pt_regs *)regs, false);
     sample_hbp_handler((struct pt_regs *)regs, (struct fp_regs *)fp_regs, (struct bp_point *)hit_point);
 }
 

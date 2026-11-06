@@ -24,6 +24,9 @@
 #include <utility>
 #include <vector>
 
+#include "debug_wire.h"
+#include "read_integrity.h"
+
 #define PAGE_SIZE 4096
 class Driver
 {
@@ -360,6 +363,7 @@ public: // 共有结构体和锁
 
         request_op_kernel_exit, // 内核线程退出
         request_op_monitor_log_read, // 读取驱动有界监控日志（追加，旧操作编号不变）
+        request_op_debug_v1, // 扩展消息复用既有 user_buffer，不改变 request_obj 布局
     };
 
     // 将在队列中使用的请求实例结构体
@@ -431,6 +435,46 @@ public: // 外部初始化
     }
 
 public:
+    int DebugCall(ls_debug_message &message)
+    {
+        static_assert(sizeof(message) <= sizeof(req->vmemrw_info.user_buffer));
+        std::scoped_lock<SpinLock> lock(request_lock);
+        message.magic = LS_DEBUG_MAGIC;
+        message.abi = LS_DEBUG_ABI;
+        memory_copy(req->vmemrw_info.user_buffer, &message, sizeof(message));
+        req->vmemrw_info.size = sizeof(message);
+        req->tgid = GetGlobalPid();
+        // Old kernels leave unknown operations untouched: fail closed.
+        StoreRequestStatus(-EOPNOTSUPP);
+        StoreRequestOp(request_op_debug_v1);
+        IoCommitAndWait();
+        const int status = LoadRequestStatus();
+        if (status != 0) return status;
+        memory_copy(&message, req->vmemrw_info.user_buffer, sizeof(message));
+        if (message.magic != LS_DEBUG_MAGIC || message.abi != LS_DEBUG_ABI || message.count > LS_DEBUG_BATCH)
+            return -EPROTO;
+        return 0;
+    }
+
+    lsdebug::ReadResult ReadDetailed(uint64_t address, size_t size)
+    {
+        const int pid = GetGlobalPid();
+        return lsdebug::ReadWithIntegrity(address, size, [this, pid](uint64_t current, uint8_t *bytes, size_t count)
+        {
+            std::scoped_lock<SpinLock> lock(request_lock);
+            req->tgid = pid;
+            req->vmemrw_info.rw_addr = current;
+            req->vmemrw_info.size = count;
+            __builtin_memset(req->vmemrw_info.user_buffer, 0, count);
+            StoreRequestStatus(-EIO);
+            StoreRequestOp(request_op_vmem_read);
+            IoCommitAndWait();
+            const int status = LoadRequestStatus();
+            if (status == static_cast<int>(count)) memory_copy(bytes, req->vmemrw_info.user_buffer, count);
+            return status;
+        });
+    }
+
     void NullIo()
     {
         std::scoped_lock<SpinLock> lock(request_lock);
@@ -1028,12 +1072,14 @@ private: // 私有实现，外部无需关系
         if (!buffer || size == 0) return -EINVAL;
         if (op != request_op_vmem_read && op != request_op_vmem_write) return -EINVAL;
 
+        if (op == request_op_vmem_read) __builtin_memset(buffer, 0, size);
+
         size_t processed = 0;
         size_t successfulBytes = 0;
         int lastStatus = -EIO;
         while (processed < size)
         {
-            const size_t chunk = std::min(size - processed, sizeof(req->vmemrw_info.user_buffer));
+            const size_t chunk = std::min({size - processed, sizeof(req->vmemrw_info.user_buffer), size_t(4096 - ((addr + processed) & 4095))});
             {
                 std::scoped_lock<SpinLock> lock(request_lock);
                 StoreRequestOp(op);
@@ -1049,11 +1095,15 @@ private: // 私有实现，外部无需关系
                 IoCommitAndWait();
 
                 lastStatus = LoadRequestStatus();
-                if (op == request_op_vmem_read)
+                if (op == request_op_vmem_read && lastStatus == static_cast<int>(chunk))
                 {
                     memory_copy(static_cast<uint8_t *>(buffer) + processed, req->vmemrw_info.user_buffer, chunk);
                 }
             }
+            // Legacy Read returns a CONTIGUOUS valid prefix, never a sum across holes.
+            // ReadDetailed is the explicit sparse alternative.
+            if (op == request_op_vmem_read && lastStatus != static_cast<int>(chunk))
+                return successfulBytes ? static_cast<int>(successfulBytes) : (lastStatus < 0 ? lastStatus : -EIO);
             if (lastStatus > 0) successfulBytes += std::min(static_cast<size_t>(lastStatus), chunk);
 
             processed += chunk;

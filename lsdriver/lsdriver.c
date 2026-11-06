@@ -38,6 +38,63 @@
 
 static struct request_obj *req = NULL;
 
+// Trace owns a separate configuration; never overwrite the ordinary bp_info.
+static struct break_point ls_debug_trace_info;
+static int ls_debug_dispatch(void)
+{
+    struct ls_debug_message *message = (void *)req->vmemrw_info.user_buffer;
+    int status = 0;
+    if (req->vmemrw_info.size != sizeof(*message) || message->magic != LS_DEBUG_MAGIC || message->abi != LS_DEBUG_ABI)
+        return -EPROTO;
+    if (message->stream && message->command != LS_DEBUG_INFO &&
+        message->command != LS_DEBUG_EVENTS_START && message->command != LS_DEBUG_TRACE_START &&
+        message->stream != READ_ONCE(ls_debug_stream)) return -ESTALE;
+    switch (message->command)
+    {
+    case LS_DEBUG_INFO:
+        message->flags = LS_DEBUG_CAP_EVENTS;
+        if (generic_kallsyms_lookup_name("copy_from_user_nofault")) message->flags |= LS_DEBUG_CAP_FP;
+        if (generic_kallsyms_lookup_name("register_user_step_hook") &&
+            generic_kallsyms_lookup_name("unregister_user_step_hook") &&
+            generic_kallsyms_lookup_name("syscall_trace_exit")) message->flags |= LS_DEBUG_CAP_STEP_TRACE;
+        message->page_size = PAGE_SIZE;
+        strscpy(message->version, LSDRIVER_VERSION, sizeof(message->version));
+        break;
+    case LS_DEBUG_EVENTS_START:
+        status = ls_debug_begin(message, false);
+        break;
+    case LS_DEBUG_EVENTS_STOP:
+        if (READ_ONCE(ls_debug_trace)) return -EBUSY;
+        ls_debug_stop(false);
+        break;
+    case LS_DEBUG_TRACE_START:
+        if (g_bp_info || g_ptebp_info || g_stepbp_info || READ_ONCE(g_dptdbg.info)) return -EBUSY;
+        status = ls_debug_begin(message, true);
+        if (status) break;
+        memset(&ls_debug_trace_info, 0, sizeof(ls_debug_trace_info));
+        WRITE_ONCE(ls_debug_trace_config, &ls_debug_trace_info);
+        ls_debug_trace_info.tgid = message->tgid;
+        ls_debug_trace_info.points[0].hit_addr = message->start_pc;
+        ls_debug_trace_info.points[0].bt = BP_BREAKPOINT_X;
+        ls_debug_trace_info.points[0].bl = BP_BREAKPOINT_LEN_4;
+        ls_debug_trace_info.points[0].bs = BP_SCOPE_MAIN_THREAD;
+        status = set_process_stepbp(&ls_debug_trace_info);
+        if (status) ls_debug_stop(true);
+        break;
+    case LS_DEBUG_TRACE_STOP:
+        if (READ_ONCE(g_stepbp_info) == &ls_debug_trace_info) stop_stepbp_monitor();
+        ls_debug_stop(true);
+        break;
+    case LS_DEBUG_READ:
+        return ls_debug_snapshot(message, true);
+    case LS_DEBUG_STATUS:
+        return ls_debug_snapshot(message, false);
+    default:
+        return -EOPNOTSUPP;
+    }
+    return status;
+}
+
 /*
 volatile 约束，这三个指针的每次读写都按易变访问处理，
 适合在线程循环中持续轮询生命周期状态。
@@ -110,25 +167,26 @@ static int DispatchThreadFunction(void *data)
                     __atomic_store_n(&req->status, v_gnss_report(req->vgnss_info.latitude_e7, req->vgnss_info.longitude_e7), __ATOMIC_RELAXED);
                     break;
                 case request_op_hwbp_set:
-                    __atomic_store_n(&req->status, set_process_hwbp(&req->bp_info), __ATOMIC_RELAXED);
+                    __atomic_store_n(&req->status, (READ_ONCE(ls_debug_trace) ? -EBUSY : set_process_hwbp(&req->bp_info)), __ATOMIC_RELAXED);
                     break;
                 case request_op_hwbp_remove:
                     remove_process_hwbp();
                     break;
                 case request_op_ptebp_set:
-                    __atomic_store_n(&req->status, set_process_ptebp(&req->bp_info), __ATOMIC_RELAXED);
+                    __atomic_store_n(&req->status, (READ_ONCE(ls_debug_trace) ? -EBUSY : set_process_ptebp(&req->bp_info)), __ATOMIC_RELAXED);
                     break;
                 case request_op_ptebp_remove:
                     remove_process_ptebp();
                     break;
                 case request_op_stepbp_set:
-                    __atomic_store_n(&req->status, set_process_stepbp(&req->bp_info), __ATOMIC_RELAXED);
+                    __atomic_store_n(&req->status, (READ_ONCE(ls_debug_trace) ? -EBUSY : set_process_stepbp(&req->bp_info)), __ATOMIC_RELAXED);
                     break;
                 case request_op_stepbp_remove:
+                    if (READ_ONCE(ls_debug_trace)) { __atomic_store_n(&req->status, -EBUSY, __ATOMIC_RELAXED); break; }
                     remove_process_stepbp();
                     break;
                 case request_op_dptdbg_set:
-                    __atomic_store_n(&req->status, set_process_dptdbg(&req->bp_info), __ATOMIC_RELAXED);
+                    __atomic_store_n(&req->status, (READ_ONCE(ls_debug_trace) ? -EBUSY : set_process_dptdbg(&req->bp_info)), __ATOMIC_RELAXED);
                     break;
                 case request_op_dptdbg_remove:
                     remove_process_dptdbg();
@@ -150,6 +208,9 @@ static int DispatchThreadFunction(void *data)
                     break;
                 case request_op_monitor_log_read:
                     __atomic_store_n(&req->status, ls_monitor_log_read(req->vmemrw_info.rw_addr, req->vmemrw_info.user_buffer, req->vmemrw_info.size), __ATOMIC_RELAXED);
+                    break;
+                case request_op_debug_v1:
+                    __atomic_store_n(&req->status, ls_debug_dispatch(), __ATOMIC_RELAXED);
                     break;
                 case request_op_kernel_exit:
                     hide_task_remove(connect_thread_task->pid);
@@ -539,6 +600,8 @@ static int taskstats_exit_hook_work(struct pt_regs *regs)
 
     get_task_comm(process_comm, task->group_leader);
 
+    ls_debug_target_exit(task);
+
     // 任意被监控目标退出时移除其 TGID，防止 PID 槽位和 do_el0_svc hook 残留。
     syscall_monitor_remove(task->tgid);
     cntvct_monitor_remove(task->tgid);
@@ -551,6 +614,7 @@ static int taskstats_exit_hook_work(struct pt_regs *regs)
         hide_task_remove(task->tgid); // 只取消当前用户进程的隐藏，不影响隐藏的内核线程
         hide_kgsl_remove(task->tgid); // 取消当前用户进程的高通GPU节点隐藏
 
+        ls_debug_stop(true);
         v_touch_destroy();                // 清理触摸
         v_gnss_destroy();                 // 清理定位
         v_gyro_destroy();                 // 清理陀螺仪

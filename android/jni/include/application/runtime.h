@@ -8,6 +8,7 @@
 #include "../../android_draw/vulkan_imgui_renderer.h"
 #include "../../driver/driver.h"
 #include "../base/config.h"
+#include "../service/debug_service.h"
 #include "../memory/mem_scanner.h"
 #include "../memory/memory_viewer.h"
 #include "../memory/pointer_manager.h"
@@ -79,6 +80,7 @@ public:
         Driver &driver_;
 
     public:
+        lsdebug::DebugService<Driver> debug;
         MemScanner scanner;
         MemViewer viewer;
         PointerManager pointer;
@@ -87,7 +89,7 @@ public:
         ProcessMonitor syscallMonitor;
         ProcessMonitor cntvctMonitor;
 
-        explicit ResourceSet(Driver &driver) : driver_(driver), syscallMonitor(driver, ProcessMonitor::Kind::Syscall), cntvctMonitor(driver, ProcessMonitor::Kind::Cntvct)
+        explicit ResourceSet(Driver &driver) : driver_(driver), debug(driver), syscallMonitor(driver, ProcessMonitor::Kind::Syscall), cntvctMonitor(driver, ProcessMonitor::Kind::Cntvct)
         {
         }
 
@@ -121,13 +123,15 @@ public:
             std::lock_guard targetLock(Config::TargetMutex);
             if (pid <= 0) return false;
             if (pid == driver_.GetGlobalPid()) return true;
-            if (scanner.isScanning() || pointer.isBusy()) return false;
+            if (debug.busy() || scanner.isScanning() || pointer.isBusy()) return false;
             if (syscallMonitor.stop() != 0 || cntvctMonitor.stop() != 0) return false;
 
             if (hwbpMode == "hwbp") driver_.RemoveProcessHwbpRef();
             else if (hwbpMode == "ptebp") driver_.RemoveProcessPtebpRef();
             else if (hwbpMode == "stepbp") driver_.RemoveProcessStepbpRef();
 
+            ls_debug_message capture{}; capture.command = LS_DEBUG_EVENTS_STOP;
+            driver_.DebugCall(capture);
             hwbpMode.clear();
             saved.clear();
             scanner.clear();
@@ -139,6 +143,7 @@ public:
 
         ~ResourceSet()
         {
+            debug.stop();
             syscallMonitor.stop();
             cntvctMonitor.stop();
         }

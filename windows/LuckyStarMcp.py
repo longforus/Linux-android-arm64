@@ -1,13 +1,20 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
 import os
 import sys
 from pathlib import Path
-from typing import Annotated, Any, Literal, TypedDict
+from typing import Annotated, Any, Literal
 
-from mcp.server import MCPServer
+try:
+    from mcp.server import MCPServer
+    _FAST_MCP_COMPAT = False
+except ImportError:
+    # SDK 1.x names this class FastMCP and configures HTTP at construction/settings.
+    from mcp.server.fastmcp import FastMCP as MCPServer
+    _FAST_MCP_COMPAT = True
+from typing_extensions import TypedDict
 from pydantic import Field
 
 PROJECT_WINDOWS_DIR = Path(__file__).resolve().parents[1] / "windows"
@@ -245,11 +252,12 @@ def android_memory_scan_clear() -> dict[str, Any]:
 def android_memory_read(
     address: HexAddress,
     size: Annotated[int, Field(ge=1, le=1_048_576)],
+    allow_partial: bool = False,
 ) -> dict[str, Any]:
-    """Read 1 to 1048576 raw bytes from any valid target address."""
+    """Read memory with integrity metadata. With allow_partial, inspect segments; empty flat data_hex is not zero memory."""
     return _call_bridge_operation(
         "memory.read",
-        {"address": address, "size": size},
+        {"address": address, "size": size, "allow_partial": allow_partial},
     )
 
 
@@ -550,6 +558,88 @@ def android_signature_filter(address: HexAddress, file_name: str = "Signature.tx
     )
 
 
+# Debug ABI v1: main-thread single-step trace, separate from ETM/CoreSight.
+Sequence = Annotated[str, Field(strict=True, pattern=r"^[0-9]{1,20}$")]
+
+
+@mcp.tool()
+def android_bridge_capabilities() -> dict[str, Any]:
+    """Report actual debug ABI and prerequisites; compiled support is not device validation."""
+    return _call_bridge_operation("bridge.capabilities")
+
+
+@mcp.tool()
+def android_breakpoint_events_start() -> dict[str, Any]:
+    """Begin a new event stream for the selected process, then install a breakpoint separately. Save the returned stream ID."""
+    return _call_bridge_operation("breakpoint.events.start")
+
+
+@mcp.tool()
+def android_breakpoint_events_stop() -> dict[str, Any]:
+    """Stop collecting breakpoint events; this does not remove the breakpoint itself."""
+    return _call_bridge_operation("breakpoint.events.stop")
+
+
+@mcp.tool()
+def android_breakpoint_events_read(
+    stream: Sequence,
+    after: Sequence = "0",
+    count: Annotated[int, Field(ge=1, le=8)] = 8,
+) -> dict[str, Any]:
+    """Read chronological hits and bounded FP chains captured at the hit; inspect lost_before_page and unwind limitations."""
+    return _call_bridge_operation("breakpoint.events.read", {"stream": stream, "after": after, "count": count})
+
+
+@mcp.tool()
+def android_breakpoint_backtrace(stream: Sequence, event_seq: Sequence) -> dict[str, Any]:
+    """Get the FP chain saved at one exact breakpoint hit. Fails if overwritten; does not unwind a later live stack."""
+    return _call_bridge_operation("breakpoint.backtrace", {"stream": stream, "event_seq": event_seq})
+
+
+@mcp.tool()
+def android_trace_configure(directory: str) -> dict[str, Any]:
+    """Choose a private absolute directory owned by the tool uid (0700), e.g. the XSettings app files directory. No shared sdcard storage."""
+    return _call_bridge_operation("trace.configure", {"directory": directory})
+
+
+@mcp.tool()
+def android_trace_start(
+    start_pc: HexAddress,
+    max_steps: Annotated[int, Field(ge=1, le=1_000_000)] = 1000,
+    duration_ms: Annotated[int, Field(ge=1, le=60_000)] = 5000,
+) -> dict[str, Any]:
+    """Trace selected process MAIN THREAD via single-step, starting when PC reaches start_pc. Requires no other active breakpoint/scan. Inspect losses; this is not ETM."""
+    return _call_bridge_operation("trace.start", {"start_pc": start_pc, "max_steps": max_steps, "duration_ms": duration_ms})
+
+
+@mcp.tool()
+def android_trace_status() -> dict[str, Any]:
+    """Read the current session state, saved events, loss count and cleanup status."""
+    return _call_bridge_operation("trace.status")
+
+
+@mcp.tool()
+def android_trace_stop() -> dict[str, Any]:
+    """Disarm tracing, drain the remaining ring and flush the trace file."""
+    return _call_bridge_operation("trace.stop")
+
+
+@mcp.tool()
+def android_trace_list() -> dict[str, Any]:
+    """List saved sessions; unfinalized files from previous tool processes are interrupted sessions."""
+    return _call_bridge_operation("trace.list")
+
+
+@mcp.tool()
+def android_trace_read(
+    session_id: str,
+    after: Sequence = "0",
+    count: Annotated[int, Field(ge=1, le=500)] = 100,
+) -> dict[str, Any]:
+    """Read a saved session page using next_after as the next cursor. Addresses and sequence IDs remain strings."""
+    return _call_bridge_operation("trace.read", {"session_id": session_id, "after": after, "count": count})
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Expose the NativeHttpBridge Android bridge as an MCP server.",
@@ -590,12 +680,18 @@ def main() -> int:
         file=sys.stderr,
         flush=True,
     )
-    mcp.run(
-        transport="streamable-http",
-        host=mcp_host,
-        port=mcp_port,
-        streamable_http_path=mcp_path,
-    )
+    if _FAST_MCP_COMPAT:
+        mcp.settings.host = mcp_host
+        mcp.settings.port = mcp_port
+        mcp.settings.streamable_http_path = mcp_path
+        mcp.run(transport="streamable-http")
+    else:
+        mcp.run(
+            transport="streamable-http",
+            host=mcp_host,
+            port=mcp_port,
+            streamable_http_path=mcp_path,
+        )
     return 0
 
 
