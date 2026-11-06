@@ -16,6 +16,7 @@ LOCAL_SRC_FILES := $(CAPSTONE_CORE_SRC:$(LOCAL_PATH)/%=%) \
 
 # 使用 CAPSTONE_HAS_AARCH64
 LOCAL_CFLAGS := -O3 -w -std=c99 \
+                -flto=full \
                 -DCAPSTONE_HAS_AARCH64 \
                 -DCAPSTONE_USE_SYS_DYN_MEM
 
@@ -40,7 +41,7 @@ LOCAL_CPPFLAGS += -O3                                # [优化] 保持O3，避�
 # LOCAL_CPPFLAGS += -ffp-contract=fast                 # [FMA融合] 强行把 a*b+c 缝合为一条时钟周期的硬件指令
 
 
-# LOCAL_CPPFLAGS += -flto                              # [全量LTO] 全局极限优化（编译会变慢，但执行极快）
+LOCAL_CPPFLAGS += -flto=full                          # Full LTO 跨源文件优化，与链接阶段保持一致
 # LOCAL_CPPFLAGS += -falign-functions=64               # [函数对齐] 填入NOP指令，强制对齐CPU 64字节缓存行
 # LOCAL_CPPFLAGS += -falign-loops=64                   # [循环对齐] 强制对齐循环体，CPU抓取指令零停顿
 # LOCAL_CPPFLAGS += -funroll-loops                     # [循环展开] 无限复制粘贴循环体，消灭跳转与分支预测失败
@@ -61,7 +62,7 @@ LOCAL_CPPFLAGS += -O3                                # [优化] 保持O3，避�
 
 # LOCAL_LDFLAGS += -fexceptions                        # 链接阶段保留异常处理
 # LOCAL_LDFLAGS += -static-libstdc++                   # [静态链接] C++基础库打入包内，防残缺机型闪退
-# LOCAL_LDFLAGS += -flto                               # [呼应前端] 后端开启Full-LTO，打破模块壁垒
+LOCAL_LDFLAGS += -flto=full                           # 链接主模块与 Capstone 的 Full LTO bitcode
 # LOCAL_LDFLAGS += -Wl,--lto-O3                        # [LTO极限优化] 链接器重组代码时，使用O3最高标准
 # LOCAL_LDFLAGS += -Wl,-mllvm,-inline-threshold=10000  # [LTO无限内联] 链接期透传参数，强行跨文件内联
 # LOCAL_LDFLAGS += -Wl,-mllvm,-unroll-threshold=10000  # [LTO无限展开] 链接期透传参数，强行跨文件展开
