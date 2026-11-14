@@ -1,5 +1,7 @@
 # 2026-11-14 上游选择性吸收
 
+后续跟进起点统一记录在 [UPSTREAM_SYNC.md](UPSTREAM_SYNC.md)，从检查点之后的新增上游提交开始审查。
+
 审查基准：本地 `22b23fd`、上游 `lsnbm/main@a7f7da248a9b0a4b4615fd5219d47ee89e3d91f6`，共同基点 `e6e1da5`。
 
 本次吸收并适配：

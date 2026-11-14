@@ -126,3 +126,7 @@ LS_KTool 是**独立 fork**，带自己的 app 适配（`jni_bridge.cpp`、`BUIL
 - 外部模块构建（Pixel 6 / 5.10-Android13）：`./build_5.10-Android13.sh`（需 `KERNEL_OUT` 与 clang 路径，脚本会临时隐藏 `Module.symvers` 避 CRC、并处理 Android 13 空 `__version_ext_names` bug）。
 - 清理编译产物：`git clean -fdx lsdriver/`（会保留仓库跟踪的 `arm64_tests/executor/*.ko`）。
 - xsettings 侧构建：`cd /home/void/AsfpProjects/xsettings && ./gradlew :app:assembleRelease`。
+
+## 上游跟进检查点
+
+跟进 `lsnbm/Linux-android-arm64/main` 前先读 `UPSTREAM_SYNC.md`，从其中记录的已审查上游提交之后开始比较。每轮审查完成后更新检查点及未吸收项；选择性移植不代表整体合并上游。
