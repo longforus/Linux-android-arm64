@@ -509,7 +509,16 @@ cd /data/akernel
 
 选择后程序转入后台，标准输出与错误输出追加到 `/storage/emulated/0/log.txt`。HTTP 模式监听端口 `9494`，RPC 路径为 `/api/rpc`；服务提供进程调试操作，应只向受信任的客户端开放。
 
-### 12.4 Python 客户端
+### 12.4 原生 MCP 与 Python 客户端
+
+模式 `4` 同时提供 `http://<设备IP>:9494/mcp`（Streamable HTTP）。MCP 客户端可直接连接 Android，电脑无需启动 Python。原生 MCP 与 `/api/rpc` 共用 `ApplicationRuntime`、操作分发、请求互斥锁和 Driver，目标 PID、扫描与断点状态由所有客户端共享。
+
+提供与 `windows/LuckyStarMcp.py` 同名的 57 个 `android_*` 工具；电脑端连接配置/发现工具和 `android://connection` 资源不在设备端提供。无会话 JSON 响应，通知返回 202，GET/DELETE 返回 405，不提供独立 SSE 流；支持协议版本 2025-03-26、2025-06-18、2025-11-25。拒绝带 Origin 的浏览器访问，供受信任的原生 MCP 客户端使用。
+
+USB 可执行 `adb forward tcp:9494 tcp:9494` 并连接 `http://127.0.0.1:9494/mcp`。XSettings fork 在 App mode 4 下通过前台服务保活，没有独立 MCP 开关。
+
+详细配置与维护见 [NATIVE_MCP.md](NATIVE_MCP.md)。以下 Python 桌面界面和电脑 MCP 桥接仍保留兼容。
+
 
 先在 Android 端启动模式 `4`，再运行 [windows/LuckyStar.py](windows/LuckyStar.py)：
 

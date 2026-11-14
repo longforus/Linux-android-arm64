@@ -91,7 +91,7 @@ LS_KTool 是**独立 fork**，带自己的 app 适配（`jni_bridge.cpp`、`BUIL
 - `include/architecture/disassembler.h`
 - `include/base/{config,memory_utils,system_log,types}.h`
 - `include/memory/{mem_scanner,memory_viewer,pointer_manager,saved_address_manager,signature_scanner}.h`
-- `include/service/http_server.h`
+- `include/service/http_server.h`、`mcp_server.h`、`mcp_catalog.h`（原生 `/mcp` 与 `/api/rpc` 共用 Driver/运行时；工具目录生成器与主机测试在 `tools/`）
 - `include/test/{read_write_test,touch_test,gyro_test,gnss_test}.h`
 - `driver/{driver,driver_loader}.h`、`logger/logger.h`
 

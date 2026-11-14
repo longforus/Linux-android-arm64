@@ -10,6 +10,7 @@
 #include "../base/system_log.h"
 #include "../application/runtime.h"
 #include "../memory/signature_scanner.h"
+#include "mcp_server.h"
 
 // ============================================================================
 // HTTP 服务器模块
@@ -697,21 +698,21 @@ namespace
         return true;
     }
 
-    bool sendHttpResponse(int fd, int statusCode, std::string_view statusText, std::string_view body)
+    bool sendHttpResponse(int fd, int statusCode, std::string_view statusText, std::string_view body, std::string_view extraHeaders = "")
     {
         const std::string response = std::format("HTTP/1.1 {} {}\r\n"
                                                  "Content-Type: application/json; charset=utf-8\r\n"
                                                  "Content-Length: {}\r\n"
                                                  "Connection: close\r\n"
                                                  "Access-Control-Allow-Origin: *\r\n"
-                                                 "Access-Control-Allow-Headers: Content-Type, Authorization\r\n"
+                                                 "Access-Control-Allow-Headers: Content-Type, Authorization, MCP-Protocol-Version, Mcp-Session-Id\r\n"
                                                  "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
-                                                 "\r\n{}",
-                                                 statusCode, statusText, body.size(), body);
+                                                 "{}\r\n{}",
+                                                 statusCode, statusText, body.size(), extraHeaders, body);
         return sendAll(fd, response);
     }
 
-    bool receiveHttpRequest(int fd, std::string *method, std::string *path, std::string *body, int *errorStatus)
+    bool receiveHttpRequest(int fd, std::string *method, std::string *path, std::string *body, int *errorStatus, json *headers)
     {
         std::string request;
         request.reserve(4096);
@@ -764,6 +765,15 @@ namespace
 
             const std::string_view line(request.data() + lineStart, lineEnd - lineStart);
             const std::size_t colon = line.find(':');
+            if (colon != std::string_view::npos) {
+                const auto key = toLowerAscii(line.substr(0, colon));
+                std::string value(line.substr(colon + 1));
+                const auto first = value.find_first_not_of(" \t");
+                const auto last = value.find_last_not_of(" \t");
+                value = first == std::string::npos ? "" : value.substr(first, last - first + 1);
+                if (headers->contains(key)) { *errorStatus = 400; return false; }
+                (*headers)[key] = value;
+            }
             if (colon != std::string_view::npos && toLowerAscii(line.substr(0, colon)) == "content-length")
             {
                 std::string_view value = line.substr(colon + 1);
@@ -1764,7 +1774,8 @@ namespace
         std::string path;
         std::string body;
         int errorStatus = 0;
-        if (!receiveHttpRequest(clientFd, &method, &path, &body, &errorStatus))
+        json headers = json::object();
+        if (!receiveHttpRequest(clientFd, &method, &path, &body, &errorStatus, &headers))
         {
             if (errorStatus == 413) sendHttpResponse(clientFd, 413, "Payload Too Large", R"({"ok":false,"error":"请求体过大"})");
             else if (errorStatus == 431) sendHttpResponse(clientFd, 431, "Request Header Fields Too Large", R"({"ok":false,"error":"请求头过大"})");
@@ -1774,7 +1785,32 @@ namespace
         }
 
         LS_LOGD_TAG_FMT("HTTP", "收到请求: {}:{} {} {}", clientIp, clientPort, method, path);
-        if (method == "OPTIONS")
+        if (path == "/mcp" || path == "/mcp/")
+        {
+            // Native clients omit Origin. Reject browser-origin access rather than
+            // extending the unauthenticated LAN driver service to arbitrary sites.
+            if (headers.contains("origin"))
+                sendHttpResponse(clientFd, 403, "Forbidden", "");
+            else if (method == "OPTIONS")
+                sendHttpResponse(clientFd, 204, "No Content", "");
+            else if (method != "POST")
+                sendHttpResponse(clientFd, 405, "Method Not Allowed", "", "Allow: POST, OPTIONS\r\n");
+            else if (!headers.value("content-type", std::string{}).starts_with("application/json"))
+                sendHttpResponse(clientFd, 415, "Unsupported Media Type", "");
+            else if (headers.contains("mcp-protocol-version") &&
+                headers["mcp-protocol-version"] != "2025-03-26" &&
+                headers["mcp-protocol-version"] != "2025-06-18" &&
+                headers["mcp-protocol-version"] != "2025-11-25")
+                sendHttpResponse(clientFd, 400, "Bad Request", xst_mcp::Error(nullptr, -32600, "Unsupported MCP-Protocol-Version").dump());
+            else {
+                const auto reply = xst_mcp::Dispatch(body, [&](const std::string &op, const json &params) {
+                    return dispatchStructuredOperationDirect(application, op, params);
+                });
+                sendHttpResponse(clientFd, reply.status, reply.status == 202 ? "Accepted" : reply.status == 400 ? "Bad Request" : "OK",
+                    reply.body.is_null() ? "" : reply.body.dump());
+            }
+        }
+        else if (method == "OPTIONS")
         {
             sendHttpResponse(clientFd, 204, "No Content", "");
         }
@@ -1842,6 +1878,7 @@ int http_server(ApplicationRuntime &application)
         {"debug_abi", capabilities.at("debug_abi")}, {"debug_status", capabilities.at("debug_status")}}.dump();
 
     LS_LOGI_TAG_FMT("HTTP", "服务端已监听 http://0.0.0.0:{}", kServerPort);
+    LS_LOGI_TAG_FMT("HTTP", "MCP 端点: http://<手机IP>:{}/mcp", kServerPort);
     PrintLanHttpAddresses();
     StartCloudflared();
 
