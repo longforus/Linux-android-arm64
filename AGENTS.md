@@ -87,9 +87,9 @@ rm -rf /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/driv
 ### 同步到 xsettings/LS_KTool（按文件，勿整体镜像）
 
 LS_KTool 是**独立 fork**，带自己的 app 适配（`jni_bridge.cpp`、`BUILD_SHARED_LIBRARY`、`-std=c++2b` 等），**绝不能 `rsync --delete`**。注意上游已将原 `include/memory_tool.h` 等拆分为：
-- `include/application/runtime.h`（`ApplicationRuntime` 托管 `Config::ThreadPools` 与各子模块资源）
+- `include/application/runtime.h`（`ApplicationRuntime` 托管 `Config::ThreadPools` 与各子模块资源）、`include/application/service.h`（HTTP/MCP 共用业务入口）
 - `include/architecture/disassembler.h`
-- `include/base/{config,memory_utils,system_log,types}.h`
+- `include/base/{config,memory_utils,scan_value,system_log,types}.h`
 - `include/memory/{mem_scanner,memory_viewer,pointer_manager,saved_address_manager,signature_scanner}.h`
 - `include/service/http_server.h`、`mcp_server.h`、`mcp_catalog.h`（原生 `/mcp` 与 `/api/rpc` 共用 Driver/运行时；工具目录生成器与主机测试在 `tools/`）
 - `include/test/{read_write_test,touch_test,gyro_test,gnss_test}.h`

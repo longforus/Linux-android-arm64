@@ -18,17 +18,12 @@
 #include "../../driver/driver.h"
 #include "config.h"
 #include "types.h"
+#include "scan_value.h"
 
 namespace MemUtils
 {
     using namespace Types;
     using namespace Config;
-
-    // 去除0xb40000高位标签
-    constexpr uintptr_t Normalize(uintptr_t addr) noexcept
-    {
-        return addr & ~(0xFFULL << 56);
-    }
 
     inline std::string_view BaseName(std::string_view path) noexcept
     {
@@ -49,33 +44,6 @@ namespace MemUtils
         const auto value = std::strtoull(temp.c_str(), &end, base);
         if (errno != 0 || end == temp.c_str() || *end != '\0') return std::nullopt;
         return static_cast<std::uint64_t>(value);
-    }
-
-    template <typename T> std::optional<T> ParseScanValue(std::string_view text)
-    {
-        static_assert(std::is_arithmetic_v<T> && (std::is_floating_point_v<T> || std::is_signed_v<T>));
-        if (text.empty()) return std::nullopt;
-
-        std::string temp(text);
-        char *end = nullptr;
-        errno = 0;
-
-        if constexpr (std::is_floating_point_v<T>)
-        {
-            const long double value = std::strtold(temp.c_str(), &end);
-            if (errno == ERANGE || end == temp.c_str() || *end != '\0' || !std::isfinite(value)) return std::nullopt;
-            if (value < static_cast<long double>(std::numeric_limits<T>::lowest()) || value > static_cast<long double>(std::numeric_limits<T>::max())) return std::nullopt;
-            const T converted = static_cast<T>(value);
-            if (!std::isfinite(converted) || (value != 0.0L && converted == T{})) return std::nullopt;
-            return converted;
-        }
-        else
-        {
-            const long long value = std::strtoll(temp.c_str(), &end, 10);
-            if (errno == ERANGE || end == temp.c_str() || *end != '\0') return std::nullopt;
-            if (value < static_cast<long long>(std::numeric_limits<T>::min()) || value > static_cast<long long>(std::numeric_limits<T>::max())) return std::nullopt;
-            return static_cast<T>(value);
-        }
     }
 
     inline std::optional<__uint128_t> ParseUInt128(std::string_view text, int base = 0)
@@ -137,16 +105,6 @@ namespace MemUtils
     {
         uintptr_t a = Normalize(addr);
         return a > Constants::ADDR_MIN && a < Constants::ADDR_MAX;
-    }
-
-    // 验证浮点数合法性
-    template <typename T> constexpr bool IsValidFloat(T value) noexcept
-    {
-        if constexpr (std::is_floating_point_v<T>)
-        {
-            return !std::isnan(value) && !std::isinf(value);
-        }
-        return true;
     }
 
     inline void HwbpRequestRead(Driver::bp_record &record, int reg)
@@ -327,28 +285,6 @@ namespace MemUtils
         return HwbpWriteRegisterValue(record, *regIndex, value);
     }
 
-    // 统一的类型分发
-    template <typename F> decltype(auto) DispatchType(DataType type, F &&fn)
-    {
-        switch (type)
-        {
-        case DataType::I8:
-            return fn.template operator()<int8_t>();
-        case DataType::I16:
-            return fn.template operator()<int16_t>();
-        case DataType::I32:
-            return fn.template operator()<int32_t>();
-        case DataType::I64:
-            return fn.template operator()<int64_t>();
-        case DataType::Float:
-            return fn.template operator()<float>();
-        case DataType::Double:
-            return fn.template operator()<double>();
-        default:
-            return fn.template operator()<int32_t>();
-        }
-    }
-
     // 值的字符串转换
     namespace detail
     {
@@ -426,75 +362,6 @@ namespace MemUtils
         if (!parsed) return false;
         const int64_t value = static_cast<int64_t>(*parsed);
         return dr->Write<int64_t>(addr, value) == static_cast<int>(sizeof(value));
-    }
-
-    //  按扫描模式比较当前值与目标值。
-    template <typename T> bool Compare(T value, T target, FuzzyMode mode, T lastValue, T rangeMax = T{})
-    {
-        auto compare = [](T lhs, T rhs)
-        {
-            if constexpr (std::is_floating_point_v<T>)
-            {
-                constexpr long double absEpsilon = std::is_same_v<T, float> ? 1e-4L : 1e-8L;
-                constexpr long double relEpsilon = static_cast<long double>(std::numeric_limits<T>::epsilon());
-                const long double left = static_cast<long double>(lhs);
-                const long double right = static_cast<long double>(rhs);
-                const long double tolerance = std::max(absEpsilon, std::max(std::abs(left), std::abs(right)) * relEpsilon);
-                const long double delta = left - right;
-                if (delta > tolerance) return 1;
-                if (delta < -tolerance) return -1;
-                return 0;
-            }
-            else
-            {
-                if (lhs > rhs) return 1;
-                if (lhs < rhs) return -1;
-                return 0;
-            }
-        };
-
-        if constexpr (std::is_floating_point_v<T>)
-        {
-            if (!IsValidFloat(value)) return false;
-            if ((mode == FuzzyMode::Equal || mode == FuzzyMode::Greater || mode == FuzzyMode::Less) && !IsValidFloat(target)) return false;
-            if ((mode == FuzzyMode::Increased || mode == FuzzyMode::Decreased || mode == FuzzyMode::Changed || mode == FuzzyMode::Unchanged) && !IsValidFloat(lastValue)) return false;
-            if (mode == FuzzyMode::Range && (!IsValidFloat(target) || !IsValidFloat(rangeMax))) return false;
-        }
-
-        switch (mode)
-        {
-        case FuzzyMode::Equal:
-            return compare(value, target) == 0;
-        case FuzzyMode::Greater:
-            return compare(value, target) > 0;
-        case FuzzyMode::Less:
-            return compare(value, target) < 0;
-        case FuzzyMode::Increased:
-            return compare(value, lastValue) > 0;
-        case FuzzyMode::Decreased:
-            return compare(value, lastValue) < 0;
-        case FuzzyMode::Changed:
-            return compare(value, lastValue) != 0;
-        case FuzzyMode::Unchanged:
-            return compare(value, lastValue) == 0;
-        case FuzzyMode::Range:
-        {
-            T lo = target, hi = rangeMax;
-            if (lo > hi) std::swap(lo, hi);
-            return compare(value, lo) >= 0 && compare(value, hi) <= 0;
-        }
-        case FuzzyMode::Pointer:
-        {
-            if constexpr (std::is_integral_v<T>)
-            {
-                using U = std::make_unsigned_t<T>;
-                return Normalize(static_cast<uintptr_t>(static_cast<U>(value))) == Normalize(static_cast<uintptr_t>(static_cast<U>(target)));
-            }
-            return false;
-        }
-        default:
-            return false;
-        }
     }
 
     // ── HEX 偏移解析 ──

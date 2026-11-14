@@ -38,6 +38,7 @@ inline void Validate(const json &value, const json &schema, const std::string &p
     if (value.is_string()) {
         const auto &text = value.get_ref<const std::string &>();
         if (schema.contains("minLength") && text.size() < schema["minLength"].get<size_t>()) invalid();
+        if (schema.contains("maxLength") && text.size() > schema["maxLength"].get<size_t>()) invalid();
         if (schema.contains("pattern")) {
             std::string pattern = schema["pattern"];
             auto flags = std::regex::ECMAScript;
@@ -127,11 +128,27 @@ inline Reply Dispatch(std::string_view body, const std::function<json(const std:
                     response["data"]["line_count"] = log["data"].value("line_count", 0);
                 }
             }
-            result = {{"content", json::array({{{"type", "text"}, {"text", response.dump()}}})},
+            result = {{"content", json::array({{{"type", "text"}, {"text", response.dump(-1, ' ', false, json::error_handler_t::replace)}}})},
                 {"structuredContent", response}, {"isError", !response.value("ok", false)}};
         } else return {200, Error(id, -32601, "Method not found")};
         return {200, {{"jsonrpc", "2.0"}, {"id", id}, {"result", std::move(result)}}};
     } catch (const std::invalid_argument &error) { return {200, Error(id, -32602, error.what())}; }
       catch (const std::exception &error) { return {200, Error(id, -32603, error.what())}; }
 }
+    template <typename Callback> Reply HandleHttp(std::string_view method, const json &headers, std::string_view body, Callback &&dispatch)
+    {
+        if (headers.contains("origin")) return {403, {{"error", "Browser origins are not accepted; use a native MCP client."}}};
+        const auto version = headers.value("mcp-protocol-version", std::string("2025-03-26"));
+        if (!(version == "2025-03-26" || version == "2025-06-18" || version == "2025-11-25")) return {400, {{"error", "Unsupported MCP-Protocol-Version"}}};
+        if (method == "OPTIONS") return {204, nullptr};
+        if (method != "POST") return {405, {{"error", "Use POST; this stateless endpoint does not offer an SSE stream."}}};
+        std::string contentType = headers.value("content-type", std::string{});
+        std::transform(contentType.begin(), contentType.end(), contentType.begin(), [](unsigned char character) {
+            return character >= 'A' && character <= 'Z' ? static_cast<char>(character + 'a' - 'A') : static_cast<char>(character);
+        });
+        const auto separator = contentType.find(';');
+        const auto mediaType = contentType.substr(0, separator);
+        if (mediaType.substr(0, mediaType.find_last_not_of(" \t") + 1) != "application/json") return {415, {{"error", "Content-Type must be application/json"}}};
+        return Dispatch(body, std::forward<Callback>(dispatch));
+    }
 }

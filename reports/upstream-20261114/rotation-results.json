@@ -1,0 +1,23 @@
+{
+  "original_auto": "1",
+  "original_rotation": "0",
+  "orientations": {
+    "portrait": {
+      "lark_layer": true,
+      "layers": [
+        "Lark#213"
+      ],
+      "buffer": "2400x2400",
+      "visually_verified": true
+    },
+    "landscape": {
+      "lark_layer": true,
+      "layers": [
+        "Lark#213"
+      ],
+      "buffer": "2400x2400",
+      "visually_verified": true
+    }
+  },
+  "passed": true
+}

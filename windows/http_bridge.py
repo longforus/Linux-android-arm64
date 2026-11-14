@@ -203,7 +203,7 @@ def build_saved_add_params(
     }
 
 
-def build_scan_params(value_type: str, mode: str, value: str = "", range_max: str = "", *, is_first: bool) -> dict[str, Any]:
+def build_scan_params(value_type: str, mode: str, value: str = "", range_max: str = "", *, is_first: bool, rounding: str = "rounded", alignment: int = 0) -> dict[str, Any]:
     mode_token = normalize_scan_mode(mode)
     value_token = str(value).strip()
     range_token = str(range_max).strip()
@@ -225,6 +225,11 @@ def build_scan_params(value_type: str, mode: str, value: str = "", range_max: st
         params["value"] = value_token
     if mode_token == "range":
         params["range_max"] = range_token
+    if rounding not in {"rounded", "truncated", "extreme", "exact"}:
+        raise ValueError("invalid float rounding mode")
+    if isinstance(alignment, bool) or alignment not in {0, 1, 2, 4, 8}:
+        raise ValueError("alignment must be 0/1/2/4/8")
+    params.update(rounding=rounding, alignment=alignment)
     return params
 
 
@@ -289,11 +294,11 @@ def parse_saved_states(data: dict[str, Any]) -> list[SavedAddressState]:
 
 
 class AndroidProtocolMixin:
-    def scan_start(self, value_type: str, mode: str, value: str = "", range_max: str = "") -> BridgeResponse:
-        return self.call_operation("scan.start", build_scan_params(value_type, mode, value, range_max, is_first=True))
+    def scan_start(self, value_type: str, mode: str, value: str = "", range_max: str = "", *, rounding: str = "rounded", alignment: int = 0) -> BridgeResponse:
+        return self.call_operation("scan.start", build_scan_params(value_type, mode, value, range_max, is_first=True, rounding=rounding, alignment=alignment))
 
-    def scan_refine(self, value_type: str, mode: str, value: str = "", range_max: str = "") -> BridgeResponse:
-        return self.call_operation("scan.refine", build_scan_params(value_type, mode, value, range_max, is_first=False))
+    def scan_refine(self, value_type: str, mode: str, value: str = "", range_max: str = "", *, rounding: str = "rounded", alignment: int = 0) -> BridgeResponse:
+        return self.call_operation("scan.refine", build_scan_params(value_type, mode, value, range_max, is_first=False, rounding=rounding, alignment=alignment))
 
     def breakpoint_set(self, mode: str, points: list[dict[str, Any]]) -> BridgeResponse:
         mode_token = str(mode).strip().lower()

@@ -207,9 +207,11 @@ def android_memory_scan_start(
     value_type: ScanValueType = "i32",
     value: str = "",
     range_max: str = "",
+    rounding: Literal["rounded", "truncated", "extreme", "exact"] = "rounded",
+    alignment: Literal[0, 1, 2, 4, 8] = 0,
 ) -> dict[str, Any]:
-    """Start a scan. equal/greater/less/pointer/string need value; range also needs range_max; unknown needs neither."""
-    return _mcp_response(bridge.scan_start(value_type, mode, value, range_max))
+    """Start a scan. Float equality uses input decimal precision; rounding=exact disables it. alignment=1 scans unaligned values; 0 uses the default. equal/greater/less/pointer/string need value; range also needs range_max; unknown needs neither."""
+    return _mcp_response(bridge.scan_start(value_type, mode, value, range_max, rounding=rounding, alignment=alignment))
 
 
 @mcp.tool()
@@ -218,9 +220,11 @@ def android_memory_scan_refine(
     value_type: ScanValueType = "i32",
     value: str = "",
     range_max: str = "",
+    rounding: Literal["rounded", "truncated", "extreme", "exact"] = "rounded",
+    alignment: Literal[0, 1, 2, 4, 8] = 0,
 ) -> dict[str, Any]:
-    """Refine results. Value modes need value, range also needs range_max, and history modes need neither."""
-    return _mcp_response(bridge.scan_refine(value_type, mode, value, range_max))
+    """Refine results with the existing alignment; 0 retains it. Float equality supports rounded/truncated/extreme/exact matching. Value modes need value, range also needs range_max, and history modes need neither."""
+    return _mcp_response(bridge.scan_refine(value_type, mode, value, range_max, rounding=rounding, alignment=alignment))
 
 
 @mcp.tool()

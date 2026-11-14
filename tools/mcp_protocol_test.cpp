@@ -49,5 +49,20 @@ int main() {
     assert(call("android_breakpoint_record_update", {{"index", 0}, {"field", "X29"}, {"value", "0x123"}}).contains("result"));
     assert(call("android_breakpoint_record_update", {{"index", 0}, {"field", "x31"}, {"value", "0x123"}}).contains("error"));
     call("android_syscall_start"); assert(operation == "syscall.read");
+    call("android_memory_scan_start", {{"mode", "equal"}, {"value_type", "f32"}, {"value", "1.2"}, {"rounding", "exact"}, {"alignment", 1}});
+    assert(operation == "scan.start" && arguments["rounding"] == "exact" && arguments["alignment"] == 1);
+    assert(call("android_memory_scan_start", {{"mode", "equal"}, {"alignment", 3}}).contains("error"));
+    auto http = [&](std::string type) { return xst_mcp::HandleHttp("POST", json{{"content-type", type}}, R"({"jsonrpc":"2.0","id":1,"method":"ping"})", rpc); };
+    assert(http("Application/JSON; charset=utf-8").status == 200);
+    assert(http("application/json-invalid").status == 415);
+    assert(http("text/plain").status == 415);
+    assert(xst_mcp::HandleHttp("GET", json::object(), "", rpc).status == 405);
+    assert(xst_mcp::HandleHttp("OPTIONS", json::object(), "", rpc).status == 204);
+    assert(xst_mcp::HandleHttp("POST", json{{"origin", "https://example.com"}}, "", rpc).status == 403);
+    assert(xst_mcp::HandleHttp("POST", json{{"mcp-protocol-version", "invalid"}}, "", rpc).status == 400);
+    auto invalidText = [&](const std::string &, const json &) { return json{{"ok", true}, {"data", std::string(1, char(0xff))}}; };
+    auto textReply = xst_mcp::Dispatch(R"({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"android_bridge_ping"}})", invalidText);
+    assert(textReply.body["result"].contains("content"));
+    assert(!textReply.body.dump(-1, ' ', false, json::error_handler_t::replace).empty());
     std::cout << "MCP protocol, catalog, validation and operation adaptation passed\n";
 }

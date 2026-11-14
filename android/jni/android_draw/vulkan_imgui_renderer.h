@@ -416,7 +416,10 @@ namespace RenderVK
         const int w = displayInfo.width;
         const int h = displayInfo.height;
 
-        native_window = android::SurfaceControlManager::Create("Lark", w, h, !allowCapture);
+        // Keep the buffer square: rotation changes the display projection, while
+        // changing buffer geometry alone would stretch the existing SurfaceControl.
+        const int max_side = std::max(w, h);
+        native_window = android::SurfaceControlManager::Create("Lark", max_side, max_side, !allowCapture);
         if (native_window == nullptr)
         {
             LS_LOGE_TAG("RenderVK", "创建 ANativeWindow 失败");

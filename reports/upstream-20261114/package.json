@@ -1,0 +1,9 @@
+{
+  "path": "/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/lineage-20.0-20261114-RELEASE-oriole.zip",
+  "size": 1164886277,
+  "sha256": "760325ff37952111698886e11c2384d5e3e1410dbed3a9fadb1adf4670d76943",
+  "apk_native_hashes": {
+    "/home/void/AsfpProjects/xsettings/app/build/outputs/apk/release/app-release.apk": "0e4c4d29c09ec0c21f2e8dd7f74cd20f0b7dfae4dd0aa6432b234ff0b5cafb2f",
+    "/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/system_ext/priv-app/XSettings/XSettings.apk": "0e4c4d29c09ec0c21f2e8dd7f74cd20f0b7dfae4dd0aa6432b234ff0b5cafb2f"
+  }
+}

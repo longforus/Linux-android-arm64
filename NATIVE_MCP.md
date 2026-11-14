@@ -1,6 +1,6 @@
 # 原生 MCP
 
-来源：`android/jni/include/service/{http_server,mcp_server,mcp_catalog}.h`。
+来源：`android/jni/include/service/{http_server,mcp_server,mcp_catalog}.h`；共用业务入口为 `android/jni/include/application/service.h`。
 
 先启动 Android 独立工具的 mode 4（或 XSettings App 的 HTTP 前台服务），再连接下述端点。
 
@@ -51,4 +51,23 @@ g++ -std=c++20 -I android/jni/json/single_include tools/mcp_protocol_test.cpp -o
 python3 tools/generate_mcp_catalog.py windows/LuckyStarMcp.py --check
 ```
 
-`mcp_server.h` 和 `mcp_catalog.h` 应与 XSettings fork 保持一致，HTTP 集成仅同步 MCP 路由与请求头处理；不要覆盖 fork 的 JNI、PID 兜底和日志适配。
+`mcp_server.h` 和 `mcp_catalog.h` 应与 XSettings fork 保持一致，`ApplicationService` 随业务逻辑一起同步；保留 fork 在该文件中的 PID 兜底，以及 HTTP 层的日志适配和 JNI 专属逻辑。
+
+### 扫描选项
+
+`android_memory_scan_start` / `android_memory_scan_refine`（RPC：`scan.start` / `scan.refine`）新增：
+
+- `rounding`：`rounded`（默认）、`truncated`、`extreme`、`exact`。浮点等值扫描按输入文本的小数精度确定区间，如 `1.2` 的 rounded 区间为 `[1.15, 1.25)`；`exact` 仅匹配转换为目标浮点类型后的精确值。增减、变化和范围模式按实际数值比较。
+- `alignment`：`0`（默认）、`1`、`2`、`4`、`8`。首扫的 `0` 使用 `min(sizeof(T), 4)`；`1` 包含未对齐地址。再次扫描的 `0` 保留原对齐，不能切换为另一种对齐。
+- `scan.get` 返回实际 `alignment`。扫描优先使用目标 `/proc/<pid>/maps` 的可读区域，读取 maps 失败时回退驱动区域。
+
+```json
+{"operation":"scan.start","params":{"mode":"equal","value_type":"f32","value":"1.2","rounding":"rounded","alignment":1}}
+```
+
+主机扫描回归（覆盖跨页、未对齐、读取失败和再次扫描）：
+
+```bash
+g++ -std=c++20 -pthread tools/scan_contract_test.cpp -o /tmp/scan-contract-test
+/tmp/scan-contract-test
+```

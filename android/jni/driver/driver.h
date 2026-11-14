@@ -8,6 +8,7 @@
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
+#include <fstream>
 #include <iterator>
 #include <memory>
 #include <mutex>
@@ -31,44 +32,7 @@
 class Driver
 {
 public: // 共有结构体和锁
-    // 轻量高性能自旋锁
-    /*
-    [技巧 1] 硬件级防伪共享
-    强制 64 字节对齐（一个标准 CPU Cache Line 大小）。
-    确保锁变量独自占据一个独立的缓存行，防止和临近的高频读写变量相互干扰引发总线颠簸。
-    在锁作为全局变量时SpinLock request_lock;闭眼加
-        编译器和链接器会把全局变量、静态变量紧密地塞在 .bss或.data 中,如果 request_lock紧挨着一个统计计数器或标志位或其他全局变量，会引发伪共享，导致其他核抢锁变慢。
-    在锁为锁数组时SpinLock bucket_locks[16];闭眼加
-        当 CPU 核心 0 抢 bucket_locks[0]，CPU 核心 1 抢 bucket_locks[1] 时，它们在逻辑上互不影响，如果不对齐在物理上会失效缓存行
-    在锁为嵌入到数据结构体时struct Entry {SpinLock lock;  uint32_t data; };不建议加，多实例分配内存利用低+容易挤满缓存 
-        */
-    class alignas(64) SpinLock
-    {
-        uint8_t locked = 0;
-
-    public:
-        __always_inline void lock() noexcept
-        {
-            uint32_t scratch;
-            uint32_t value;
-            asm volatile(".arch_extension lse\n"
-                         "mov %w[value], #1\n"
-                         // 原子争抢，失败立即重试，成功即退出。
-                         "1:\n"
-                         "swpab %w[value], %w[scratch], [%[address]]\n"
-                         "cbnz %w[scratch], 1b\n"
-                         : [scratch] "=&r"(scratch), [value] "=&r"(value)
-                         : [address] "r"(&locked)
-                         : "memory");
-        }
-
-        __always_inline void unlock() noexcept
-        {
-            asm volatile("stlrb wzr, [%[address]]" : : [address] "r"(&locked) : "memory");
-        }
-    };
-
-    SpinLock request_lock;
+    alignas(64) std::mutex request_lock;
 
 #define TLS_THREAD_NAME_LEN 16
     struct env_params
@@ -438,7 +402,7 @@ public:
     int DebugCall(ls_debug_message &message)
     {
         static_assert(sizeof(message) <= sizeof(req->vmemrw_info.user_buffer));
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         message.magic = LS_DEBUG_MAGIC;
         message.abi = LS_DEBUG_ABI;
         memory_copy(req->vmemrw_info.user_buffer, &message, sizeof(message));
@@ -461,7 +425,7 @@ public:
         const int pid = GetGlobalPid();
         return lsdebug::ReadWithIntegrity(address, size, [this, pid](uint64_t current, uint8_t *bytes, size_t count)
         {
-            std::scoped_lock<SpinLock> lock(request_lock);
+            std::scoped_lock lock(request_lock);
             req->tgid = pid;
             req->vmemrw_info.rw_addr = current;
             req->vmemrw_info.size = count;
@@ -477,14 +441,14 @@ public:
 
     void NullIo()
     {
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_none);
         IoCommitAndWait();
     }
     void ExitKernel()
     {
         // 内核停止运行
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_kernel_exit);
         IoCommitAndWait();
     }
@@ -658,9 +622,25 @@ public: // 外部获取内存信息
     }
 
     // 获取扫描区域
-    std::vector<std::pair<uintptr_t, uintptr_t>> GetScanRegions()
+    std::vector<std::pair<uintptr_t, uintptr_t>> GetScanRegions(bool allReadable = false)
     {
         std::vector<std::pair<uintptr_t, uintptr_t>> regions;
+
+        if (allReadable)
+        {
+            std::ifstream maps("/proc/" + std::to_string(GetGlobalPid()) + "/maps");
+            std::string line;
+            while (std::getline(maps, line))
+            {
+                unsigned long long start = 0, end = 0;
+                char permissions[5]{};
+                if (std::sscanf(line.c_str(), "%llx-%llx %4s", &start, &end, permissions) != 3 || permissions[0] != 'r' || end <= start) continue;
+                regions.emplace_back(static_cast<uintptr_t>(start), static_cast<uintptr_t>(end));
+            }
+            if (maps.eof() && !regions.empty()) return regions;
+            regions.clear();
+            LS_LOGE_TAG("MemoryScan", "无法完整读取目标 maps，回退到驱动扫描区域");
+        }
 
         const std::unique_ptr<virtual_memory> snapshot(new virtual_memory(GetMemoryInfo()));
         const int regionCount = std::clamp(snapshot->region_count, 0, MAX_SCAN_REGIONS);
@@ -916,7 +896,7 @@ public: // 有界日志读取，不依赖应用执行 dmesg 的权限
         output.clear();
         const uint64_t selector = tag == "sysmon" ? 1 : tag == "cntvct" ? 2 : 0;
         if (!selector) return -EINVAL;
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_monitor_log_read);
         req->vmemrw_info.rw_addr = selector;
         req->vmemrw_info.size = sizeof(req->vmemrw_info.user_buffer);
@@ -1042,7 +1022,7 @@ private: // 私有实现，外部无需关系
     void InitTouch(int requested_slots)
     {
         if (requested_slots <= 0) return;
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_touch_init);
         req->vinput_info.request_virtual_slots = requested_slots;
         IoCommitAndWait();
@@ -1052,7 +1032,7 @@ private: // 私有实现，外部无需关系
     void InitGyro(bool enable)
     {
         if (!enable) return;
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_gyro_init);
         IoCommitAndWait();
     }
@@ -1061,7 +1041,7 @@ private: // 私有实现，外部无需关系
     void InitGnss(bool enable)
     {
         if (!enable) return;
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_gnss_init);
         IoCommitAndWait();
     }
@@ -1081,7 +1061,7 @@ private: // 私有实现，外部无需关系
         {
             const size_t chunk = std::min({size - processed, sizeof(req->vmemrw_info.user_buffer), size_t(4096 - ((addr + processed) & 4095))});
             {
-                std::scoped_lock<SpinLock> lock(request_lock);
+                std::scoped_lock lock(request_lock);
                 StoreRequestOp(op);
                 req->tgid = GetGlobalPid();
                 req->vmemrw_info.rw_addr = addr + processed;
@@ -1116,7 +1096,7 @@ private: // 私有实现，外部无需关系
     virtual_memory HandleVirtualMemoryInfo()
     {
         {
-            std::scoped_lock<SpinLock> lock(request_lock);
+            std::scoped_lock lock(request_lock);
             StoreRequestOp(request_op_vmem_info);
             req->tgid = GetGlobalPid();
             IoCommitAndWait();
@@ -1137,7 +1117,7 @@ private: // 私有实现，外部无需关系
         double normX = static_cast<double>(x) / screenW;
         double normY = static_cast<double>(y) / screenH;
 
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         if (req->vinput_info.POSITION_X <= 0 || req->vinput_info.POSITION_Y <= 0) return;
         StoreRequestOp(op);
         req->vinput_info.slot = slot;
@@ -1166,7 +1146,7 @@ private: // 私有实现，外部无需关系
     // 陀螺仪事件，单位为 rad/s * 1000
     void HandleGyroReport(int gyro_x_mrad_s, int gyro_y_mrad_s, int gyro_z_mrad_s)
     {
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_gyro_report);
         req->vgyro_info.gyro_x_mrad_s = gyro_x_mrad_s;
         req->vgyro_info.gyro_y_mrad_s = gyro_y_mrad_s;
@@ -1177,7 +1157,7 @@ private: // 私有实现，外部无需关系
     // 虚拟定位事件，单位为 degrees * 10000000
     void HandleGnssReport(int latitude_e7, int longitude_e7)
     {
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(request_op_gnss_report);
         req->vgnss_info.latitude_e7 = latitude_e7;
         req->vgnss_info.longitude_e7 = longitude_e7;
@@ -1191,7 +1171,7 @@ private: // 私有实现，外部无需关系
         const int tgid = GetGlobalPid();
         const size_t count = std::min(points.size(), static_cast<size_t>(BP_CONFIG_MAX));
 
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(op);
         StoreRequestStatus(0);
         if (op == request_op_hwbp_set)
@@ -1217,7 +1197,7 @@ private: // 私有实现，外部无需关系
         const int tgid = GetGlobalPid();
         const size_t count = std::min(points.size(), static_cast<size_t>(BP_CONFIG_MAX));
 
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(op);
         StoreRequestStatus(0);
         if (op == request_op_ptebp_set)
@@ -1243,7 +1223,7 @@ private: // 私有实现，外部无需关系
         const int tgid = GetGlobalPid();
         const size_t count = std::min(points.size(), static_cast<size_t>(BP_CONFIG_MAX));
 
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(op);
         StoreRequestStatus(0);
         if (op == request_op_stepbp_set)
@@ -1270,7 +1250,7 @@ private: // 私有实现，外部无需关系
         const int tgid = GetGlobalPid();
         const size_t count = std::min(points.size(), static_cast<size_t>(BP_CONFIG_MAX));
 
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(op);
         StoreRequestStatus(0);
         if (op == request_op_dptdbg_set)
@@ -1298,7 +1278,7 @@ private: // 私有实现，外部无需关系
     {
         if ((op != request_op_syscall_monitor_set && op != request_op_syscall_monitor_remove) || tgid <= 0) return -1;
 
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(op);
         req->tgid = tgid;
         StoreRequestStatus(0);
@@ -1310,7 +1290,7 @@ private: // 私有实现，外部无需关系
     {
         if ((op != request_op_cntvct_monitor_set && op != request_op_cntvct_monitor_remove) || tgid <= 0) return -EINVAL;
 
-        std::scoped_lock<SpinLock> lock(request_lock);
+        std::scoped_lock lock(request_lock);
         StoreRequestOp(op);
         req->tgid = tgid;
         StoreRequestStatus(0);
@@ -1335,7 +1315,7 @@ private: // 私有实现，外部无需关系
         params.tls_status = params.pacga_status = -EIO;
         int status;
         {
-            std::scoped_lock<SpinLock> lock(request_lock);
+            std::scoped_lock lock(request_lock);
             StoreRequestOp(request_op_env_get_params);
             req->tgid = tgid;
             StoreRequestStatus(0);

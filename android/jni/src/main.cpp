@@ -167,7 +167,7 @@ class MainUI
 private:
     ApplicationRuntime &application_;
     ApplicationRuntime::ResourceSet &runtime_;
-    MemScanner &scanner_;
+    MemScanner<Driver> &scanner_;
     PointerManager &ptrManager_;
     SavedAddressManager &savedManager_;
     MemViewer &memViewer_;
@@ -176,6 +176,8 @@ private:
     {
         Types::DataType dataType = Types::DataType::I32;
         Types::FuzzyMode fuzzyMode = Types::FuzzyMode::Unknown;
+        int floatRounding = 0;
+        bool unaligned = false;
         int page = 0;
         std::string lastStringPattern;
     } scanParams_;
@@ -318,6 +320,7 @@ private:
         scanParams_.page = 0;
         auto type = scanParams_.dataType;
         auto mode = scanParams_.fuzzyMode;
+        const size_t alignment = scanParams_.unaligned ? 1 : 0;
         const auto pid = dr->GetGlobalPid();
         const auto lockedType = scanner_.dataType();
         const bool stringBaseline = scanner_.isStringScan();
@@ -343,7 +346,7 @@ private:
             type = Types::DataType::I64;
             auto parsed = MemUtils::ParseUInt64(valueStr, 16);
             if (!parsed) return;
-            scanner_.startAsync<int64_t>(pid, static_cast<int64_t>(MemUtils::Normalize(static_cast<uintptr_t>(*parsed))), type, mode, isFirst);
+            scanner_.startAsync<int64_t>(pid, static_cast<int64_t>(MemUtils::Normalize(static_cast<uintptr_t>(*parsed))), type, mode, isFirst, int64_t{}, {}, MemUtils::FloatRounding::Rounded, alignment);
             return;
         }
         if (mode == Types::FuzzyMode::String)
@@ -359,7 +362,7 @@ private:
                                {
                                    if (mode == Types::FuzzyMode::Unknown || (mode >= Types::FuzzyMode::Increased && mode <= Types::FuzzyMode::Unchanged))
                                    {
-                                       scanner_.startAsync<T>(pid, T{}, type, mode, isFirst);
+                                       scanner_.startAsync<T>(pid, T{}, type, mode, isFirst, T{}, {}, MemUtils::FloatRounding::Rounded, alignment);
                                        return;
                                    }
 
@@ -370,12 +373,12 @@ private:
                                        const auto minValue = MemUtils::ParseScanValue<T>(valueStr.substr(0, pos));
                                        const auto maxValue = MemUtils::ParseScanValue<T>(valueStr.substr(pos + 1));
                                        if (!minValue || !maxValue) return;
-                                       scanner_.startAsync<T>(pid, *minValue, type, mode, isFirst, *maxValue);
+                                       scanner_.startAsync<T>(pid, *minValue, type, mode, isFirst, *maxValue, {}, MemUtils::FloatRounding::Rounded, alignment);
                                        return;
                                    }
 
                                    const auto value = MemUtils::ParseScanValue<T>(valueStr);
-                                   if (value) scanner_.startAsync<T>(pid, *value, type, mode, isFirst);
+                                   if (value) scanner_.startAsync<T>(pid, *value, type, mode, isFirst, T{}, valueStr, static_cast<MemUtils::FloatRounding>(scanParams_.floatRounding), alignment);
                                });
     }
 
@@ -1194,6 +1197,23 @@ private:
         ImGui::BeginDisabled(scanning || stringBaseline);
         if (ImGui::Button(Types::Labels::FUZZY[static_cast<int>(scanParams_.fuzzyMode)], {w, S(45)})) state_.showMode = true;
         ImGui::EndDisabled();
+
+        if (!isStringMode)
+        {
+            ImGui::BeginDisabled(scanning || hasBaseline);
+            ImGui::Checkbox("逐字节扫描（含未对齐地址）", &scanParams_.unaligned);
+            ImGui::EndDisabled();
+        }
+
+        if (scanParams_.fuzzyMode == Types::FuzzyMode::Equal && (scanParams_.dataType == Types::DataType::Float || scanParams_.dataType == Types::DataType::Double))
+        {
+            UI::Space(S(6));
+            UI::Text(Colors::LABEL, "浮点匹配:");
+            ImGui::BeginDisabled(scanning);
+            ImGui::SetNextItemWidth(w);
+            ImGui::Combo("##FloatRounding", &scanParams_.floatRounding, "四舍五入\0截断区间\0扩大范围\0精确数值\0");
+            ImGui::EndDisabled();
+        }
 
         UI::Space(S(6));
         UI::Text(Colors::LABEL, isPtrMode ? "目标地址(Hex):" : "搜索数值:");

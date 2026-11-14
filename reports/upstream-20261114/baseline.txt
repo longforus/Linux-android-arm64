@@ -1,0 +1,12 @@
+20.0-20261112-RELEASE-oriole
+_b
+Enforcing
+3337 (Pixel 6 KPM)
+1
+0
+    codePath=/data/app/~~Tfb4JZNaCPsRpKArLDV6tw==/com.android.xsettings-kErWZ8qRMzcfpOWN6RfE6A==
+    versionCode=1794630200 minSdk=33 targetSdk=33
+    versionName=20261114.1223
+    codePath=/system_ext/priv-app/XSettings
+    versionCode=1793091203 minSdk=33 targetSdk=33
+    versionName=20261027.165323

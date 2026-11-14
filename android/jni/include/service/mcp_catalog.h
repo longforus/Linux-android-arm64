@@ -155,7 +155,7 @@ inline const json &Catalog() {
   },
   {
     "name": "android_memory_scan_start",
-    "description": "Start a scan. equal/greater/less/pointer/string need value; range also needs range_max; unknown needs neither.",
+    "description": "Start a scan. Float equality uses input decimal precision; rounding=exact disables it. alignment=1 scans unaligned values; 0 uses the default. equal/greater/less/pointer/string need value; range also needs range_max; unknown needs neither.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -190,6 +190,27 @@ inline const json &Catalog() {
         "range_max": {
           "type": "string",
           "default": ""
+        },
+        "rounding": {
+          "enum": [
+            "rounded",
+            "truncated",
+            "extreme",
+            "exact"
+          ],
+          "type": "string",
+          "default": "rounded"
+        },
+        "alignment": {
+          "enum": [
+            0,
+            1,
+            2,
+            4,
+            8
+          ],
+          "type": "integer",
+          "default": 0
         }
       },
       "required": [
@@ -201,7 +222,7 @@ inline const json &Catalog() {
   },
   {
     "name": "android_memory_scan_refine",
-    "description": "Refine results. Value modes need value, range also needs range_max, and history modes need neither.",
+    "description": "Refine results with the existing alignment; 0 retains it. Float equality supports rounded/truncated/extreme/exact matching. Value modes need value, range also needs range_max, and history modes need neither.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -239,6 +260,27 @@ inline const json &Catalog() {
         "range_max": {
           "type": "string",
           "default": ""
+        },
+        "rounding": {
+          "enum": [
+            "rounded",
+            "truncated",
+            "extreme",
+            "exact"
+          ],
+          "type": "string",
+          "default": "rounded"
+        },
+        "alignment": {
+          "enum": [
+            0,
+            1,
+            2,
+            4,
+            8
+          ],
+          "type": "integer",
+          "default": 0
         }
       },
       "required": [

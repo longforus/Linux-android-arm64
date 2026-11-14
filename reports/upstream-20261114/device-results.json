@@ -1,0 +1,5691 @@
+{
+  "fixture": {
+    "pid": 6881,
+    "page": 4096,
+    "base": "0x71cf1ea000",
+    "payload": "0x71cf1ea020",
+    "unaligned_int": "0x71cf1ed011",
+    "near": "0x71cf1ea001",
+    "outside": "0x71cf1eaffe",
+    "exact": "0x71cf1ed008",
+    "partial": "0x71cf1ebff0",
+    "marker": "0x71cf1ea080",
+    "hot": "0x6333926000"
+  },
+  "checks": {
+    "health": true,
+    "protocol_negotiation": true,
+    "57_tools_new_scan_schema": true,
+    "media_type_rejection": true,
+    "browser_origin_rejection": true,
+    "rpc_mcp_shared_target": true,
+    "exact_memory_read": true,
+    "memory_write_readback": true,
+    "independent_write_observation": true,
+    "concurrent_driver_requests": true,
+    "unmapped_read_integrity": true,
+    "strict_unmapped_read_rejected": true,
+    "unaligned_integer_scan": true,
+    "scan_refine_keeps_alignment": true,
+    "float_rounded_scan": true,
+    "float_exact_refine": true,
+    "cross_page_float_scan": true,
+    "disassembly_viewer": true,
+    "hwbp_hits": true,
+    "ptebp_hits": true,
+    "stepbp_hits": true,
+    "breakpoint_event_stream": true,
+    "captured_fp_backtrace": true,
+    "bounded_trace_cleanup": true,
+    "trace_file_readback": true,
+    "service_still_healthy": true
+  },
+  "calls": [
+    {
+      "mcp": "initialize",
+      "params": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {},
+        "clientInfo": {
+          "name": "device-regression",
+          "version": "1"
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": {
+          "capabilities": {
+            "tools": {
+              "listChanged": false
+            }
+          },
+          "instructions": "Addresses and registers must be 0x-prefixed strings. Target, scans, viewer and breakpoints are shared with HTTP RPC and all clients.",
+          "protocolVersion": "2025-11-25",
+          "serverInfo": {
+            "name": "XSettings Native MCP",
+            "version": "1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "mcp": "tools/list",
+      "params": null,
+      "status": 200,
+      "response": {
+        "id": 2,
+        "jsonrpc": "2.0",
+        "result": {
+          "tools": [
+            {
+              "description": "Diagnose bridge reachability; normal tools connect automatically and do not require this first.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_bridge_ping"
+            },
+            {
+              "description": "Bind all scan, viewer, and breakpoint operations to a known PID.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "pid": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 2147483647,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "pid"
+                ],
+                "type": "object"
+              },
+              "name": "android_target_set_pid"
+            },
+            {
+              "description": "Resolve a package name to PID and make that process the current target.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "package_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "package_name"
+                ],
+                "type": "object"
+              },
+              "name": "android_target_attach_package"
+            },
+            {
+              "description": "Resolve a package name to PID without changing the current target.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "package_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "package_name"
+                ],
+                "type": "object"
+              },
+              "name": "android_target_find_pid"
+            },
+            {
+              "description": "Read the current target process bound inside the Android HTTP bridge.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_target_current"
+            },
+            {
+              "description": "Read ARM64 environment parameters for the current target process.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "thread_name": {
+                    "default": "",
+                    "type": "string"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_env_get_params"
+            },
+            {
+              "description": "Fetch module and segment information only; scan regions are not returned to MCP clients.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_memory_regions"
+            },
+            {
+              "description": "Resolve a module segment start or end address from the current target process.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "module_name": {
+                    "type": "string"
+                  },
+                  "segment_index": {
+                    "default": 0,
+                    "maximum": 2147483647,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "which": {
+                    "default": "start",
+                    "enum": [
+                      "start",
+                      "end"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "module_name"
+                ],
+                "type": "object"
+              },
+              "name": "android_module_address"
+            },
+            {
+              "description": "Dump a module name or a half-open address range such as 0x5000-0x6000.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "target": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "target"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_dump"
+            },
+            {
+              "description": "Start a scan. Float equality uses input decimal precision; rounding=exact disables it. alignment=1 scans unaligned values; 0 uses the default. equal/greater/less/pointer/string need value; range also needs range_max; unknown needs neither.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "alignment": {
+                    "default": 0,
+                    "enum": [
+                      0,
+                      1,
+                      2,
+                      4,
+                      8
+                    ],
+                    "type": "integer"
+                  },
+                  "mode": {
+                    "enum": [
+                      "unknown",
+                      "equal",
+                      "greater",
+                      "less",
+                      "range",
+                      "pointer",
+                      "string"
+                    ],
+                    "type": "string"
+                  },
+                  "range_max": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "rounding": {
+                    "default": "rounded",
+                    "enum": [
+                      "rounded",
+                      "truncated",
+                      "extreme",
+                      "exact"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "value_type": {
+                    "default": "i32",
+                    "enum": [
+                      "i8",
+                      "i16",
+                      "i32",
+                      "i64",
+                      "f32",
+                      "f64"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "mode"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_scan_start"
+            },
+            {
+              "description": "Refine results with the existing alignment; 0 retains it. Float equality supports rounded/truncated/extreme/exact matching. Value modes need value, range also needs range_max, and history modes need neither.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "alignment": {
+                    "default": 0,
+                    "enum": [
+                      0,
+                      1,
+                      2,
+                      4,
+                      8
+                    ],
+                    "type": "integer"
+                  },
+                  "mode": {
+                    "enum": [
+                      "equal",
+                      "greater",
+                      "less",
+                      "increased",
+                      "decreased",
+                      "changed",
+                      "unchanged",
+                      "range",
+                      "pointer",
+                      "string"
+                    ],
+                    "type": "string"
+                  },
+                  "range_max": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "rounding": {
+                    "default": "rounded",
+                    "enum": [
+                      "rounded",
+                      "truncated",
+                      "extreme",
+                      "exact"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "value_type": {
+                    "default": "i32",
+                    "enum": [
+                      "i8",
+                      "i16",
+                      "i32",
+                      "i64",
+                      "f32",
+                      "f64"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "mode"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_scan_refine"
+            },
+            {
+              "description": "Read one result page; value_type must match the active scan (string for string scans).",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "count": {
+                    "default": 100,
+                    "maximum": 200,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "start": {
+                    "default": 0,
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "value_type": {
+                    "default": "i32",
+                    "enum": [
+                      "i8",
+                      "i16",
+                      "i32",
+                      "i64",
+                      "f32",
+                      "f64",
+                      "string"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_memory_scan_results"
+            },
+            {
+              "description": "Read the current memory scan progress and result count.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_memory_scan_status"
+            },
+            {
+              "description": "Clear the current memory scan result set.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_memory_scan_clear"
+            },
+            {
+              "description": "Read memory with integrity metadata. With allow_partial, inspect segments; empty flat data_hex is not zero memory.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "allow_partial": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "size": {
+                    "maximum": 1048576,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "address",
+                  "size"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_read"
+            },
+            {
+              "description": "Write up to 1048576 bytes as even-length hex digits (whitespace allowed, no 0x prefix).",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "data_hex": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address",
+                  "data_hex"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_write"
+            },
+            {
+              "description": "Return the server-owned saved address list with current values and lock states.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_saved_list"
+            },
+            {
+              "description": "Save an address. pointer forces i64; text forces i8 and uses text_length; numeric uses value_type.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "note": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "text_length": {
+                    "default": 64,
+                    "maximum": 256,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "value_kind": {
+                    "default": "numeric",
+                    "enum": [
+                      "numeric",
+                      "pointer",
+                      "text"
+                    ],
+                    "type": "string"
+                  },
+                  "value_type": {
+                    "default": "i32",
+                    "enum": [
+                      "i8",
+                      "i16",
+                      "i32",
+                      "i64",
+                      "f32",
+                      "f64"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address"
+                ],
+                "type": "object"
+              },
+              "name": "android_saved_add"
+            },
+            {
+              "description": "Remove one address and its associated saved lock.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address"
+                ],
+                "type": "object"
+              },
+              "name": "android_saved_remove"
+            },
+            {
+              "description": "Write a saved address using its server-owned type and update its lock value.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "name": "android_saved_write"
+            },
+            {
+              "description": "Set or clear the note for one server-owned saved address.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address",
+                  "note"
+                ],
+                "type": "object"
+              },
+              "name": "android_saved_set_note"
+            },
+            {
+              "description": "Set lock state. An empty value locks the current value; value is ignored when unlocking.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "locked": {
+                    "type": "boolean"
+                  },
+                  "value": {
+                    "default": "",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address",
+                  "locked"
+                ],
+                "type": "object"
+              },
+              "name": "android_saved_set_locked"
+            },
+            {
+              "description": "Apply a signed hexadecimal byte offset to all server-owned saved addresses.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "offset": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "offset"
+                ],
+                "type": "object"
+              },
+              "name": "android_saved_offset"
+            },
+            {
+              "description": "Clear the server-owned saved address list and associated saved locks.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_saved_clear"
+            },
+            {
+              "description": "Read current pointer scan task state and preserved result count.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_pointer_status"
+            },
+            {
+              "description": "Start a pointer scan. manual requires manual_base; array requires array_base and array_count.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "array_base": {
+                    "anyOf": [
+                      {
+                        "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                        "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "array_count": {
+                    "anyOf": [
+                      {
+                        "maximum": 1000000,
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "depth": {
+                    "maximum": 16,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "manual_base": {
+                    "anyOf": [
+                      {
+                        "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                        "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "max_offset": {
+                    "maximum": 2147483647,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "mode": {
+                    "default": "module",
+                    "enum": [
+                      "module",
+                      "manual",
+                      "array"
+                    ],
+                    "type": "string"
+                  },
+                  "module_filter": {
+                    "default": "",
+                    "type": "string"
+                  },
+                  "target": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "target",
+                  "depth",
+                  "max_offset"
+                ],
+                "type": "object"
+              },
+              "name": "android_pointer_scan"
+            },
+            {
+              "description": "Merge all saved pointer bin files by keeping chains with matching offset structure.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_pointer_merge"
+            },
+            {
+              "description": "Export the merged pointer bin data into a human-readable text file.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_pointer_export"
+            },
+            {
+              "description": "Open an address and return its freshly read 100-byte snapshot.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "view_format": {
+                    "default": "hexadecimal",
+                    "enum": [
+                      "hexadecimal",
+                      "hex",
+                      "i8",
+                      "i16",
+                      "i32",
+                      "i64",
+                      "f32",
+                      "f64",
+                      "disasm"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_view_open"
+            },
+            {
+              "description": "Move by an exact byte offset such as '+0x20' or '-0x10' and return the fresh snapshot.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "offset": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "offset"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_view_offset"
+            },
+            {
+              "description": "Change the viewer format and return the freshly decoded snapshot.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "view_format": {
+                    "enum": [
+                      "hexadecimal",
+                      "hex",
+                      "i8",
+                      "i16",
+                      "i32",
+                      "i64",
+                      "f32",
+                      "f64",
+                      "disasm"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "view_format"
+                ],
+                "type": "object"
+              },
+              "name": "android_memory_view_set_format"
+            },
+            {
+              "description": "Refresh and return the current 100-byte snapshot; disasm also returns decoded instructions.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_memory_view_read"
+            },
+            {
+              "description": "Return breakpoints with addresses, registers and Q halves as exact 0x strings.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_breakpoint_get"
+            },
+            {
+              "description": "Set hwbp/ptebp/stepbp points; use 0x strings for addresses, also returned as 0x strings.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "mode": {
+                    "enum": [
+                      "hwbp",
+                      "ptebp",
+                      "stepbp"
+                    ],
+                    "type": "string"
+                  },
+                  "points": {
+                    "description": "Array of 1..16 objects. Every object must contain exactly these required fields: address (nonzero 0x-prefixed string), bp_type (read|write|read_write|execute), bp_scope (main|other|all), and length (integer 1..8). Execution example: [{\"address\":\"0x7A12345678\",\"bp_type\":\"execute\",\"bp_scope\":\"all\",\"length\":4}]",
+                    "examples": [
+                      [
+                        {
+                          "address": "0x7A12345678",
+                          "bp_scope": "all",
+                          "bp_type": "execute",
+                          "length": 4
+                        }
+                      ]
+                    ],
+                    "items": {
+                      "properties": {
+                        "address": {
+                          "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                          "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                          "title": "Address",
+                          "type": "string"
+                        },
+                        "bp_scope": {
+                          "description": "Thread scope: main thread, other threads, or all threads.",
+                          "enum": [
+                            "main",
+                            "other",
+                            "all"
+                          ],
+                          "title": "Bp Scope",
+                          "type": "string"
+                        },
+                        "bp_type": {
+                          "description": "Breakpoint access type; use execute for an instruction breakpoint.",
+                          "enum": [
+                            "read",
+                            "write",
+                            "read_write",
+                            "execute"
+                          ],
+                          "title": "Bp Type",
+                          "type": "string"
+                        },
+                        "length": {
+                          "description": "Breakpoint length in bytes.",
+                          "maximum": 8,
+                          "minimum": 1,
+                          "title": "Length",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "address",
+                        "bp_type",
+                        "bp_scope",
+                        "length"
+                      ],
+                      "title": "AndroidBreakpointPoint",
+                      "type": "object"
+                    },
+                    "maxItems": 16,
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "mode",
+                  "points"
+                ],
+                "type": "object"
+              },
+              "name": "android_breakpoint_set"
+            },
+            {
+              "description": "Clear the currently active hwbp, ptebp, or stepbp mode.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_breakpoint_clear"
+            },
+            {
+              "description": "Patch pc, x0..x29, q0..q31, masks or op.<register>; pass 64/128-bit values as 0x strings.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "field": {
+                    "pattern": "(?i)^(?:(?:(?:op|mask)\\.)?(?:pc|hit_count|lr|sp|pstate|orig_x0|syscallno|fpsr|fpcr|x(?:[0-9]|[12][0-9])|[qv](?:[0-9]|[12][0-9]|3[01]))|mask(?:[0-9]|1[0-7]|[._](?:[0-9]|1[0-7])|\\[(?:[0-9]|1[0-7])\\]))$",
+                    "type": "string"
+                  },
+                  "index": {
+                    "maximum": 2147483647,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "value": {
+                    "description": "Register value as a 0x-prefixed hex string, up to 128 bits; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,32}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "index",
+                  "field",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "name": "android_breakpoint_record_update"
+            },
+            {
+              "description": "Start syscall monitoring and return the currently available log.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_syscall_start"
+            },
+            {
+              "description": "Stop syscall monitoring for the current target PID.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_syscall_stop"
+            },
+            {
+              "description": "Read all currently available lsdriver syscall log lines.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_syscall_log"
+            },
+            {
+              "description": "Start CNTVCT_EL0 read monitoring and return the currently available log.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_cntvct_start"
+            },
+            {
+              "description": "Stop CNTVCT_EL0 read monitoring for the current target PID.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_cntvct_stop"
+            },
+            {
+              "description": "Read all currently available lsdriver CNTVCT monitor log lines.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_cntvct_log"
+            },
+            {
+              "description": "Generate an Android-side signature using range_size bytes before and after the address.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "file_name": {
+                    "default": "Signature.txt",
+                    "type": "string"
+                  },
+                  "range_size": {
+                    "maximum": 1200,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "address",
+                  "range_size"
+                ],
+                "type": "object"
+              },
+              "name": "android_signature_scan_address"
+            },
+            {
+              "description": "Scan using an Android-side signature file; relative names may resolve under /data/akernel/.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "file_name": {
+                    "default": "Signature.txt",
+                    "type": "string"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_signature_scan_file"
+            },
+            {
+              "description": "Scan a pattern such as '48 8B ?? FFh'; '?' and '??' are wildcard bytes.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "pattern": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "range_offset": {
+                    "default": 0,
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "pattern"
+                ],
+                "type": "object"
+              },
+              "name": "android_signature_scan_pattern"
+            },
+            {
+              "description": "Filter changed bytes in an Android-side signature file at the supplied address.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "address": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  },
+                  "file_name": {
+                    "default": "Signature.txt",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "address"
+                ],
+                "type": "object"
+              },
+              "name": "android_signature_filter"
+            },
+            {
+              "description": "Report actual debug ABI and prerequisites; compiled support is not device validation.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_bridge_capabilities"
+            },
+            {
+              "description": "Begin a new event stream for the selected process, then install a breakpoint separately. Save the returned stream ID.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_breakpoint_events_start"
+            },
+            {
+              "description": "Stop collecting breakpoint events; this does not remove the breakpoint itself.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_breakpoint_events_stop"
+            },
+            {
+              "description": "Read chronological hits and bounded FP chains captured at the hit; inspect lost_before_page and unwind limitations.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "after": {
+                    "default": "0",
+                    "pattern": "^[0-9]{1,20}$",
+                    "type": "string"
+                  },
+                  "count": {
+                    "default": 8,
+                    "maximum": 8,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "stream": {
+                    "pattern": "^[0-9]{1,20}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "stream"
+                ],
+                "type": "object"
+              },
+              "name": "android_breakpoint_events_read"
+            },
+            {
+              "description": "Get the FP chain saved at one exact breakpoint hit. Fails if overwritten; does not unwind a later live stack.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "event_seq": {
+                    "pattern": "^[0-9]{1,20}$",
+                    "type": "string"
+                  },
+                  "stream": {
+                    "pattern": "^[0-9]{1,20}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "stream",
+                  "event_seq"
+                ],
+                "type": "object"
+              },
+              "name": "android_breakpoint_backtrace"
+            },
+            {
+              "description": "Choose a private absolute directory owned by the tool uid (0700), e.g. the XSettings app files directory. No shared sdcard storage.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "directory": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "directory"
+                ],
+                "type": "object"
+              },
+              "name": "android_trace_configure"
+            },
+            {
+              "description": "Trace selected process MAIN THREAD via single-step, starting when PC reaches start_pc. Requires no other active breakpoint/scan. Inspect losses; this is not ETM.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "duration_ms": {
+                    "default": 5000,
+                    "maximum": 60000,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "max_steps": {
+                    "default": 1000,
+                    "maximum": 1000000,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "start_pc": {
+                    "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+                    "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "start_pc"
+                ],
+                "type": "object"
+              },
+              "name": "android_trace_start"
+            },
+            {
+              "description": "Read the current session state, saved events, loss count and cleanup status.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_trace_status"
+            },
+            {
+              "description": "Disarm tracing, drain the remaining ring and flush the trace file.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_trace_stop"
+            },
+            {
+              "description": "List saved sessions; unfinalized files from previous tool processes are interrupted sessions.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {},
+                "required": [],
+                "type": "object"
+              },
+              "name": "android_trace_list"
+            },
+            {
+              "description": "Read a saved session page using next_after as the next cursor. Addresses and sequence IDs remain strings.",
+              "inputSchema": {
+                "additionalProperties": false,
+                "properties": {
+                  "after": {
+                    "default": "0",
+                    "pattern": "^[0-9]{1,20}$",
+                    "type": "string"
+                  },
+                  "count": {
+                    "default": 100,
+                    "maximum": 500,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "session_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "session_id"
+                ],
+                "type": "object"
+              },
+              "name": "android_trace_read"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_bridge_capabilities",
+        "arguments": {}
+      },
+      "status": 200,
+      "response": {
+        "id": 3,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"backend\":\"lsdriver\",\"captured_fp_chain\":true,\"debug_abi\":1,\"debug_status\":0,\"etm_trace\":false,\"event_page_size\":8,\"event_ring_size\":256,\"events\":true,\"kernel_page_size\":4096,\"kernel_version\":\"2.4.0\",\"legacy_shared_layout\":true,\"protocol_version\":1,\"read_integrity\":true,\"step_trace_prerequisites\":true,\"trace_file_budget\":8388608,\"trace_runtime_verified\":false,\"trace_scope\":\"main_thread\",\"trace_session_budget\":32},\"ok\":true,\"operation\":\"bridge.capabilities\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "backend": "lsdriver",
+              "captured_fp_chain": true,
+              "debug_abi": 1,
+              "debug_status": 0,
+              "etm_trace": false,
+              "event_page_size": 8,
+              "event_ring_size": 256,
+              "events": true,
+              "kernel_page_size": 4096,
+              "kernel_version": "2.4.0",
+              "legacy_shared_layout": true,
+              "protocol_version": 1,
+              "read_integrity": true,
+              "step_trace_prerequisites": true,
+              "trace_file_budget": 8388608,
+              "trace_runtime_verified": false,
+              "trace_scope": "main_thread",
+              "trace_session_budget": 32
+            },
+            "ok": true,
+            "operation": "bridge.capabilities"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "target.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "pid": 0
+        },
+        "ok": true,
+        "operation": "target.get"
+      }
+    },
+    {
+      "rpc": "breakpoint.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "bp_info": {
+            "num_brps": 0,
+            "num_wrps": 0,
+            "points": [
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              }
+            ]
+          },
+          "mode": ""
+        },
+        "ok": true,
+        "operation": "breakpoint.get"
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_target_set_pid",
+        "arguments": {
+          "pid": 6881
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 4,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"pid\":6881},\"ok\":true,\"operation\":\"target.select\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "pid": 6881
+            },
+            "ok": true,
+            "operation": "target.select"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "target.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "pid": 6881
+        },
+        "ok": true,
+        "operation": "target.get"
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_read",
+        "arguments": {
+          "address": "0x71cf1ea020",
+          "size": 4
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 5,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"address\":\"0x71cf1ea020\",\"complete\":true,\"data_hex\":\"DF9B5713\",\"read_bytes\":4,\"requested_bytes\":4,\"segments\":[{\"address\":\"0x71cf1ea020\",\"data_hex\":\"DF9B5713\",\"offset\":0,\"size\":4,\"status\":4,\"valid\":true}],\"size\":4},\"ok\":true,\"operation\":\"memory.read\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "address": "0x71cf1ea020",
+              "complete": true,
+              "data_hex": "DF9B5713",
+              "read_bytes": 4,
+              "requested_bytes": 4,
+              "segments": [
+                {
+                  "address": "0x71cf1ea020",
+                  "data_hex": "DF9B5713",
+                  "offset": 0,
+                  "size": 4,
+                  "status": 4,
+                  "valid": true
+                }
+              ],
+              "size": 4
+            },
+            "ok": true,
+            "operation": "memory.read"
+          }
+        }
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_write",
+        "arguments": {
+          "address": "0x71cf1ea020",
+          "data_hex": "e0ac6824"
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 6,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"address\":\"0x71CF1EA020\",\"readback_hex\":\"E0AC6824\",\"readback_status\":4,\"size\":4,\"verified\":true},\"ok\":true,\"operation\":\"memory.write\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "address": "0x71CF1EA020",
+              "readback_hex": "E0AC6824",
+              "readback_status": 4,
+              "size": 4,
+              "verified": true
+            },
+            "ok": true,
+            "operation": "memory.write"
+          }
+        }
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_write",
+        "arguments": {
+          "address": "0x71cf1ea020",
+          "data_hex": "DF9B5713"
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 7,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"address\":\"0x71CF1EA020\",\"readback_hex\":\"DF9B5713\",\"readback_status\":4,\"size\":4,\"verified\":true},\"ok\":true,\"operation\":\"memory.write\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "address": "0x71CF1EA020",
+              "readback_hex": "DF9B5713",
+              "readback_status": 4,
+              "size": 4,
+              "verified": true
+            },
+            "ok": true,
+            "operation": "memory.write"
+          }
+        }
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_read",
+        "arguments": {
+          "address": "0x0",
+          "size": 32,
+          "allow_partial": true
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 8,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"address\":\"0x0\",\"complete\":false,\"data_hex\":\"\",\"read_bytes\":0,\"requested_bytes\":32,\"segments\":[{\"address\":\"0x0\",\"offset\":0,\"size\":32,\"status\":-14,\"valid\":false}],\"size\":32},\"ok\":true,\"operation\":\"memory.read\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "address": "0x0",
+              "complete": false,
+              "data_hex": "",
+              "read_bytes": 0,
+              "requested_bytes": 32,
+              "segments": [
+                {
+                  "address": "0x0",
+                  "offset": 0,
+                  "size": 32,
+                  "status": -14,
+                  "valid": false
+                }
+              ],
+              "size": 32
+            },
+            "ok": true,
+            "operation": "memory.read"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "memory.read",
+      "params": {
+        "address": "0x0",
+        "size": 32
+      },
+      "status": 200,
+      "response": {
+        "complete": false,
+        "error": "读取不完整；设置 allow_partial=true 获取有效区段",
+        "ok": false,
+        "operation": "memory.read",
+        "read_bytes": 0,
+        "requested_bytes": 32
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_scan_start",
+        "arguments": {
+          "mode": "equal",
+          "value_type": "i32",
+          "value": "324508639",
+          "alignment": 1
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 9,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"alignment\":1,\"count\":0,\"mode\":\"equal\",\"progress\":0.0,\"scanning\":true,\"string_scan\":false,\"value_format\":\"number\",\"value_type\":\"I32\"},\"ok\":true,\"operation\":\"scan.start\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "alignment": 1,
+              "count": 0,
+              "mode": "equal",
+              "progress": 0.0,
+              "scanning": true,
+              "string_scan": false,
+              "value_format": "number",
+              "value_type": "I32"
+            },
+            "ok": true,
+            "operation": "scan.start"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 0,
+          "mode": "equal",
+          "progress": 0.0,
+          "scanning": true,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "I32"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 2,
+          "mode": "equal",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "I32"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.results",
+      "params": {
+        "start": 0,
+        "count": 200,
+        "value_type": "i32"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [
+            {
+              "addr": "0x71CF1EA020",
+              "value": "324508639"
+            },
+            {
+              "addr": "0x71CF1ED011",
+              "value": "324508639"
+            }
+          ],
+          "mode": "equal",
+          "request_count": 200,
+          "result_count": 2,
+          "start": 0,
+          "total_count": 2,
+          "type": "i32",
+          "value_format": "number"
+        },
+        "ok": true,
+        "operation": "scan.results"
+      }
+    },
+    {
+      "rpc": "memory.write",
+      "params": {
+        "address": "0x71cf1ed011",
+        "data_hex": "e0ac6824"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "address": "0x71CF1ED011",
+          "readback_hex": "E0AC6824",
+          "readback_status": 4,
+          "size": 4,
+          "verified": true
+        },
+        "ok": true,
+        "operation": "memory.write"
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_scan_refine",
+        "arguments": {
+          "mode": "equal",
+          "value_type": "i32",
+          "value": "610839776"
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 10,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"alignment\":1,\"count\":0,\"mode\":\"equal\",\"progress\":0.0,\"scanning\":true,\"string_scan\":false,\"value_format\":\"number\",\"value_type\":\"I32\"},\"ok\":true,\"operation\":\"scan.refine\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "alignment": 1,
+              "count": 0,
+              "mode": "equal",
+              "progress": 0.0,
+              "scanning": true,
+              "string_scan": false,
+              "value_format": "number",
+              "value_type": "I32"
+            },
+            "ok": true,
+            "operation": "scan.refine"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 1,
+          "mode": "equal",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "I32"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.results",
+      "params": {
+        "start": 0,
+        "count": 200,
+        "value_type": "i32"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [
+            {
+              "addr": "0x71CF1ED011",
+              "value": "610839776"
+            }
+          ],
+          "mode": "equal",
+          "request_count": 200,
+          "result_count": 1,
+          "start": 0,
+          "total_count": 1,
+          "type": "i32",
+          "value_format": "number"
+        },
+        "ok": true,
+        "operation": "scan.results"
+      }
+    },
+    {
+      "rpc": "memory.write",
+      "params": {
+        "address": "0x71cf1ed011",
+        "data_hex": "DF9B5713"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "address": "0x71CF1ED011",
+          "readback_hex": "DF9B5713",
+          "readback_status": 4,
+          "size": 4,
+          "verified": true
+        },
+        "ok": true,
+        "operation": "memory.write"
+      }
+    },
+    {
+      "rpc": "scan.clear",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 0,
+          "mode": "unknown",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": ""
+        },
+        "ok": true,
+        "operation": "scan.clear"
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_scan_start",
+        "arguments": {
+          "mode": "equal",
+          "value_type": "f32",
+          "value": "1.2",
+          "alignment": 1,
+          "rounding": "rounded"
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 11,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"alignment\":1,\"count\":0,\"mode\":\"equal\",\"progress\":0.0,\"scanning\":true,\"string_scan\":false,\"value_format\":\"number\",\"value_type\":\"Float\"},\"ok\":true,\"operation\":\"scan.start\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "alignment": 1,
+              "count": 0,
+              "mode": "equal",
+              "progress": 0.0,
+              "scanning": true,
+              "string_scan": false,
+              "value_format": "number",
+              "value_type": "Float"
+            },
+            "ok": true,
+            "operation": "scan.start"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 0,
+          "mode": "equal",
+          "progress": 0.0,
+          "scanning": true,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "Float"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 10,
+          "mode": "equal",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "Float"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.results",
+      "params": {
+        "start": 0,
+        "count": 200,
+        "value_type": "f32"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [
+            {
+              "addr": "0x633392657D",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x6333926595",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x63339265FD",
+              "value": "1.24"
+            },
+            {
+              "addr": "0x6333926615",
+              "value": "1.24"
+            },
+            {
+              "addr": "0x633392757D",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x6333927595",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x63339275FD",
+              "value": "1.24"
+            },
+            {
+              "addr": "0x6333927615",
+              "value": "1.24"
+            },
+            {
+              "addr": "0x71CF1EA001",
+              "value": "1.24"
+            },
+            {
+              "addr": "0x71CF1ED008",
+              "value": "1.2"
+            }
+          ],
+          "mode": "equal",
+          "request_count": 200,
+          "result_count": 10,
+          "start": 0,
+          "total_count": 10,
+          "type": "f32",
+          "value_format": "number"
+        },
+        "ok": true,
+        "operation": "scan.results"
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_scan_refine",
+        "arguments": {
+          "mode": "equal",
+          "value_type": "f32",
+          "value": "1.2",
+          "rounding": "exact"
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 12,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"alignment\":1,\"count\":0,\"mode\":\"equal\",\"progress\":0.0,\"scanning\":true,\"string_scan\":false,\"value_format\":\"number\",\"value_type\":\"Float\"},\"ok\":true,\"operation\":\"scan.refine\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "alignment": 1,
+              "count": 0,
+              "mode": "equal",
+              "progress": 0.0,
+              "scanning": true,
+              "string_scan": false,
+              "value_format": "number",
+              "value_type": "Float"
+            },
+            "ok": true,
+            "operation": "scan.refine"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 5,
+          "mode": "equal",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "Float"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.results",
+      "params": {
+        "start": 0,
+        "count": 200,
+        "value_type": "f32"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [
+            {
+              "addr": "0x633392657D",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x6333926595",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x633392757D",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x6333927595",
+              "value": "1.2"
+            },
+            {
+              "addr": "0x71CF1ED008",
+              "value": "1.2"
+            }
+          ],
+          "mode": "equal",
+          "request_count": 200,
+          "result_count": 5,
+          "start": 0,
+          "total_count": 5,
+          "type": "f32",
+          "value_format": "number"
+        },
+        "ok": true,
+        "operation": "scan.results"
+      }
+    },
+    {
+      "rpc": "scan.clear",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 0,
+          "mode": "unknown",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": ""
+        },
+        "ok": true,
+        "operation": "scan.clear"
+      }
+    },
+    {
+      "mcp": "tools/call",
+      "params": {
+        "name": "android_memory_scan_start",
+        "arguments": {
+          "mode": "equal",
+          "value_type": "f32",
+          "value": "1.26",
+          "alignment": 1,
+          "rounding": "exact"
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": 13,
+        "jsonrpc": "2.0",
+        "result": {
+          "content": [
+            {
+              "text": "{\"data\":{\"alignment\":1,\"count\":0,\"mode\":\"equal\",\"progress\":0.0,\"scanning\":true,\"string_scan\":false,\"value_format\":\"number\",\"value_type\":\"Float\"},\"ok\":true,\"operation\":\"scan.start\"}",
+              "type": "text"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "data": {
+              "alignment": 1,
+              "count": 0,
+              "mode": "equal",
+              "progress": 0.0,
+              "scanning": true,
+              "string_scan": false,
+              "value_format": "number",
+              "value_type": "Float"
+            },
+            "ok": true,
+            "operation": "scan.start"
+          }
+        }
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 0,
+          "mode": "equal",
+          "progress": 0.0,
+          "scanning": true,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "Float"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 5,
+          "mode": "equal",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": "Float"
+        },
+        "ok": true,
+        "operation": "scan.get"
+      }
+    },
+    {
+      "rpc": "scan.results",
+      "params": {
+        "start": 0,
+        "count": 200,
+        "value_type": "f32"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [
+            {
+              "addr": "0x63339265BD",
+              "value": "1.26"
+            },
+            {
+              "addr": "0x63339265D5",
+              "value": "1.26"
+            },
+            {
+              "addr": "0x63339275BD",
+              "value": "1.26"
+            },
+            {
+              "addr": "0x63339275D5",
+              "value": "1.26"
+            },
+            {
+              "addr": "0x71CF1EAFFE",
+              "value": "1.26"
+            }
+          ],
+          "mode": "equal",
+          "request_count": 200,
+          "result_count": 5,
+          "start": 0,
+          "total_count": 5,
+          "type": "f32",
+          "value_format": "number"
+        },
+        "ok": true,
+        "operation": "scan.results"
+      }
+    },
+    {
+      "rpc": "scan.clear",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 0,
+          "mode": "unknown",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": ""
+        },
+        "ok": true,
+        "operation": "scan.clear"
+      }
+    },
+    {
+      "rpc": "viewer.open",
+      "params": {
+        "address": "0x6333926000",
+        "view_format": "disasm"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "base": "0x6333926000",
+          "byte_count": 100,
+          "data_hex": "080000D01F2003D51F2003D50004009109F541F92905009109F501F9C0035FD6F07BBFA9100000B011B641F910A20D9120021FD61F2003D51F2003D51F2003D5100000B011BA41F910C20D9120021FD6100000B011BE41F910E20D9120021FD6100000B0",
+          "disasm": [
+            {
+              "address": "0x6333926000",
+              "bytes_hex": "080000D0",
+              "mnemonic": "ADRP",
+              "op_str": "X8, 0X6333928000",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926004",
+              "bytes_hex": "1F2003D5",
+              "mnemonic": "NOP",
+              "op_str": "",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926008",
+              "bytes_hex": "1F2003D5",
+              "mnemonic": "NOP",
+              "op_str": "",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x633392600C",
+              "bytes_hex": "00040091",
+              "mnemonic": "ADD",
+              "op_str": "X0, X0, #1",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926010",
+              "bytes_hex": "09F541F9",
+              "mnemonic": "LDR",
+              "op_str": "X9, [X8, #0X3E8]",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926014",
+              "bytes_hex": "29050091",
+              "mnemonic": "ADD",
+              "op_str": "X9, X9, #1",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926018",
+              "bytes_hex": "09F501F9",
+              "mnemonic": "STR",
+              "op_str": "X9, [X8, #0X3E8]",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x633392601C",
+              "bytes_hex": "C0035FD6",
+              "mnemonic": "RET",
+              "op_str": "",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926020",
+              "bytes_hex": "F07BBFA9",
+              "mnemonic": "STP",
+              "op_str": "X16, X30, [SP, #-0X10]!",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926024",
+              "bytes_hex": "100000B0",
+              "mnemonic": "ADRP",
+              "op_str": "X16, 0X6333927000",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926028",
+              "bytes_hex": "11B641F9",
+              "mnemonic": "LDR",
+              "op_str": "X17, [X16, #0X368]",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x633392602C",
+              "bytes_hex": "10A20D91",
+              "mnemonic": "ADD",
+              "op_str": "X16, X16, #0X368",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926030",
+              "bytes_hex": "20021FD6",
+              "mnemonic": "BR",
+              "op_str": "X17",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926034",
+              "bytes_hex": "1F2003D5",
+              "mnemonic": "NOP",
+              "op_str": "",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926038",
+              "bytes_hex": "1F2003D5",
+              "mnemonic": "NOP",
+              "op_str": "",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x633392603C",
+              "bytes_hex": "1F2003D5",
+              "mnemonic": "NOP",
+              "op_str": "",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926040",
+              "bytes_hex": "100000B0",
+              "mnemonic": "ADRP",
+              "op_str": "X16, 0X6333927000",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926044",
+              "bytes_hex": "11BA41F9",
+              "mnemonic": "LDR",
+              "op_str": "X17, [X16, #0X370]",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926048",
+              "bytes_hex": "10C20D91",
+              "mnemonic": "ADD",
+              "op_str": "X16, X16, #0X370",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x633392604C",
+              "bytes_hex": "20021FD6",
+              "mnemonic": "BR",
+              "op_str": "X17",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926050",
+              "bytes_hex": "100000B0",
+              "mnemonic": "ADRP",
+              "op_str": "X16, 0X6333927000",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926054",
+              "bytes_hex": "11BE41F9",
+              "mnemonic": "LDR",
+              "op_str": "X17, [X16, #0X378]",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926058",
+              "bytes_hex": "10E20D91",
+              "mnemonic": "ADD",
+              "op_str": "X16, X16, #0X378",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x633392605C",
+              "bytes_hex": "20021FD6",
+              "mnemonic": "BR",
+              "op_str": "X17",
+              "size": 4,
+              "valid": true
+            },
+            {
+              "address": "0x6333926060",
+              "bytes_hex": "100000B0",
+              "mnemonic": "ADRP",
+              "op_str": "X16, 0X6333927000",
+              "size": 4,
+              "valid": true
+            }
+          ],
+          "format": "disasm",
+          "read_status": 100,
+          "read_success": true
+        },
+        "ok": true,
+        "operation": "viewer.open"
+      }
+    },
+    {
+      "rpc": "breakpoint.set",
+      "params": {
+        "mode": "hwbp",
+        "points": [
+          {
+            "address": "0x6333926000",
+            "bp_type": "execute",
+            "bp_scope": "main",
+            "length": 4
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "mode": "hwbp",
+          "point_count": 1,
+          "points": [
+            {
+              "address": "0x6333926000",
+              "index": 0,
+              "length": 4,
+              "scope": "main",
+              "type": "execute"
+            }
+          ],
+          "status": 0
+        },
+        "ok": true,
+        "operation": "breakpoint.set"
+      }
+    },
+    {
+      "rpc": "breakpoint.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "bp_info": {
+            "num_brps": 6,
+            "num_wrps": 4,
+            "points": [
+              {
+                "bl": 4,
+                "bs": 0,
+                "bt": 4,
+                "hit_addr": "0x6333926000",
+                "record_count": 1,
+                "records": [
+                  {
+                    "fpcr": "0x0",
+                    "fpsr": "0x0",
+                    "hit_count": 20,
+                    "lr": "0x63339251C0",
+                    "mask": [
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x15"
+                    ],
+                    "orig_x0": "0x7FD1AAE578",
+                    "pc": "0x6333926000",
+                    "pstate": "0x60001000",
+                    "q0": {
+                      "hi": "0x7FD1AAE510",
+                      "lo": "0x7FD1AAE5B0"
+                    },
+                    "q1": {
+                      "hi": "0xFFFFFF80FFFFFFC8",
+                      "lo": "0x7FD1AAE4D0"
+                    },
+                    "q10": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q11": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q12": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q13": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q14": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q15": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q16": {
+                      "hi": "0xC0300C03C0300C03",
+                      "lo": "0xC0300C03C0300C03"
+                    },
+                    "q17": {
+                      "hi": "0x0",
+                      "lo": "0x1010400"
+                    },
+                    "q18": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q19": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q2": {
+                      "hi": "0x4040",
+                      "lo": "0x4040"
+                    },
+                    "q20": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q21": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q22": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q23": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q24": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q25": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q26": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q27": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q28": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q29": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q3": {
+                      "hi": "0x710B4C7000",
+                      "lo": "0x710B4C7000"
+                    },
+                    "q30": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q31": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q4": {
+                      "hi": "0x30300000202",
+                      "lo": "0x10100000000"
+                    },
+                    "q5": {
+                      "hi": "0x3030",
+                      "lo": "0x2020"
+                    },
+                    "q6": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q7": {
+                      "hi": "0x6E00650070004F",
+                      "lo": "0x78006F00720050"
+                    },
+                    "q8": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q9": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "sp": "0x7FD1AAE5B0",
+                    "syscallno": "0xFFFFFFFF",
+                    "x0": "0x13579BDF",
+                    "x1": "0x0",
+                    "x10": "0x3E8",
+                    "x11": "0xBE2C1BB469EF403B",
+                    "x12": "0x7FD1AADED4",
+                    "x13": "0x3",
+                    "x14": "0x0",
+                    "x15": "0x71CB4E397A",
+                    "x16": "0x71CB58F438",
+                    "x17": "0x71CB56B780",
+                    "x18": "0x71D026C000",
+                    "x19": "0x5000",
+                    "x2": "0x1B",
+                    "x20": "0x71CF1EA000",
+                    "x21": "0x71CF1EA020",
+                    "x22": "0x633392282F",
+                    "x23": "0x13579BDF",
+                    "x24": "0x71CB590F68",
+                    "x25": "0x6333928000",
+                    "x26": "0x6333928000",
+                    "x27": "0x8F5C28F5C28F5C29",
+                    "x28": "0x51EB851EB851EB8",
+                    "x29": "0x7FD1AAE5D0",
+                    "x3": "0xFFFFFFFFFFFFFFFF",
+                    "x4": "0xFFFFFFFFFFFFFFFF",
+                    "x5": "0xB40000710B4C803B",
+                    "x6": "0xA",
+                    "x7": "0xA",
+                    "x8": "0x1",
+                    "x9": "0xBE2C1BB469EF403B"
+                  }
+                ]
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              }
+            ]
+          },
+          "mode": "hwbp"
+        },
+        "ok": true,
+        "operation": "breakpoint.get"
+      }
+    },
+    {
+      "rpc": "breakpoint.clear",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "cleared": true,
+          "mode": ""
+        },
+        "ok": true,
+        "operation": "breakpoint.clear"
+      }
+    },
+    {
+      "rpc": "breakpoint.set",
+      "params": {
+        "mode": "ptebp",
+        "points": [
+          {
+            "address": "0x6333926000",
+            "bp_type": "execute",
+            "bp_scope": "main",
+            "length": 4
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "mode": "ptebp",
+          "point_count": 1,
+          "points": [
+            {
+              "address": "0x6333926000",
+              "index": 0,
+              "length": 4,
+              "scope": "main",
+              "type": "execute"
+            }
+          ],
+          "status": 0
+        },
+        "ok": true,
+        "operation": "breakpoint.set"
+      }
+    },
+    {
+      "rpc": "breakpoint.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "bp_info": {
+            "num_brps": 0,
+            "num_wrps": 0,
+            "points": [
+              {
+                "bl": 4,
+                "bs": 0,
+                "bt": 4,
+                "hit_addr": "0x6333926000",
+                "record_count": 1,
+                "records": [
+                  {
+                    "fpcr": "0x0",
+                    "fpsr": "0x0",
+                    "hit_count": 20,
+                    "lr": "0x63339251C0",
+                    "mask": [
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x15"
+                    ],
+                    "orig_x0": "0x7FD1AAE578",
+                    "pc": "0x6333926000",
+                    "pstate": "0x60001000",
+                    "q0": {
+                      "hi": "0x7FD1AAE510",
+                      "lo": "0x7FD1AAE5B0"
+                    },
+                    "q1": {
+                      "hi": "0xFFFFFF80FFFFFFC8",
+                      "lo": "0x7FD1AAE4D0"
+                    },
+                    "q10": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q11": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q12": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q13": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q14": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q15": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q16": {
+                      "hi": "0xC0300C03C0300C03",
+                      "lo": "0xC0300C03C0300C03"
+                    },
+                    "q17": {
+                      "hi": "0x0",
+                      "lo": "0x1010400"
+                    },
+                    "q18": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q19": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q2": {
+                      "hi": "0x4040",
+                      "lo": "0x4040"
+                    },
+                    "q20": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q21": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q22": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q23": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q24": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q25": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q26": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q27": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q28": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q29": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q3": {
+                      "hi": "0x710B4C7000",
+                      "lo": "0x710B4C7000"
+                    },
+                    "q30": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q31": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q4": {
+                      "hi": "0x30300000202",
+                      "lo": "0x10100000000"
+                    },
+                    "q5": {
+                      "hi": "0x3030",
+                      "lo": "0x2020"
+                    },
+                    "q6": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q7": {
+                      "hi": "0x6E00650070004F",
+                      "lo": "0x78006F00720050"
+                    },
+                    "q8": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q9": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "sp": "0x7FD1AAE5B0",
+                    "syscallno": "0xFFFFFFFF",
+                    "x0": "0x13579BDF",
+                    "x1": "0x0",
+                    "x10": "0x3E8",
+                    "x11": "0xBE2C1BB469EF403B",
+                    "x12": "0x7FD1AADED4",
+                    "x13": "0x3",
+                    "x14": "0x0",
+                    "x15": "0x71CB4E397A",
+                    "x16": "0x71CB58F438",
+                    "x17": "0x71CB56B780",
+                    "x18": "0x71D026C000",
+                    "x19": "0x5000",
+                    "x2": "0x1B",
+                    "x20": "0x71CF1EA000",
+                    "x21": "0x71CF1EA020",
+                    "x22": "0x633392282F",
+                    "x23": "0x13579BDF",
+                    "x24": "0x71CB590F68",
+                    "x25": "0x6333928000",
+                    "x26": "0x6333928000",
+                    "x27": "0x8F5C28F5C28F5C29",
+                    "x28": "0x51EB851EB851EB8",
+                    "x29": "0x7FD1AAE5D0",
+                    "x3": "0xFFFFFFFFFFFFFFFF",
+                    "x4": "0xFFFFFFFFFFFFFFFF",
+                    "x5": "0xB40000710B4C803B",
+                    "x6": "0xA",
+                    "x7": "0xA",
+                    "x8": "0x1",
+                    "x9": "0xBE2C1BB469EF403B"
+                  }
+                ]
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              }
+            ]
+          },
+          "mode": "ptebp"
+        },
+        "ok": true,
+        "operation": "breakpoint.get"
+      }
+    },
+    {
+      "rpc": "breakpoint.clear",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "cleared": true,
+          "mode": ""
+        },
+        "ok": true,
+        "operation": "breakpoint.clear"
+      }
+    },
+    {
+      "rpc": "breakpoint.set",
+      "params": {
+        "mode": "stepbp",
+        "points": [
+          {
+            "address": "0x6333926000",
+            "bp_type": "execute",
+            "bp_scope": "main",
+            "length": 4
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "mode": "stepbp",
+          "point_count": 1,
+          "points": [
+            {
+              "address": "0x6333926000",
+              "index": 0,
+              "length": 4,
+              "scope": "main",
+              "type": "execute"
+            }
+          ],
+          "status": 0
+        },
+        "ok": true,
+        "operation": "breakpoint.set"
+      }
+    },
+    {
+      "rpc": "breakpoint.get",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "bp_info": {
+            "num_brps": 0,
+            "num_wrps": 0,
+            "points": [
+              {
+                "bl": 4,
+                "bs": 0,
+                "bt": 4,
+                "hit_addr": "0x6333926000",
+                "record_count": 1,
+                "records": [
+                  {
+                    "fpcr": "0x0",
+                    "fpsr": "0x0",
+                    "hit_count": 21,
+                    "lr": "0x63339251C0",
+                    "mask": [
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x55",
+                      "0x15"
+                    ],
+                    "orig_x0": "0x7FD1AAE578",
+                    "pc": "0x6333926000",
+                    "pstate": "0x60001000",
+                    "q0": {
+                      "hi": "0x7FD1AAE510",
+                      "lo": "0x7FD1AAE5B0"
+                    },
+                    "q1": {
+                      "hi": "0xFFFFFF80FFFFFFC8",
+                      "lo": "0x7FD1AAE4D0"
+                    },
+                    "q10": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q11": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q12": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q13": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q14": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q15": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q16": {
+                      "hi": "0xC0300C03C0300C03",
+                      "lo": "0xC0300C03C0300C03"
+                    },
+                    "q17": {
+                      "hi": "0x0",
+                      "lo": "0x1010400"
+                    },
+                    "q18": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q19": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q2": {
+                      "hi": "0x4040",
+                      "lo": "0x4040"
+                    },
+                    "q20": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q21": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q22": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q23": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q24": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q25": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q26": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q27": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q28": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q29": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q3": {
+                      "hi": "0x710B4C7000",
+                      "lo": "0x710B4C7000"
+                    },
+                    "q30": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q31": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q4": {
+                      "hi": "0x30300000202",
+                      "lo": "0x10100000000"
+                    },
+                    "q5": {
+                      "hi": "0x3030",
+                      "lo": "0x2020"
+                    },
+                    "q6": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q7": {
+                      "hi": "0x6E00650070004F",
+                      "lo": "0x78006F00720050"
+                    },
+                    "q8": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "q9": {
+                      "hi": "0x0",
+                      "lo": "0x0"
+                    },
+                    "sp": "0x7FD1AAE5B0",
+                    "syscallno": "0xFFFFFFFF",
+                    "x0": "0x13579BDF",
+                    "x1": "0x0",
+                    "x10": "0x3E8",
+                    "x11": "0xBE2C1BB469EF403B",
+                    "x12": "0x7FD1AADED4",
+                    "x13": "0x3",
+                    "x14": "0x0",
+                    "x15": "0x71CB4E397A",
+                    "x16": "0x71CB58F438",
+                    "x17": "0x71CB56B780",
+                    "x18": "0x71D026C000",
+                    "x19": "0x5000",
+                    "x2": "0x1B",
+                    "x20": "0x71CF1EA000",
+                    "x21": "0x71CF1EA020",
+                    "x22": "0x633392282F",
+                    "x23": "0x13579BDF",
+                    "x24": "0x71CB590F68",
+                    "x25": "0x6333928000",
+                    "x26": "0x6333928000",
+                    "x27": "0x8F5C28F5C28F5C29",
+                    "x28": "0x51EB851EB851EB8",
+                    "x29": "0x7FD1AAE5D0",
+                    "x3": "0xFFFFFFFFFFFFFFFF",
+                    "x4": "0xFFFFFFFFFFFFFFFF",
+                    "x5": "0xB40000710B4C803B",
+                    "x6": "0xA",
+                    "x7": "0xA",
+                    "x8": "0x1",
+                    "x9": "0xBE2C1BB469EF403B"
+                  }
+                ]
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              },
+              {
+                "bl": 0,
+                "bs": 0,
+                "bt": 0,
+                "hit_addr": "0x0",
+                "record_count": 0,
+                "records": []
+              }
+            ]
+          },
+          "mode": "stepbp"
+        },
+        "ok": true,
+        "operation": "breakpoint.get"
+      }
+    },
+    {
+      "rpc": "breakpoint.clear",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "cleared": true,
+          "mode": ""
+        },
+        "ok": true,
+        "operation": "breakpoint.clear"
+      }
+    },
+    {
+      "rpc": "breakpoint.events.start",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "active": true,
+          "captured": "0",
+          "events": [],
+          "lost_before_page": "0",
+          "newest_seq": "0",
+          "next_after": "0",
+          "oldest_seq": "1",
+          "reason": 0,
+          "ring_overwritten": "0",
+          "stream": "1"
+        },
+        "ok": true,
+        "operation": "breakpoint.events.start"
+      }
+    },
+    {
+      "rpc": "breakpoint.set",
+      "params": {
+        "mode": "hwbp",
+        "points": [
+          {
+            "address": "0x6333926000",
+            "bp_type": "execute",
+            "bp_scope": "main",
+            "length": 4
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "mode": "hwbp",
+          "point_count": 1,
+          "points": [
+            {
+              "address": "0x6333926000",
+              "index": 0,
+              "length": 4,
+              "scope": "main",
+              "type": "execute"
+            }
+          ],
+          "status": 0
+        },
+        "ok": true,
+        "operation": "breakpoint.set"
+      }
+    },
+    {
+      "rpc": "breakpoint.events.read",
+      "params": {
+        "stream": "1",
+        "after": "0",
+        "count": 8
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "active": true,
+          "captured": "10",
+          "events": [
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "1",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148325518137",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "2",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148345604116",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "3",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148365884918",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "4",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148385997345",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "5",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148406189768",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "6",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148426439280",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "7",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148446984446",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [
+                {
+                  "fp": "0x7fd1aae630",
+                  "return_address": "0x71cb509604"
+                },
+                {
+                  "fp": "0x7fd1aae680",
+                  "return_address": "0x6333924058"
+                },
+                {
+                  "fp": "0x0",
+                  "return_address": "0x0"
+                }
+              ],
+              "kind": "breakpoint",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "8",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148467112620",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            }
+          ],
+          "lost_before_page": "0",
+          "newest_seq": "10",
+          "next_after": "8",
+          "oldest_seq": "1",
+          "reason": 0,
+          "ring_overwritten": "0",
+          "stream": "1"
+        },
+        "ok": true,
+        "operation": "breakpoint.events.read"
+      }
+    },
+    {
+      "rpc": "breakpoint.backtrace",
+      "params": {
+        "stream": "1",
+        "event_seq": "1"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "event": {
+            "fp": "0x7fd1aae5d0",
+            "frames": [
+              {
+                "fp": "0x7fd1aae630",
+                "return_address": "0x71cb509604"
+              },
+              {
+                "fp": "0x7fd1aae680",
+                "return_address": "0x6333924058"
+              },
+              {
+                "fp": "0x0",
+                "return_address": "0x0"
+              }
+            ],
+            "kind": "breakpoint",
+            "lr": "0x63339251c0",
+            "pc": "0x6333926000",
+            "pid": 6881,
+            "process_start_ns": "38818796486",
+            "seq": "1",
+            "sp": "0x7fd1aae5b0",
+            "tid": 6881,
+            "timestamp_ns": "148325518137",
+            "unwind": {
+              "complete": false,
+              "method": "captured_fp_chain",
+              "raw_return_addresses": true,
+              "reason": 0
+            }
+          },
+          "stream": "1"
+        },
+        "ok": true,
+        "operation": "breakpoint.backtrace"
+      }
+    },
+    {
+      "rpc": "breakpoint.clear",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "cleared": true,
+          "mode": ""
+        },
+        "ok": true,
+        "operation": "breakpoint.clear"
+      }
+    },
+    {
+      "rpc": "breakpoint.events.stop",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "active": false,
+          "captured": "11",
+          "events": [],
+          "lost_before_page": "0",
+          "newest_seq": "11",
+          "next_after": "0",
+          "oldest_seq": "1",
+          "reason": 3,
+          "ring_overwritten": "0",
+          "stream": "1"
+        },
+        "ok": true,
+        "operation": "breakpoint.events.stop"
+      }
+    },
+    {
+      "rpc": "trace.configure",
+      "params": {
+        "directory": "/data/user/0/com.android.xsettings/files/lsdriver-integration-traces"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "configured": true,
+          "directory": "/data/user/0/com.android.xsettings/files/lsdriver-integration-traces"
+        },
+        "ok": true,
+        "operation": "trace.configure"
+      }
+    },
+    {
+      "rpc": "trace.start",
+      "params": {
+        "start_pc": "0x6333926000",
+        "max_steps": 64,
+        "duration_ms": 2000
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "active": true,
+          "captured": "0",
+          "duration_ms": 2000,
+          "lost": "0",
+          "max_steps": 64,
+          "pid": 6881,
+          "process_start_ns": "38818796486",
+          "reason": "running",
+          "session_id": "trace-1794635974943144000",
+          "start_pc": "0x6333926000",
+          "stream": "2",
+          "tid": 6881
+        },
+        "ok": true,
+        "operation": "trace.start"
+      }
+    },
+    {
+      "rpc": "trace.stop",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "active": false,
+          "captured": "64",
+          "cleanup_pending": false,
+          "duration_ms": 2000,
+          "error": "",
+          "kernel_reason": 1,
+          "lost": "0",
+          "max_steps": 64,
+          "pid": 6881,
+          "process_start_ns": "38818796486",
+          "reason": "step_limit",
+          "ring_overwritten": "0",
+          "saved_events": "64",
+          "saved_through_seq": "64",
+          "session_id": "trace-1794635974943144000",
+          "size_bytes": 21060,
+          "start_pc": "0x6333926000",
+          "stop_status": 0,
+          "stream": "2",
+          "tid": 6881
+        },
+        "ok": true,
+        "operation": "trace.stop"
+      }
+    },
+    {
+      "rpc": "trace.status",
+      "params": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "active": false,
+          "captured": "64",
+          "cleanup_pending": false,
+          "duration_ms": 2000,
+          "error": "",
+          "kernel_reason": 1,
+          "lost": "0",
+          "max_steps": 64,
+          "pid": 6881,
+          "process_start_ns": "38818796486",
+          "reason": "step_limit",
+          "ring_overwritten": "0",
+          "saved_events": "64",
+          "saved_through_seq": "64",
+          "session_id": "trace-1794635974943144000",
+          "size_bytes": 21060,
+          "start_pc": "0x6333926000",
+          "stop_status": 0,
+          "stream": "2",
+          "tid": 6881
+        },
+        "ok": true,
+        "operation": "trace.status"
+      }
+    },
+    {
+      "rpc": "trace.read",
+      "params": {
+        "session_id": "trace-1794635974943144000",
+        "after": "0",
+        "count": 100
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "events": [
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "1",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613471018",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926004",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "2",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613477366",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926008",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "3",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613478546",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x633392600c",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "4",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613479848",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926010",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "5",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613481394",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926014",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "6",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613483063",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926018",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "7",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613484894",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x633392601c",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "8",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613486155",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x63339251c0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "9",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613488271",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x63339251c4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "10",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613489777",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x63339251c8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "11",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613491567",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x63339251cc",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "12",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613493073",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x63339251d0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "13",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613494293",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x63339251a4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "14",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613495717",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x63339251a8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "15",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613496897",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339260f0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "16",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613498810",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339260f4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "17",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613500641",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339260f8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "18",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613502513",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339260fc",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "19",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613503977",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526e90",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "20",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148613505320",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526e94",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "21",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613506826",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526e98",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "22",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613508616",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526e9c",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "23",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613509837",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ea0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "24",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613511220",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ea4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "25",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613512400",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ea8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "26",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613513906",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526eac",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "27",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613515737",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526eb0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "28",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613517365",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526eb4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "29",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613518545",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526eb8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "30",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613520376",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ebc",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "31",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613521556",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ec0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "32",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613523509",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ec4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "33",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613524729",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ec8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "34",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613526235",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ecc",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "35",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613527822",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ed0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "36",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613529002",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ed4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "37",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613530548",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ed8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "38",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613532420",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526edc",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "39",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613534129",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb58ab60",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "40",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613535146",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb58ab64",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "41",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613536326",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb58ab68",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "42",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613537954",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb58ab6c",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "43",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613539174",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb56b780",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "44",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613540680",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb56b784",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "45",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148613542511",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb56b78c",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "46",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633887889",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb56b790",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "47",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633891632",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb56b794",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "48",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633894033",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb526ee0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "49",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633896352",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb526ee4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "50",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633899445",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb526ee8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "51",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633902293",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb526eec",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "52",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633904572",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae590",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x71cb526ee0",
+              "pc": "0x71cb526ef0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "53",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633906850",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ef4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "54",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633909129",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526ef8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "55",
+              "sp": "0x7fd1aae570",
+              "tid": 6881,
+              "timestamp_ns": "148633911407",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x71cb526efc",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "56",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633913686",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339251ac",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "57",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633916046",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339251b0",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "58",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633920197",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339251b4",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "59",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633922475",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339251b8",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "60",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633925120",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251ac",
+              "pc": "0x63339251bc",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "61",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633927439",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926000",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "62",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633929759",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926004",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "63",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633933950",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            },
+            {
+              "fp": "0x7fd1aae5d0",
+              "frames": [],
+              "kind": "step",
+              "lr": "0x63339251c0",
+              "pc": "0x6333926008",
+              "pid": 6881,
+              "process_start_ns": "38818796486",
+              "seq": "64",
+              "sp": "0x7fd1aae5b0",
+              "tid": 6881,
+              "timestamp_ns": "148633936391",
+              "unwind": {
+                "complete": false,
+                "method": "captured_fp_chain",
+                "raw_return_addresses": true,
+                "reason": 0
+              }
+            }
+          ],
+          "next_after": "64",
+          "session_id": "trace-1794635974943144000"
+        },
+        "ok": true,
+        "operation": "trace.read"
+      }
+    },
+    {
+      "rpc": "trace.stop",
+      "params": {},
+      "status": 200,
+      "response": {
+        "data": {
+          "active": false,
+          "captured": "64",
+          "cleanup_pending": false,
+          "duration_ms": 2000,
+          "error": "",
+          "kernel_reason": 1,
+          "lost": "0",
+          "max_steps": 64,
+          "pid": 6881,
+          "process_start_ns": "38818796486",
+          "reason": "step_limit",
+          "ring_overwritten": "0",
+          "saved_events": "64",
+          "saved_through_seq": "64",
+          "session_id": "trace-1794635974943144000",
+          "size_bytes": 21060,
+          "start_pc": "0x6333926000",
+          "stop_status": 0,
+          "stream": "2",
+          "tid": 6881
+        },
+        "ok": true,
+        "operation": "trace.stop"
+      }
+    },
+    {
+      "rpc": "breakpoint.clear",
+      "params": {},
+      "status": 200,
+      "response": {
+        "data": {
+          "cleared": false,
+          "mode": ""
+        },
+        "ok": true,
+        "operation": "breakpoint.clear"
+      }
+    },
+    {
+      "rpc": "breakpoint.events.stop",
+      "params": {},
+      "status": 200,
+      "response": {
+        "data": {
+          "active": false,
+          "captured": "64",
+          "events": [],
+          "lost_before_page": "0",
+          "newest_seq": "64",
+          "next_after": "0",
+          "oldest_seq": "1",
+          "reason": 1,
+          "ring_overwritten": "0",
+          "stream": "2"
+        },
+        "ok": true,
+        "operation": "breakpoint.events.stop"
+      }
+    },
+    {
+      "rpc": "scan.clear",
+      "params": {},
+      "status": 200,
+      "response": {
+        "data": {
+          "alignment": 1,
+          "count": 0,
+          "mode": "unknown",
+          "progress": 1.0,
+          "scanning": false,
+          "string_scan": false,
+          "value_format": "number",
+          "value_type": ""
+        },
+        "ok": true,
+        "operation": "scan.clear"
+      }
+    },
+    {
+      "rpc": "memory.write",
+      "params": {
+        "address": "0x71cf1ea020",
+        "data_hex": "df9b5713"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "address": "0x71CF1EA020",
+          "readback_hex": "DF9B5713",
+          "readback_status": 4,
+          "size": 4,
+          "verified": true
+        },
+        "ok": true,
+        "operation": "memory.write"
+      }
+    },
+    {
+      "rpc": "memory.write",
+      "params": {
+        "address": "0x71cf1ed011",
+        "data_hex": "df9b5713"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "address": "0x71CF1ED011",
+          "readback_hex": "DF9B5713",
+          "readback_status": 4,
+          "size": 4,
+          "verified": true
+        },
+        "ok": true,
+        "operation": "memory.write"
+      }
+    }
+  ],
+  "capabilities": {
+    "backend": "lsdriver",
+    "captured_fp_chain": true,
+    "debug_abi": 1,
+    "debug_status": 0,
+    "etm_trace": false,
+    "event_page_size": 8,
+    "event_ring_size": 256,
+    "events": true,
+    "kernel_page_size": 4096,
+    "kernel_version": "2.4.0",
+    "legacy_shared_layout": true,
+    "protocol_version": 1,
+    "read_integrity": true,
+    "step_trace_prerequisites": true,
+    "trace_file_budget": 8388608,
+    "trace_runtime_verified": false,
+    "trace_scope": "main_thread",
+    "trace_session_budget": 32
+  },
+  "previous_target": {
+    "pid": 0
+  },
+  "fixture_observed_write": "ticks=5100 value=324508639\nticks=5150 value=324508639\nticks=5200 value=324508639\nticks=5250 value=610839776\n",
+  "breakpoints": {
+    "hwbp": {
+      "hits": 20
+    },
+    "ptebp": {
+      "hits": 20
+    },
+    "stepbp": {
+      "hits": 21
+    }
+  },
+  "trace": {
+    "active": false,
+    "captured": "64",
+    "cleanup_pending": false,
+    "duration_ms": 2000,
+    "error": "",
+    "kernel_reason": 1,
+    "lost": "0",
+    "max_steps": 64,
+    "pid": 6881,
+    "process_start_ns": "38818796486",
+    "reason": "step_limit",
+    "ring_overwritten": "0",
+    "saved_events": "64",
+    "saved_through_seq": "64",
+    "session_id": "trace-1794635974943144000",
+    "size_bytes": 21060,
+    "start_pc": "0x6333926000",
+    "stop_status": 0,
+    "stream": "2",
+    "tid": 6881
+  },
+  "passed": true
+}

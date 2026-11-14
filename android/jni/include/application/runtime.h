@@ -80,8 +80,9 @@ public:
         Driver &driver_;
 
     public:
+        std::mutex requestMutex;
         lsdebug::DebugService<Driver> debug;
-        MemScanner scanner;
+        MemScanner<Driver> scanner;
         MemViewer viewer;
         PointerManager pointer;
         SavedAddressManager saved;
@@ -89,7 +90,7 @@ public:
         ProcessMonitor syscallMonitor;
         ProcessMonitor cntvctMonitor;
 
-        explicit ResourceSet(Driver &driver) : driver_(driver), debug(driver), syscallMonitor(driver, ProcessMonitor::Kind::Syscall), cntvctMonitor(driver, ProcessMonitor::Kind::Cntvct)
+        explicit ResourceSet(Driver &driver) : driver_(driver), debug(driver), scanner(driver), syscallMonitor(driver, ProcessMonitor::Kind::Syscall), cntvctMonitor(driver, ProcessMonitor::Kind::Cntvct)
         {
         }
 

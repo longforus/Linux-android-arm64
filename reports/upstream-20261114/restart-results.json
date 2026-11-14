@@ -1,0 +1,26 @@
+{
+  "before_pid": "6498",
+  "health": {
+    "debug_abi": 1,
+    "debug_status": 0,
+    "kernel_version": "2.4.0",
+    "ok": true,
+    "service": "LS_KTool",
+    "transport": "http"
+  },
+  "elapsed_seconds": 2.978771756053902,
+  "after_pid": "11564",
+  "target": {
+    "data": {
+      "pid": 0
+    },
+    "ok": true,
+    "operation": "target.get"
+  },
+  "rotation_restored": [
+    "1",
+    "0"
+  ],
+  "fixture_stop": "",
+  "passed": true
+}

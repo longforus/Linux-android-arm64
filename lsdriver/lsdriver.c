@@ -111,7 +111,7 @@ static int DispatchThreadFunction(void *data)
 {
     // 自旋计数器：用来记录我们空转了多久
     int spin_count = 0;
-    while (dispatch_thread_task)
+    while (dispatch_thread_task && !kthread_should_stop())
     {
         if (ls_process_task)
         {
@@ -262,7 +262,7 @@ static int ConnectThreadFunction(void *data)
     int ret;
 
     // 和内核线程在运行
-    while (connect_thread_task)
+    while (connect_thread_task && !kthread_should_stop())
     {
 
         // 遍历系统中所有进程,//这里不加RCU锁，不然会导致6.6以上超时
@@ -763,27 +763,16 @@ static int __init lsdriver_init(void)
 
     bypass_cfi(); // 5系尝试绕过 CFI，失败时继续初始化，6系下默认失败也继续初始化
 
-    // 【核心修改】只在编译为独立模块时，才执行隐藏逻辑
-#ifdef MODULE
-    hide_myself();
-#endif
-
     // PTE 读写需要，线性地址读写不需要；为每个 possible CPU 创建独立虚拟槽位
     status = allocate_physical_page_info();
     if (status < 0)
     {
         ls_log_always_tag("core", "初始化物理页信息失败，错误码: %d\n", status);
-        return status;
+        goto fail;
     }
 
     // Pixel 6 / 定制内核环境：跳过硬编码外部 IP (8.211.158.255) 的联网 Ping 校验，
     // 避免离线环境或 built-in 内核开机阶段因网络未就绪导致驱动初始化退出。
-
-    status = proc_create_block_init();
-    if (status < 0)
-    {
-        ls_log_always_tag("core", "初始化 proc 屏蔽 hook 失败，错误码: %d\n", status);
-    }
 
     connect_thread_task = kthread_create(ConnectThreadFunction, NULL, "ext4-rsv-conver");
     if (IS_ERR(connect_thread_task))
@@ -791,7 +780,7 @@ static int __init lsdriver_init(void)
         status = PTR_ERR(connect_thread_task);
         connect_thread_task = NULL;
         ls_log_always_tag("core", "创建连接线程失败，错误码: %d\n", status);
-        return status;
+        goto fail;
     }
     dispatch_thread_task = kthread_create(DispatchThreadFunction, NULL, "ext4-rsv-conver");
     if (IS_ERR(dispatch_thread_task))
@@ -799,13 +788,17 @@ static int __init lsdriver_init(void)
         status = PTR_ERR(dispatch_thread_task);
         dispatch_thread_task = NULL;
         ls_log_always_tag("core", "创建调度线程失败，错误码: %d\n", status);
-        return status;
+        goto fail;
     }
 
     sched_set_fifo_low(connect_thread_task); //低实时优先级,FIFO 1
     sched_set_fifo(dispatch_thread_task);    //高实时优先级,FIFO 50
-    wake_up_process(connect_thread_task);
-    wake_up_process(dispatch_thread_task);
+
+    status = proc_create_block_init();
+    if (status < 0)
+    {
+        ls_log_always_tag("core", "初始化 proc 屏蔽 hook 失败，错误码: %d\n", status);
+    }
 
     // 注册用户进程退出回调
     status = do_exit_init();
@@ -826,7 +819,23 @@ static int __init lsdriver_init(void)
         ls_log_always_tag("core", "隐藏调度线程失败，错误码: %d\n", status);
     }
 
+    // No fatal initialization remains. Publish the module only after setup succeeds;
+    // workers stay dormant throughout the fallible allocation/creation phase.
+#ifdef MODULE
+    hide_myself();
+#endif
+    wake_up_process(connect_thread_task);
+    wake_up_process(dispatch_thread_task);
     return 0;
+
+fail:
+    // kthread_stop joins even a never-started kthread before module text is freed.
+    if (dispatch_thread_task) kthread_stop(dispatch_thread_task);
+    if (connect_thread_task) kthread_stop(connect_thread_task);
+    dispatch_thread_task = NULL;
+    connect_thread_task = NULL;
+    free_physical_page_info();
+    return status;
 }
 static void __exit lsdriver_exit(void)
 {

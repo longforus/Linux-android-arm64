@@ -104,6 +104,15 @@ int arm64_encode_bti_c(uint32_t *instruction)
     return 0;
 }
 
+// UDF encodes its 16-bit immediate in bits [15:0], unlike BRK's [20:5].
+int arm64_encode_udf(uint32_t immediate, uint32_t *instruction)
+{
+    if (!instruction) return -EINVAL;
+    if (immediate > 0xFFFFU) return -ERANGE;
+    *instruction = immediate;
+    return 0;
+}
+
 int arm64_encode_brk(uint32_t immediate, uint32_t *instruction)
 {
     if (!instruction) return -EINVAL;

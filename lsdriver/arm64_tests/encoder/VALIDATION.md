@@ -10,7 +10,7 @@ make -C lsdriver/arm64_tests/encoder contract-test
 
 测试直接链接生产 [arm64_encode.c](../../arm64_encode/arm64_encode.c)，覆盖：
 
-- 固定系统指令、BRK、BR/BLR/RET；
+- 固定系统指令、UDF、BRK、BR/BLR/RET；
 - B/BL、条件分支、CBZ/CBNZ、TBZ/TBNZ 的字段和范围；
 - ADR/ADRP 的 `immlo/immhi`、页对齐和范围；
 - ADD/SUB 立即数与 shifted-register 形式；
@@ -20,3 +20,5 @@ make -C lsdriver/arm64_tests/encoder contract-test
 - 空指针、未对齐地址、越界立即数、寄存器重叠及 scratch 寄存器边界。
 
 固定机器字来自 GNU AArch64 汇编器对照结果；错误路径检查返回码，并确认合法路径的完整输出 word。
+
+UDF 的 `imm16` 位于 `[15:0]`，`udf #0xffff` 编码为 `0x0000FFFF`；已用 NDK 29 LLVM 汇编器交叉验证，不能套用 BRK 的 `[20:5]` 布局。
