@@ -644,6 +644,46 @@ def android_trace_read(
     return _call_bridge_operation("trace.read", {"session_id": session_id, "after": after, "count": count})
 
 
+@mcp.tool()
+def android_wxshadow_status() -> dict[str, Any]:
+    """Query R^X shadow page capabilities and state."""
+    return _call_bridge_operation("wxshadow.status")
+
+
+@mcp.tool()
+def android_wxshadow_enable(enabled: Annotated[int, Field(ge=0, le=1)]) -> dict[str, Any]:
+    """Toggle the R^X shadow patch mechanism: 1 enables, 0 disables (falls back to the plain-write scheme)."""
+    return _call_bridge_operation("wxshadow.enable", {"enabled": enabled})
+
+
+@mcp.tool()
+def android_wxshadow_patch(address: HexAddress, data_hex: str) -> dict[str, Any]:
+    """Write an R^X shadow patch as even-length hex digits (whitespace allowed, no 0x prefix). Execution sees the patched bytes while reads return the original."""
+    normalized = "".join(str(data_hex).split())
+    if not normalized:
+        raise ValueError("data_hex must not be empty")
+    if len(normalized) % 2 != 0:
+        raise ValueError("data_hex must contain complete bytes")
+    return _call_bridge_operation("wxshadow.patch", {"address": address, "data_hex": normalized})
+
+
+@mcp.tool()
+def android_wxshadow_release(address: HexAddress | None = None, all: bool = False) -> dict[str, Any]:
+    """Release R^X shadow pages by address, current target, or all."""
+    params: dict[str, Any] = {}
+    if address is not None:
+        params["address"] = address
+    if all:
+        params["all"] = True
+    return _call_bridge_operation("wxshadow.release", params)
+
+
+@mcp.tool()
+def android_wxshadow_list() -> dict[str, Any]:
+    """List currently managed R^X shadow pages."""
+    return _call_bridge_operation("wxshadow.list")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Expose the NativeHttpBridge Android bridge as an MCP server.",

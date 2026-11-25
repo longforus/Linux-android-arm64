@@ -1392,6 +1392,119 @@ public:
             });
         }
 
+        if (op.starts_with("wxshadow."))
+        {
+            if (op == "wxshadow.status")
+            {
+                ls_wxshadow_message message{};
+                message.command = LS_WXSHADOW_INFO;
+                const int status = driver_.WxShadowCall(message);
+                if (status) return fail("wxshadow 状态查询失败 status=" + std::to_string(status));
+                return okData({
+                    {"status", message.status},
+                    {"page_size", message.page_size},
+                    {"cap_patch", (message.flags & LS_WXSHADOW_CAP_PATCH) != 0},
+                    {"cap_read_hide", (message.flags & LS_WXSHADOW_CAP_READ_HIDE) != 0},
+                    {"cap_gup_hide", (message.flags & LS_WXSHADOW_CAP_GUP_HIDE) != 0},
+                    {"cap_fork_safe", (message.flags & LS_WXSHADOW_CAP_FORK_SAFE) != 0},
+                });
+            }
+            if (op == "wxshadow.enable")
+            {
+                const auto enabled = requiredInt("enabled", "enabled");
+                if (std::holds_alternative<json>(enabled)) return std::get<json>(enabled);
+                const int val = std::get<int>(enabled);
+                if (val != 0 && val != 1) return fail("enabled 必须为 0 或 1");
+                ls_wxshadow_message message{};
+                message.command = LS_WXSHADOW_ENABLE;
+                message.flags = val ? 1U : 0U;
+                const int status = driver_.WxShadowCall(message);
+                if (status) return fail("wxshadow enable 失败 status=" + std::to_string(status));
+                return okData({{"enabled", val != 0}, {"status", message.status}});
+            }
+            if (op == "wxshadow.patch")
+            {
+                const auto address = requiredUInt64("address", "address");
+                const auto dataHex = requiredString("data_hex", "data_hex");
+                if (std::holds_alternative<json>(address)) return std::get<json>(address);
+                if (std::holds_alternative<json>(dataHex)) return std::get<json>(dataHex);
+                auto bytes = parseHexBytes(std::get<std::string>(dataHex));
+                if (!bytes.has_value() || bytes->empty()) return fail("data_hex 无效");
+                if (bytes->size() > LS_WXSHADOW_PATCH_MAX) return fail(std::format("data_hex 最大 {} 字节", LS_WXSHADOW_PATCH_MAX));
+
+                // 按 4KB 页边界拆分跨页写入；多块提交时，任一块失败即返回部分成功进度。
+                const uint64_t start = std::get<std::uint64_t>(address);
+                const size_t total = bytes->size();
+                size_t written = 0;
+                uint32_t chunks = 0;
+                while (written < total)
+                {
+                    const uint64_t chunkAddr = start + written;
+                    const size_t pageRemain = 0x1000 - (chunkAddr & 0xFFF);
+                    const size_t chunkLen = std::min({total - written, pageRemain, static_cast<size_t>(LS_WXSHADOW_PATCH_MAX)});
+                    ls_wxshadow_message message{};
+                    message.command = LS_WXSHADOW_PATCH;
+                    message.tgid = driver_.GetGlobalPid();
+                    message.addr = chunkAddr;
+                    message.len = chunkLen;
+                    __builtin_memcpy(message.u.patch, bytes->data() + written, chunkLen);
+                    const int status = driver_.WxShadowCall(message);
+                    if (status) return fail(std::format("wxshadow patch 失败 status={}（已写入 {}/{} 字节）", status, written, total));
+                    written += chunkLen;
+                    ++chunks;
+                }
+                return okData({
+                    {"address", std::format("0x{:X}", start)},
+                    {"size", total},
+                    {"chunks", chunks},
+                    {"status", 0},
+                });
+            }
+            if (op == "wxshadow.release")
+            {
+                ls_wxshadow_message message{};
+                message.command = LS_WXSHADOW_RELEASE;
+                message.tgid = driver_.GetGlobalPid();
+                const std::string addressText = optionalString("address");
+                if (params.contains("all")) message.scope = LS_WXSHADOW_REL_ALL;
+                else if (!addressText.empty())
+                {
+                    const auto address = MemUtils::ParseUInt64(addressText);
+                    if (!address.has_value()) return fail("address 无效");
+                    message.addr = *address;
+                    message.scope = LS_WXSHADOW_REL_ADDR;
+                }
+                else message.scope = LS_WXSHADOW_REL_TGID;
+                const int status = driver_.WxShadowCall(message);
+                if (status) return fail("wxshadow release 失败 status=" + std::to_string(status));
+                return okData({{"status", message.status}});
+            }
+            if (op == "wxshadow.list")
+            {
+                ls_wxshadow_message message{};
+                message.command = LS_WXSHADOW_LIST;
+                const int status = driver_.WxShadowCall(message);
+                if (status) return fail("wxshadow list 失败 status=" + std::to_string(status));
+                json pages = json::array();
+                const uint32_t count = message.list_count < LS_WXSHADOW_LIST_MAX ? message.list_count : LS_WXSHADOW_LIST_MAX;
+                for (uint32_t i = 0; i < count; ++i)
+                {
+                    pages.push_back({
+                        {"tgid", message.u.list[i].tgid},
+                        {"state", message.u.list[i].state},
+                        {"patch_count", message.u.list[i].patch_count},
+                        {"page_addr", std::format("0x{:X}", message.u.list[i].page_addr)},
+                    });
+                }
+                return okData({
+                    {"page_count", message.page_count},
+                    {"list_count", message.list_count},
+                    {"pages", std::move(pages)},
+                });
+            }
+            return fail("未知 wxshadow operation");
+        }
+
         return fail(std::format("未知 operation: {}", op));
     } catch (const std::exception &error)
     {

@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "debug_wire.h"
+#include "wxshadow_wire.h"
 #include "read_integrity.h"
 
 #define PAGE_SIZE 4096
@@ -328,6 +329,7 @@ public: // 共有结构体和锁
         request_op_kernel_exit, // 内核线程退出
         request_op_monitor_log_read, // 读取驱动有界监控日志（追加，旧操作编号不变）
         request_op_debug_v1, // 扩展消息复用既有 user_buffer，不改变 request_obj 布局
+        request_op_wxshadow, // R^X Shadow Page（预留，内核当前返回 -EOPNOTSUPP）
     };
 
     // 将在队列中使用的请求实例结构体
@@ -416,6 +418,27 @@ public:
         if (status != 0) return status;
         memory_copy(&message, req->vmemrw_info.user_buffer, sizeof(message));
         if (message.magic != LS_DEBUG_MAGIC || message.abi != LS_DEBUG_ABI || message.count > LS_DEBUG_BATCH)
+            return -EPROTO;
+        return 0;
+    }
+
+    int WxShadowCall(ls_wxshadow_message &message)
+    {
+        static_assert(sizeof(message) <= sizeof(req->vmemrw_info.user_buffer));
+        std::scoped_lock lock(request_lock);
+        message.magic = LS_WXSHADOW_MAGIC;
+        message.abi = LS_WXSHADOW_ABI;
+        memory_copy(req->vmemrw_info.user_buffer, &message, sizeof(message));
+        req->vmemrw_info.size = sizeof(message);
+        req->tgid = GetGlobalPid();
+        // 默认 fail-closed，内核处理成功后覆盖 status。
+        StoreRequestStatus(-EOPNOTSUPP);
+        StoreRequestOp(request_op_wxshadow);
+        IoCommitAndWait();
+        const int status = LoadRequestStatus();
+        if (status != 0) return status;
+        memory_copy(&message, req->vmemrw_info.user_buffer, sizeof(message));
+        if (message.magic != LS_WXSHADOW_MAGIC || message.abi != LS_WXSHADOW_ABI || message.list_count > LS_WXSHADOW_LIST_MAX)
             return -EPROTO;
         return 0;
     }

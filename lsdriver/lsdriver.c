@@ -34,6 +34,7 @@
 #include "virtual_memory_rw.h"
 #include "virtual_memory_enum.h"
 #include "break_point.h"
+#include "arm64_wxshadow.h"
 #include "network/ipv4_ping.h"
 
 static struct request_obj *req = NULL;
@@ -211,6 +212,9 @@ static int DispatchThreadFunction(void *data)
                     break;
                 case request_op_debug_v1:
                     __atomic_store_n(&req->status, ls_debug_dispatch(), __ATOMIC_RELAXED);
+                    break;
+                case request_op_wxshadow:
+                    __atomic_store_n(&req->status, wxshadow_dispatch((struct ls_wxshadow_message *)req->vmemrw_info.user_buffer), __ATOMIC_RELAXED);
                     break;
                 case request_op_kernel_exit:
                     hide_task_remove(connect_thread_task->pid);
@@ -622,6 +626,7 @@ static int taskstats_exit_hook_work(struct pt_regs *regs)
         remove_process_ptebp();           // 清理 PTEBP
         remove_process_dptdbg();          // 清理 DPTDBG
         remove_process_stepbp();          // 清理单步断点
+        wxshadow_release_all();           // 清理 R^X shadow 页
         syscall_monitor_remove_all();     // 清理全部系统调用监控目标
         cntvct_monitor_remove_all();      // 清理全部 CNTVCT_EL0 读取监控
         virtual_memory_rw(0, 0, 0, 0, 0); // 清理缓存 mm 引用

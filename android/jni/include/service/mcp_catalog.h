@@ -1276,6 +1276,99 @@ inline const json &Catalog() {
       "additionalProperties": false
     },
     "operation": "trace.read"
+  },
+  {
+    "name": "android_wxshadow_status",
+    "description": "Query R^X shadow page capabilities and state.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "operation": "wxshadow.status"
+  },
+  {
+    "name": "android_wxshadow_enable",
+    "description": "Toggle the R^X shadow patch mechanism: 1 enables, 0 disables (falls back to the plain-write scheme).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "operation": "wxshadow.enable"
+  },
+  {
+    "name": "android_wxshadow_patch",
+    "description": "Write an R^X shadow patch as even-length hex digits (whitespace allowed, no 0x prefix). Execution sees the patched bytes while reads return the original.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+          "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+          "type": "string"
+        },
+        "data_hex": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "data_hex"
+      ],
+      "additionalProperties": false
+    },
+    "operation": "wxshadow.patch"
+  },
+  {
+    "name": "android_wxshadow_release",
+    "description": "Release R^X shadow pages by address, current target, or all.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "anyOf": [
+            {
+              "description": "64-bit address as a 0x-prefixed hex string; JSON numbers are not accepted.",
+              "pattern": "^0[xX][0-9A-Fa-f]{1,16}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "all": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "operation": "wxshadow.release"
+  },
+  {
+    "name": "android_wxshadow_list",
+    "description": "List currently managed R^X shadow pages.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "operation": "wxshadow.list"
   }
 ])MCP");
     return catalog;

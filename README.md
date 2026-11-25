@@ -86,6 +86,11 @@ GitHub 的 Download ZIP 不包含子模块源码，请使用 Git 克隆仓库。
    - 指定进程的系统调用、`CNTVCT_EL0` 读取监控。
    - 查询线程的 TLS 与 PACGA 环境参数。
 
+10. [R^X Shadow Patch（wxshadow，隐藏补丁）](#14-rx-shadow-patchwxshadow)
+   - 在目标进程代码页做「执行走补丁、读取看原文」的隐藏补丁：补丁写入私有 shadow 页并以 `--x`（仅执行）权限映射，读取时切回原文。
+   - 读隐藏覆盖自读（`do_mem_abort` 权限异常切换）与外部读（`follow_page_pte` GUP 隐藏）。
+   - fork 保护（`dup_mmap` pause/resume）、退出清理（`exit_mmap`）、运行时映射失效检测（`mmu_notifier`）与运行时开关（`wxshadow.enable`）齐备。
+
 用户态封装主要接口：
 
 - `Read<T>` / `Read(address, buffer, size)` / `Write(...)`
@@ -186,6 +191,7 @@ GitHub 的 Download ZIP 不包含子模块源码，请使用 Git 克隆仓库。
 | `request_op_syscall_monitor_set` / `request_op_syscall_monitor_remove` | 启停系统调用监控 |
 | `request_op_cntvct_monitor_set` / `request_op_cntvct_monitor_remove` | 启停 CNTVCT_EL0 读取监控 |
 | `request_op_env_get_params` | 查询线程环境参数 |
+| `request_op_wxshadow` | R^X Shadow Patch（隐藏补丁），消息走 `vmemrw_info.user_buffer` |
 | `request_op_kernel_exit` | 停止驱动工作线程 |
 
 ---
@@ -584,3 +590,45 @@ make -C lsdriver/arm64_tests/executor device-binaries
 - `breakpoint.events.start/status/read/stop`：命中事件环、序号和缺口；`breakpoint.backtrace` 查询命中时保存的有界 FP 链。
 - `trace.configure/start/status/stop/list/read`：主线程软件单步、有限时长/步数/文件预算、持久分页与丢失计数。
 - 本扩展复用既有共享缓冲，不改变原操作号与 request_obj 布局；不依赖 KPM。使用前查询能力，按返回的完整性、丢失计数和清理状态判断结果。
+
+---
+
+## 14. R^X Shadow Patch（wxshadow，隐藏补丁）
+
+对目标进程代码页做「**执行走补丁、读取看原文**」的隐藏补丁：把补丁字节写进私有 shadow 页，并以 `--x`（仅执行，`PTE_USER/RDONLY/UXN` 全清）权限映射到原虚拟地址。进程执行时命中 shadow（补丁），读取时权限异常切回原文，从而对自读完整性校验与外部读（`/proc/pid/mem`、`process_vm_readv`、`ptrace`）隐藏补丁。
+
+### 命令（复用 `vmemrw_info.user_buffer` 承载 `ls_wxshadow_message`，`request_op_wxshadow` 分发）
+
+| 命令 | 作用 |
+| --- | --- |
+| `LS_WXSHADOW_INFO` (`wxshadow.status`) | 查询能力位与 hook 状态 |
+| `LS_WXSHADOW_PATCH` (`wxshadow.patch`) | 写入补丁（单次页内；用户态按 4KB 页边界自动拆分跨页） |
+| `LS_WXSHADOW_RELEASE` (`wxshadow.release`) | 按地址 / 目标 / 全部释放 |
+| `LS_WXSHADOW_LIST` (`wxshadow.list`) | 列出受管页（tgid、page_addr、state、patch 数） |
+| `LS_WXSHADOW_ENABLE` (`wxshadow.enable`) | 运行时总开关：`1` 开启 / `0` 关闭（关闭后其余命令全 fail-closed 回 `-EOPNOTSUPP`） |
+
+### 关键 hook 与生命周期
+
+| hook | 作用 |
+| --- | --- |
+| `do_mem_abort` | 读异常 `SHADOW(--x)→ORIGINAL(r--)`、取指异常 `ORIGINAL→SHADOW`、写异常撤销该页 |
+| `exit_mmap` | 进程退出前恢复原 PTE，避免 zap 触发 `Bad page map` |
+| `follow_page_pte` | GUP 读隐藏（`/proc/pid/mem` 等外部读回原文） |
+| `dup_mmap` | fork 保护（fork 前 pause、返回后 resume，子进程不继承 shadow PFN） |
+| `mmu_notifier` | mprotect/munmap 等映射失效时拆页恢复原文 |
+
+以上 hook 均为**懒安装**：首个 patch 时安装，最后一个页释放后卸载（`wxshadow.enable 0` 也会全量撤销）。
+
+### 注意事项 / 边界
+
+- **PFN 交换的 rmap/refcount 隐患**：shadow 页是匿名页，直接塞进 file-backed 代码段 VMA 的 PTE。本实现靠 `exit_mmap`（退出前恢复）、`dup_mmap`（fork 前 pause）、`follow_page_pte`（GUP 隐藏）与 `mmu_notifier`（mprotect/munmap 检测）覆盖危险路径，但**多线程 fork 竞态、长时间驻留、极端换页/migration 压力下的 `Bad page map`/`Bad rss-counter` 尚未穷尽验证**。对抗场景使用前建议先做可控压测（fork + mprotect + exit 全链路已在本机验证通过）。
+- **hook 懒安装**：`wxshadow.status` 的 `cap_patch`/`cap_read_hide` 是固定能力位；`cap_gup_hide`/`cap_fork_safe` 才反映 follow_page_pte/dup_mmap 是否装成功。
+- **开关不落 /proc**：开关走共享内存（`wxshadow.enable`），无 `/proc` 节点，避免普通 App 探测。
+- **补丁上限**：单次 patch 受 4096 字节共享缓冲减 header 约束（`LS_WXSHADOW_PATCH_MAX=4032`），跨页由用户态拆分，多块提交时任一块失败即部分成功。
+
+### 用户态接口
+
+- RPC：`wxshadow.status / enable / patch / release / list`（`service.h`）。
+- MCP：`android_wxshadow_status / enable / patch / release / list`（`mcp_catalog.h`，由 `windows/LuckyStarMcp.py` 生成）。
+- 驱动封装：`Driver::WxShadowCall(ls_wxshadow_message&)`（`android/jni/driver/driver.h`），fail-closed。
+- 协议头：内核 `lsdriver/io_version/wxshadow_wire.h` 与用户态 `android/jni/driver/wxshadow_wire.h` 字段级一致。
