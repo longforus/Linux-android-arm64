@@ -17,7 +17,8 @@ SERIAL="${1:-}"
 ADB="adb"
 [ -n "$SERIAL" ] && ADB="adb -s $SERIAL"
 
-RPC="http://127.0.0.1:9494/api/rpc"
+BASE="http://127.0.0.1:9494"
+RPC="$BASE/api/rpc"
 RC="com.android.xsettings/com.longforus.xsettings.XstCommandReceiver"
 TEST_BIN="/data/local/tmp/wxshadow_test"
 TEST_LOG="/data/local/tmp/wxshadow_test.log"
@@ -54,13 +55,13 @@ ok "测试二进制就绪"
 # ---- 1. 服务健康 ----
 echo "=== [1] 服务健康 ==="
 $ADB forward tcp:9494 tcp:9494 >/dev/null 2>&1
-HEALTH=$(curl -s -m 5 "$RPC/health" 2>/dev/null)
+HEALTH=$(curl -s -m 5 "$BASE/health" 2>/dev/null)
 if ! echo "$HEALTH" | grep -q '"ok":true'; then
     echo "  服务未就绪，尝试 START_HTTP 拉起..."
     $ADB shell am broadcast -a com.longforus.xsettings.action.START_HTTP -n "$RC" --include-stopped-packages >/dev/null 2>&1
     sleep 4
     $ADB forward tcp:9494 tcp:9494 >/dev/null 2>&1
-    HEALTH=$(curl -s -m 5 "$RPC/health" 2>/dev/null)
+    HEALTH=$(curl -s -m 5 "$BASE/health" 2>/dev/null)
 fi
 echo "$HEALTH" | grep -q '"ok":true' && ok "health ok" || { bad "health: $HEALTH"; exit 1; }
 
