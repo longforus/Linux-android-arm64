@@ -436,6 +436,29 @@ static int wx_mmu_notifier_invalidate_range_start(struct mmu_notifier *mn,
 						   const struct mmu_notifier_range *range)
 {
 	(void)mn;
+
+	/*
+	 * 只对真正会改变我们 PTE 的事件拆页:
+	 *   UNMAP          -> munmap/mremap/exit 移除映射
+	 *   CLEAR          -> zap/madvise 清 PTE, 或内存迁移 try_to_unmap (CMA/ksm/migrate)
+	 *   PROTECTION_VMA -> mprotect 改权限 (本模块引入 notifier 的初衷)
+	 *   MIGRATE        -> migrate_vma 迁移
+	 * 跳过:
+	 *   PROTECTION_PAGE -> 仅清除 PTE 写位 (fork 的 copy_page_range / page_mkclean /
+	 *                      wp_clean/clear_refs)。我们的 shadow 页是 --x (永不可写),
+	 *                      写保护对它无影响; fork 由 dup_mmap hook 单独处理。
+	 *   SOFT_DIRTY / RELEASE -> 不改变我们的 PTE。
+	 */
+	switch (range->event) {
+	case MMU_NOTIFY_UNMAP:
+	case MMU_NOTIFY_CLEAR:
+	case MMU_NOTIFY_PROTECTION_VMA:
+	case MMU_NOTIFY_MIGRATE:
+		break;
+	default:
+		return 0;
+	}
+
 	if (!mmu_notifier_range_blockable(range))
 		return -EAGAIN;
 	wx_teardown_pages_in_range(range->mm, range->start, range->end);
@@ -626,8 +649,12 @@ static void __attribute__((used, __noinline__)) wx_follow_page_pte_return_work(v
 	if (!p)
 		return;
 	spin_lock_irqsave(&g_wxshadow.lock, flags);
-	if (!p->dead)
-		wx_write_pte_locked(p, wx_pte_shadow(p), true);
+	if (!p->dead) {
+		int r = wx_write_pte_locked(p, wx_pte_shadow(p), true);
+		if (r != 0)
+			ls_log_always_tag("wxshadow", "follow_page_pte restore failed ret=%d addr=%lx\n",
+					  r, p->page_addr);
+	}
 	spin_unlock_irqrestore(&g_wxshadow.lock, flags);
 	wx_page_put(p);
 }

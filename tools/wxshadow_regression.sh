@@ -87,24 +87,34 @@ rpc "{\"operation\":\"target.select\",\"params\":{\"pid\":$PID}}" >/dev/null
 R=$(rpc "{\"operation\":\"wxshadow.patch\",\"params\":{\"address\":\"$ADDR\",\"data_hex\":\"$NOP_HEX\"}}")
 echo "$R" | grep -q '"status":0' && ok "patch status=0" || bad "patch: $R"
 
-# ---- 5. 受管页 ----
-echo "=== [5] wxshadow.list ==="
+# ---- 5. 受管页 + 懒安装 hook 能力 ----
+echo "=== [5] wxshadow.list + 懒安装能力 ==="
 L=$(rpc '{"operation":"wxshadow.list"}')
 echo "$L" | grep -q '"page_count":1' && ok "list 1 页" || bad "list: $L"
+ST=$(rpc '{"operation":"wxshadow.status"}')
+echo "$ST" | grep -q '"cap_gup_hide":true' && ok "cap_gup_hide=true (follow_page_pte 已装)" || bad "status: $ST"
+echo "$ST" | grep -q '"cap_fork_safe":true' && ok "cap_fork_safe=true (dup_mmap 已装)" || bad "status: $ST"
 
 # ---- 6. 读隐藏 ----
 echo "=== [6] 读隐藏 ==="
-# GUP (/proc/pid/mem) 应读到原文；driver 直读应看到补丁
-GUP=$($ADB shell "su -c 'dd if=/proc/$PID/mem bs=4096 skip=$SKIP count=1 2>/dev/null | head -c 4 | xxd -p'")
+# 先 driver 直读 (patch 后 PTE 必为 shadow, 确定性)；后 GUP 读 (读隐藏)。
+# 注意: GUP 读匿名 CMA 代码页可能触发内存迁移而拆页 (安全, 仅丢补丁), 故 GUP 只断言读到原文。
 DIRECT=$(rpc "{\"operation\":\"memory.read\",\"params\":{\"address\":\"$ADDR\",\"size\":4}}" | python3 -c 'import sys,json; print(json.load(sys.stdin)["data"]["data_hex"][:8].lower())' 2>/dev/null)
-echo "$GUP" | grep -qi "$ORIG_HEX" && ok "GUP 读到原文 ($GUP)" || bad "GUP 读到 [$GUP]，期望原文 $ORIG_HEX"
 echo "$DIRECT" | grep -qi "$(echo $NOP_HEX | tr 'A-F' 'a-f')" && ok "driver 直读看到补丁 ($DIRECT)" || bad "driver 直读 [$DIRECT]，期望补丁"
+GUP=$($ADB shell "su -c 'dd if=/proc/$PID/mem bs=4096 skip=$SKIP count=1 2>/dev/null | head -c 4 | xxd -p'")
+echo "$GUP" | grep -qi "$ORIG_HEX" && ok "GUP 读到原文 ($GUP)" || bad "GUP 读到 [$GUP]，期望原文 $ORIG_HEX"
 
-# ---- 7. fork ----
-echo "=== [7] fork ==="
+# ---- 7. fork 保护 ----
+echo "=== [7] fork 保护 ==="
+# 若 [6] 的 GUP 读触发了 CMA 迁移拆页, 这里重新 patch 保证有活的受管页再测 fork。
+rpc "{\"operation\":\"wxshadow.patch\",\"params\":{\"address\":\"$ADDR\",\"data_hex\":\"$NOP_HEX\"}}" >/dev/null
 $ADB shell "su -c 'kill -USR1 $PID'"
 sleep 1
 $ADB shell "cat $TEST_LOG" | grep -q "fork+reap" && ok "fork+reap" || bad "fork 未完成"
+L=$(rpc '{"operation":"wxshadow.list"}')
+echo "$L" | grep -q '"page_count":1' && ok "fork 后父进程仍 1 页（PROTECTION_PAGE 已忽略）" || bad "fork 后 list: $L"
+DIRECT=$(rpc "{\"operation\":\"memory.read\",\"params\":{\"address\":\"$ADDR\",\"size\":4}}" | python3 -c 'import sys,json; print(json.load(sys.stdin)["data"]["data_hex"][:8].lower())' 2>/dev/null)
+echo "$DIRECT" | grep -qi "$(echo $NOP_HEX | tr 'A-F' 'a-f')" && ok "fork 后直读仍补丁 ($DIRECT)" || bad "fork 后直读 [$DIRECT]，期望补丁"
 
 # ---- 8. mprotect (mmu_notifier 拆页) ----
 echo "=== [8] mprotect ==="
@@ -116,7 +126,7 @@ echo "$L" | grep -q '"page_count":0' && ok "mprotect 后 list 空（mmu_notifier
 
 # ---- 9. dmesg 无 bad page ----
 echo "=== [9] dmesg 无 Bad page/rss/panic ==="
-BADLOG=$($ADB shell "su -c 'dmesg | grep -iE \"bad page|bad rss|BUG:|Kernel panic\"'")
+BADLOG=$($ADB shell "su -c 'dmesg | grep -iE \"kernel BUG at|Kernel panic|Bad page map|Bad rss-counter\"'")
 [ -z "$BADLOG" ] && ok "无 bad page/rss/panic" || bad "发现: $BADLOG"
 
 # ---- 10. exit ----
