@@ -615,13 +615,14 @@ make -C lsdriver/arm64_tests/executor device-binaries
 | `exit_mmap` | 进程退出前恢复原 PTE，避免 zap 触发 `Bad page map` |
 | `follow_page_pte` | GUP 读隐藏（`/proc/pid/mem` 等外部读回原文） |
 | `dup_mmap` | fork 保护（fork 前 pause、返回后 resume，子进程不继承 shadow PFN） |
-| `mmu_notifier` | mprotect/munmap 等映射失效时拆页恢复原文 |
+| `mmu_notifier` | 按 event 白名单拆页：`UNMAP`/`CLEAR`/`PROTECTION_VMA`/`MIGRATE` 拆页恢复原文；`PROTECTION_PAGE`/`SOFT_DIRTY`/`RELEASE` 忽略（写保护事件，shadow 页 `--x` 永不可写，对它是 no-op；fork 由 `dup_mmap` 单独处理） |
 
 以上 hook 均为**懒安装**：首个 patch 时安装，最后一个页释放后卸载（`wxshadow.enable 0` 也会全量撤销）。
 
 ### 注意事项 / 边界
 
 - **PFN 交换的 rmap/refcount 隐患**：shadow 页是匿名页，直接塞进 file-backed 代码段 VMA 的 PTE。本实现靠 `exit_mmap`（退出前恢复）、`dup_mmap`（fork 前 pause）、`follow_page_pte`（GUP 隐藏）与 `mmu_notifier`（mprotect/munmap 检测）覆盖危险路径，但**多线程 fork 竞态、长时间驻留、极端换页/migration 压力下的 `Bad page map`/`Bad rss-counter` 尚未穷尽验证**。对抗场景使用前建议先做可控压测（fork + mprotect + exit 全链路已在本机验证通过）。
+- **CMA 迁移边界（匿名/JIT 代码页）**：若被打补丁的是**匿名页**（`MAP_ANONYMOUS`，典型如 JIT/注入代码），其原始物理页可能落在 CMA/ZONE_MOVABLE。外部进程读 `/proc/<pid>/mem`、`process_vm_readv` 等触发 GUP 时，内核会走 `check_and_migrate_cma_pages → migrate_pages → try_to_unmap` 并发出 `MMU_NOTIFY_CLEAR`，本模块会**拆页恢复原文**（这是安全的：不拆会让缓存的 `original_pte` PFN 失效，更危险），代价是**该次外部读会让这条补丁失效**。用 `dmesg | grep wxshadow` 可见 `mmu_notifier: 拆解 N 页`（CMA 迁移触发 CLEAR），而非 `follow_page_pte restore failed`。**补丁打在 file-backed `.text`（如 `.so`）上不受影响**——file 页不在 CMA，GUP 读不触发迁移。回归脚本因此把 [6] 改成「先 driver 直读（见补丁）再 GUP（读原文）」，并在 [7] fork 前重新 patch。
 - **hook 懒安装**：`wxshadow.status` 的 `cap_patch`/`cap_read_hide` 是固定能力位；`cap_gup_hide`/`cap_fork_safe` 才反映 follow_page_pte/dup_mmap 是否装成功。
 - **开关不落 /proc**：开关走共享内存（`wxshadow.enable`），无 `/proc` 节点，避免普通 App 探测。
 - **补丁上限**：单次 patch 受 4096 字节共享缓冲减 header 约束（`LS_WXSHADOW_PATCH_MAX=4032`），跨页由用户态拆分，多块提交时任一块失败即部分成功。
