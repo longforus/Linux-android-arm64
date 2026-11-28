@@ -11,6 +11,7 @@
 #include "../application/service.h"
 #include "../memory/signature_scanner.h"
 #include "mcp_server.h"
+#include "http_request.h"
 
 // ============================================================================
 // HTTP 服务器模块
@@ -248,111 +249,14 @@ namespace
 
     bool receiveHttpRequest(int fd, std::string *method, std::string *path, std::string *body, int *errorStatus, json *headers)
     {
-        std::string request;
-        request.reserve(4096);
-        std::array<char, 4096> chunk{};
-        std::size_t headerEnd = std::string::npos;
-
-        while (headerEnd == std::string::npos)
-        {
-            const ssize_t received = recv(fd, chunk.data(), chunk.size(), 0);
-            if (received == 0) return false;
-            if (received < 0)
-            {
-                if (errno == EINTR) continue;
-                return false;
-            }
-
-            request.append(chunk.data(), static_cast<std::size_t>(received));
-            if (request.size() > kMaxHttpHeaderBytes)
-            {
-                *errorStatus = 431;
-                return false;
-            }
-            headerEnd = request.find("\r\n\r\n");
-        }
-
-        const std::size_t requestLineEnd = request.find("\r\n");
-        if (requestLineEnd == std::string::npos)
-        {
-            *errorStatus = 400;
-            return false;
-        }
-
-        const std::string_view requestLine(request.data(), requestLineEnd);
-        const std::size_t firstSpace = requestLine.find(' ');
-        const std::size_t secondSpace = firstSpace == std::string_view::npos ? std::string_view::npos : requestLine.find(' ', firstSpace + 1);
-        if (firstSpace == std::string_view::npos || secondSpace == std::string_view::npos)
-        {
-            *errorStatus = 400;
-            return false;
-        }
-        *method = std::string(requestLine.substr(0, firstSpace));
-        *path = std::string(requestLine.substr(firstSpace + 1, secondSpace - firstSpace - 1));
-
-        std::size_t contentLength = 0;
-        std::size_t lineStart = requestLineEnd + 2;
-        while (lineStart < headerEnd)
-        {
-            const std::size_t lineEnd = request.find("\r\n", lineStart);
-            if (lineEnd == std::string::npos || lineEnd > headerEnd) break;
-
-            const std::string_view line(request.data() + lineStart, lineEnd - lineStart);
-            const std::size_t colon = line.find(':');
-            if (colon != std::string_view::npos) {
-                const auto key = toLowerAscii(line.substr(0, colon));
-                std::string value(line.substr(colon + 1));
-                const auto first = value.find_first_not_of(" \t");
-                const auto last = value.find_last_not_of(" \t");
-                value = first == std::string::npos ? "" : value.substr(first, last - first + 1);
-                if (headers->contains(key)) { *errorStatus = 400; return false; }
-                (*headers)[key] = value;
-            }
-            if (colon != std::string_view::npos && toLowerAscii(line.substr(0, colon)) == "content-length")
-            {
-                std::string_view value = line.substr(colon + 1);
-                const std::size_t valueStart = value.find_first_not_of(" \t");
-                const std::size_t valueEnd = value.find_last_not_of(" \t");
-                if (valueStart == std::string_view::npos)
-                {
-                    *errorStatus = 400;
-                    return false;
-                }
-                value = value.substr(valueStart, valueEnd - valueStart + 1);
-                const auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), contentLength);
-                if (ec != std::errc{} || ptr != value.data() + value.size())
-                {
-                    *errorStatus = 400;
-                    return false;
-                }
-            }
-            lineStart = lineEnd + 2;
-        }
-
-        if (contentLength > kMaxHttpBodyBytes)
-        {
-            *errorStatus = 413;
-            return false;
-        }
-
-        const std::size_t bodyStart = headerEnd + 4;
-        while (request.size() - bodyStart < contentLength)
-        {
-            const ssize_t received = recv(fd, chunk.data(), chunk.size(), 0);
-            if (received == 0)
-            {
-                *errorStatus = 400;
-                return false;
-            }
-            if (received < 0)
-            {
-                if (errno == EINTR) continue;
-                return false;
-            }
-            request.append(chunk.data(), static_cast<std::size_t>(received));
-        }
-
-        body->assign(request.data() + bodyStart, contentLength);
+        Http::Request parsed;
+        const int status = Http::Receive(fd, parsed);
+        *errorStatus = status > 0 ? status : 0;
+        if (status) return false;
+        *method = std::move(parsed.method);
+        *path = std::move(parsed.path);
+        *body = std::move(parsed.body);
+        *headers = std::move(parsed.headers);
         return true;
     }
 
@@ -399,6 +303,7 @@ namespace
 
     void HandleClientConnection(ApplicationService &service, int clientFd, sockaddr_in clientAddr, const std::string &healthResponse)
     {
+        struct ClientGuard { int fd; ~ClientGuard() { close(fd); } } guard{clientFd};
         char clientIp[INET_ADDRSTRLEN]{};
         if (inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, sizeof(clientIp)) == nullptr)
         {
@@ -417,7 +322,6 @@ namespace
             if (errorStatus == 413) sendHttpResponse(clientFd, 413, "Payload Too Large", R"({"ok":false,"error":"请求体过大"})");
             else if (errorStatus == 431) sendHttpResponse(clientFd, 431, "Request Header Fields Too Large", R"({"ok":false,"error":"请求头过大"})");
             else if (errorStatus != 0) sendHttpResponse(clientFd, 400, "Bad Request", R"({"ok":false,"error":"HTTP 请求格式无效"})");
-            close(clientFd);
             return;
         }
 
@@ -455,7 +359,6 @@ namespace
         {
             sendHttpResponse(clientFd, 404, "Not Found", R"({"ok":false,"error":"接口不存在"})");
         }
-        close(clientFd);
     }
 } // namespace
 
@@ -511,7 +414,7 @@ int http_server(ApplicationRuntime &application)
     {
         sockaddr_in clientAddr{};
         socklen_t clientLen = sizeof(clientAddr);
-        const int clientFd = accept(serverFd, reinterpret_cast<sockaddr *>(&clientAddr), &clientLen);
+        const int clientFd = accept4(serverFd, reinterpret_cast<sockaddr *>(&clientAddr), &clientLen, SOCK_CLOEXEC);
         if (clientFd < 0)
         {
             if (errno == EINTR) continue;
@@ -519,6 +422,15 @@ int http_server(ApplicationRuntime &application)
             continue;
         }
 
+        constexpr timeval timeout{15, 0};
+        if (Config::ActiveThreadPools().client().get_tasks_queued() >= kListenBacklog ||
+            setsockopt(clientFd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) != 0)
+        {
+            close(clientFd);
+            continue;
+        }
+        try {
         Config::ActiveThreadPools().client().detach_task([&service, clientFd, clientAddr, healthResponse] { HandleClientConnection(service, clientFd, clientAddr, healthResponse); });
+        } catch (...) { close(clientFd); throw; }
     }
 }

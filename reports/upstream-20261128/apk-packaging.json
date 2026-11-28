@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/home/void/AsfpProjects/xsettings/app/build/outputs/apk/release/app-release.apk",
+    "native_sha256": "7eba7a03fffbb83e2e27a03995f96f2ab1215e6a48024ae1bd3160f5798410d9"
+  },
+  {
+    "path": "/home/void/lineageos/pixel6_20/device/google/raviole/xsettings/com.android.xsettings.apk",
+    "native_sha256": "7eba7a03fffbb83e2e27a03995f96f2ab1215e6a48024ae1bd3160f5798410d9"
+  },
+  {
+    "path": "/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/system_ext/priv-app/XSettings/XSettings.apk",
+    "native_sha256": "7eba7a03fffbb83e2e27a03995f96f2ab1215e6a48024ae1bd3160f5798410d9"
+  }
+]

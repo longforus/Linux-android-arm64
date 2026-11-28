@@ -276,6 +276,12 @@ static int ConnectThreadFunction(void *data)
 
             // 这次的task是旧task跳过
             if (task == ls_process_task) continue;
+            // A fork child inherits comm and must not replace its connected parent.
+            rcu_read_lock();
+            bool is_client_child = rcu_dereference(task->real_parent) == READ_ONCE(ls_process_task);
+            rcu_read_unlock();
+            if (is_client_child) continue;
+
             // 这次的task启动时间小于旧task跳过
             old_task = ls_process_task;
             if (old_task && task->start_time <= old_task->start_time) continue;

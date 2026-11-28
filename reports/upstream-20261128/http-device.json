@@ -1,0 +1,15 @@
+{
+  "health": {
+    "debug_abi": 1,
+    "debug_status": 0,
+    "kernel_version": "2.4.0",
+    "ok": true,
+    "service": "LS_KTool",
+    "transport": "http"
+  },
+  "bad-version": "HTTP/1.1 400 Bad Request",
+  "transfer-encoding": "HTTP/1.1 400 Bad Request",
+  "duplicate-length": "HTTP/1.1 400 Bad Request",
+  "concurrent_health": 40,
+  "idle_closed_seconds": 14.994582105999598
+}

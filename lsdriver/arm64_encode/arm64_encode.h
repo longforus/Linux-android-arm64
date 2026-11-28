@@ -34,6 +34,8 @@ enum arm64_encode_load_store_kind
 };
 
 int arm64_encode_nop(uint32_t *instruction);
+int arm64_encode_bti_jc(uint32_t *instruction);
+int arm64_emit_bti_abs_jump(uint64_t target, uint8_t scratch, uint32_t *output, size_t word_count);
 int arm64_encode_bti_c(uint32_t *instruction);
 int arm64_encode_udf(uint32_t immediate, uint32_t *instruction);
 int arm64_encode_brk(uint32_t immediate, uint32_t *instruction);

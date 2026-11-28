@@ -1,0 +1,23 @@
+20.0-20261128-RELEASE-oriole
+_b
+1
+Enforcing
+uid=0(root) gid=0(root) groups=0(root) context=u:r:ksu:s0
+
+3337 (Pixel 6 KPM)
+0d6d6fc585c0264d64c2772d34046b47c336f79f2cd4a87e6ef04c55166e4b3e  /vendor/lib/modules/kernelpatch.ko
+Current Battery Service state:
+  AC powered: true
+  USB powered: false
+  Wireless powered: false
+  Max charging current: 1500000
+  Max charging voltage: 5000000
+  Charge counter: 3364000
+  status: 4
+  health: 2
+  present: true
+  level: 78
+  scale: 100
+  voltage: 3985
+  temperature: 297
+  technology: Li-ion

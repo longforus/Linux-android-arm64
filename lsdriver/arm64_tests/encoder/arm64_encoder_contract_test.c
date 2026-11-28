@@ -192,6 +192,11 @@ static int check_system_and_sequences(void)
     failures += expect_words("absolute jump", output, expected_jump, 5);
     failures += expect_status("absolute jump scratch 31", arm64_emit_abs_jump(0, 31, output, 4), -EINVAL);
     failures += expect_status("absolute jump short buffer", arm64_emit_abs_jump(0, 16, output, 3), -EINVAL);
+    failures += expect_status("BTI jump", arm64_emit_bti_abs_jump(0x123456789ABCDEF0ULL, 16, output, 5), 0);
+    failures += expect_word("BTI landing", output[0], 0xD50324DFU);
+    failures += expect_word("BTI jump load", output[1], 0x58000050U);
+    failures += expect_word("BTI jump ret", output[2], 0xD65F0200U);
+    failures += expect_status("BTI jump short", arm64_emit_bti_abs_jump(0, 16, output, 4), -EINVAL);
     return failures;
 }
 

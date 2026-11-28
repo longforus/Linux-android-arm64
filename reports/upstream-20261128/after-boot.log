@@ -1,0 +1,15 @@
+Waiting for Android ADB
+Booted 20.0-20261128-RELEASE-oriole
+Serving...
+Performing Incremental Install
+Failure [INSTALL_FAILED_SESSION_INVALID: Incremental installation of this package is not allowed.]
+Performing Streamed Install
+Success
+
+Broadcasting: Intent { act=com.longforus.xsettings.action.START_HTTP flg=0x400020 cmp=com.android.xsettings/com.longforus.xsettings.XstCommandReceiver }
+Broadcast completed: result=0
+
+9494
+
+
+Controlled fixture {"pid":6635,"page":4096,"base":"0x709b054000","payload":"0x709b054020","unaligned_int":"0x709b057011","near":"0x709b054001","outside":"0x709b054ffe","exact":"0x709b057008","partial":"0x709b055ff0","marker":"0x709b054080","hot":"0x63e53cd000"}

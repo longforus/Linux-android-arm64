@@ -1,0 +1,29 @@
+{
+  "version": "20.0-20261128-RELEASE-oriole",
+  "slot": "_b",
+  "selinux": "Enforcing",
+  "root": "uid=0(root) gid=0(root) groups=0(root) context=u:r:ksu:s0",
+  "kpm_version": "3337 (Pixel 6 KPM)",
+  "health": {
+    "debug_abi": 1,
+    "debug_status": 0,
+    "kernel_version": "2.4.0",
+    "ok": true,
+    "service": "LS_KTool",
+    "transport": "http"
+  },
+  "target": {
+    "data": {
+      "pid": 0
+    },
+    "ok": true,
+    "operation": "target.get"
+  },
+  "rotation": [
+    "1",
+    "0"
+  ],
+  "kpm_list": "",
+  "kpm_hash": "0d6d6fc585c0264d64c2772d34046b47c336f79f2cd4a87e6ef04c55166e4b3e  /vendor/lib/modules/kernelpatch.ko",
+  "passed": true
+}

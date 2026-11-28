@@ -1,0 +1,1205 @@
+bash: cannot set terminal process group (-1): Inappropriate ioctl for device
+bash: no job control in this shell
+atuin: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.38' not found (required by atuin)
+atuin: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.39' not found (required by atuin)
+Looking for dependencies in device/google/oriole
+Looking for dependencies in device/google/raviole
+Looking for dependencies in device/google/gs101
+Looking for dependencies in kernel/google/gs201/private/gs-google
+kernel/google/gs201/private/gs-google has no additional dependencies.
+
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=13
+LINEAGE_VERSION=20.0-20261128-RELEASE-oriole
+TARGET_PRODUCT=lineage_oriole
+TARGET_BUILD_VARIANT=user
+TARGET_BUILD_TYPE=release
+TARGET_ARCH=arm64
+TARGET_ARCH_VARIANT=armv8-2a
+TARGET_CPU_VARIANT=cortex-a55
+TARGET_2ND_ARCH=arm
+TARGET_2ND_ARCH_VARIANT=armv8-a
+TARGET_2ND_CPU_VARIANT=generic
+HOST_ARCH=x86_64
+HOST_2ND_ARCH=x86
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-7.3.6-3-cachyos-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+HOST_CROSS_ARCH=x86
+HOST_CROSS_2ND_ARCH=x86_64
+HOST_BUILD_TYPE=release
+BUILD_ID=TQ3A.230901.001
+OUT_DIR=/mnt/sdwd/android_build/out/pixel6_20
+PRODUCT_SOONG_NAMESPACES=device/google/gs-common/powerstats hardware/google/gchips/gralloc4 hardware/google/av hardware/google/gchips hardware/google/graphics/common hardware/google/graphics/gs101 hardware/google/interfaces hardware/google/pixel device/google/gs101 device/google/gs101/powerstats vendor/google/whitechapel/tools vendor/broadcom/bluetooth vendor/google/camera vendor/google/interfaces vendor/google_devices/common/proprietary/confirmatioui_hal vendor/google_nos/host/android vendor/google_nos/test/system-test-harness vendor/samsung_slsi/telephony/ vendor/arm/mali/valhall device/google/gs101/conf vendor/samsung_slsi/codec2 device/google/gs101/gnss/47765 vendor/google/trusty/common vendor/google/whitechapel/audio/hal vendor/google/whitechapel/audio/interfaces vendor/google/whitechapel/aoc vendor/goodix/udfps/fp_utils vendor/goodix/udfps/g6_trusty vendor/goodix/udfps/g6_aidl_trusty device/google/raviole/powerstats/oriole device/google/raviole vendor/google_devices/raviole/prebuilts vendor/google/oriole
+============================================
+============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=13
+LINEAGE_VERSION=20.0-20261128-RELEASE-oriole
+TARGET_PRODUCT=lineage_oriole
+TARGET_BUILD_VARIANT=user
+TARGET_BUILD_TYPE=release
+TARGET_ARCH=arm64
+TARGET_ARCH_VARIANT=armv8-2a
+TARGET_CPU_VARIANT=cortex-a55
+TARGET_2ND_ARCH=arm
+TARGET_2ND_ARCH_VARIANT=armv8-a
+TARGET_2ND_CPU_VARIANT=generic
+HOST_ARCH=x86_64
+HOST_2ND_ARCH=x86
+HOST_OS=linux
+HOST_OS_EXTRA=Linux-7.3.6-3-cachyos-x86_64-Ubuntu-22.04.5-LTS
+HOST_CROSS_OS=windows
+HOST_CROSS_ARCH=x86
+HOST_CROSS_2ND_ARCH=x86_64
+HOST_BUILD_TYPE=release
+BUILD_ID=TQ3A.230901.001
+OUT_DIR=/mnt/sdwd/android_build/out/pixel6_20
+PRODUCT_SOONG_NAMESPACES=device/google/gs-common/powerstats hardware/google/gchips/gralloc4 hardware/google/av hardware/google/gchips hardware/google/graphics/common hardware/google/graphics/gs101 hardware/google/interfaces hardware/google/pixel device/google/gs101 device/google/gs101/powerstats vendor/google/whitechapel/tools vendor/broadcom/bluetooth vendor/google/camera vendor/google/interfaces vendor/google_devices/common/proprietary/confirmatioui_hal vendor/google_nos/host/android vendor/google_nos/test/system-test-harness vendor/samsung_slsi/telephony/ vendor/arm/mali/valhall device/google/gs101/conf vendor/samsung_slsi/codec2 device/google/gs101/gnss/47765 vendor/google/trusty/common vendor/google/whitechapel/audio/hal vendor/google/whitechapel/audio/interfaces vendor/google/whitechapel/aoc vendor/goodix/udfps/fp_utils vendor/goodix/udfps/g6_trusty vendor/goodix/udfps/g6_aidl_trusty device/google/raviole/powerstats/oriole device/google/raviole vendor/google_devices/raviole/prebuilts vendor/google/oriole
+============================================
+environment variables changed value:
+   CC_WRAPPER ("" -> "/usr/bin/ccache")
+   USE_CCACHE ("" -> "1")
+[100% 1/1] analyzing Android.bp files and generating ninja file at /mnt/sdwd/android_build/out/pixel6_20/soong/build.ninja
+/mnt/sdwd/android_build/out/pixel6_20/soong/make_vars-lineage_oriole.mk was modified, regenerating...
+Adding CUSTOM_LOCALES [ast_ES gd_GB cy_GB fur_IT] to PRODUCT_LOCALES [en_US af_ZA am_ET ar_EG ar_XB as_IN az_AZ be_BY bg_BG bn_BD bs_BA ca_ES cs_CZ da_DK de_DE el_GR en_AU en_CA en_GB en_IN en_XA es_ES es_US et_EE eu_ES fa_IR fi_FI fr_CA fr_FR gl_ES gu_IN hi_IN hr_HR hu_HU hy_AM in_ID is_IS it_IT iw_IL ja_JP ka_GE kk_KZ km_KH kn_IN ko_KR ky_KG lo_LA lt_LT lv_LV mk_MK ml_IN mn_MN mr_IN ms_MY my_MM nb_NO ne_NP nl_NL or_IN pa_IN pl_PL pt_BR pt_PT ro_RO ru_RU si_LK sk_SK sl_SI sq_AL sr_Latn_RS sr_RS sv_SE sw_TZ ta_IN te_IN th_TH tl_PH tr_TR uk_UA ur_PK uz_UZ vi_VN zh_CN zh_HK zh_TW zu_ZA]
+/mnt/sdwd/android_build/out/pixel6_20/soong/make_vars-lineage_oriole.mk was modified, regenerating...
+[100% 2/2] initializing build system ...
+Adding CUSTOM_LOCALES [ast_ES gd_GB cy_GB fur_IT] to PRODUCT_LOCALES [en_US af_ZA am_ET ar_EG ar_XB as_IN az_AZ be_BY bg_BG bn_BD bs_BA ca_ES cs_CZ da_DK de_DE el_GR en_AU en_CA en_GB en_IN en_XA es_ES es_US et_EE eu_ES fa_IR fi_FI fr_CA fr_FR gl_ES gu_IN hi_IN hr_HR hu_HU hy_AM in_ID is_IS it_IT iw_IL ja_JP ka_GE kk_KZ km_KH kn_IN ko_KR ky_KG lo_LA lt_LT lv_LV mk_MK ml_IN mn_MN mr_IN ms_MY my_MM nb_NO ne_NP nl_NL or_IN pa_IN pl_PL pt_BR pt_PT ro_RO ru_RU si_LK sk_SK sl_SI sq_AL sr_Latn_RS sr_RS sv_SE sw_TZ ta_IN te_IN th_TH tl_PH tr_TR uk_UA ur_PK uz_UZ vi_VN zh_CN zh_HK zh_TW zu_ZA]
+[  1% 3/186] including /mnt/sdwd/android_build/out/pixel6_20/soong/installs-lineage_oriole.mk ...
+[  2% 4/186] including /mnt/sdwd/android_build/out/pixel6_20/soong/Android-lineage_oriole.mk ...
+[  2% 5/186] including art/Android.mk ...
+[  3% 6/186] including bionic/Android.mk ...
+[  3% 7/186] including bootable/recovery/Android.mk ...
+[  4% 8/186] including build/make/target/board/Android.mk ...
+[  4% 9/186] including build/make/target/product/gsi/Android.mk ...
+[  5% 10/186] including build/make/target/product/security/Android.mk ...
+[  5% 11/186] including build/make/tools/fs_config/Android.mk ...
+[  6% 12/186] including cts/hostsidetests/appsecurity/test-apps/SplitApp/Android.mk ...
+[  6% 13/186] including development/build/Android.mk ...
+[  7% 14/186] including development/gki/Android.mk ...
+[  8% 15/186] including development/samples/RenderScript/Android.mk ...
+[  8% 16/186] including development/samples/ShortcutDemo/Android.mk ...
+[  9% 17/186] including development/testrunner/Android.mk ...
+[  9% 18/186] including device/generic/car/Android.mk ...
+[ 10% 19/186] including device/generic/goldfish-opengl/Android.mk ...
+[ 10% 20/186] including device/generic/goldfish/Android.mk ...
+[ 11% 21/186] including device/generic/trusty/Android.mk ...
+[ 11% 22/186] including device/generic/uml/Android.mk ...
+[ 12% 23/186] including device/google/atv/Android.mk ...
+[ 12% 24/186] including device/google/contexthub/firmware/Android.mk ...
+[ 13% 25/186] including device/google/contexthub/lefty/Android.mk ...
+[ 13% 26/186] including device/google/contexthub/lib/Android.mk ...
+[ 14% 27/186] including device/google/contexthub/sensorhal/Android.mk ...
+[ 15% 28/186] including device/google/cuttlefish/Android.mk ...
+[ 15% 29/186] including device/google/gs101/Android.mk ...
+[ 16% 30/186] including device/google/raviole/Android.mk ...
+[ 16% 31/186] including device/lineage/atv/Android.mk ...
+[ 17% 32/186] including device/sample/Android.mk ...
+[ 17% 33/186] including external/android-nn-driver/Android.mk ...
+[ 18% 34/186] including external/ant-wireless/ant_native/Android.mk ...
+[ 18% 35/186] including external/ant-wireless/ant_service/Android.mk ...
+[ 19% 36/186] including external/armnn/Android.mk ...
+[ 19% 37/186] including external/bash/Android.mk ...
+[ 20% 38/186] including external/chromium-trace/Android.mk ...
+[ 20% 39/186] including external/chromium-webview/Android.mk ...
+[ 21% 40/186] including external/clang/Android.mk ...
+[ 22% 41/186] including external/e2fsprogs/Android.mk ...
+[ 22% 42/186] including external/exoplayer/Android.mk ...
+[ 23% 43/186] including external/flatbuffers/Android.mk ...
+[ 23% 44/186] including external/fmtlib/support/Android.mk ...
+[ 24% 45/186] including external/google-breakpad/Android.mk ...
+[ 24% 46/186] including external/googletest/googletest/Android.mk ...
+[ 25% 47/186] including external/htop/Android.mk ...
+[ 25% 48/186] including external/hyphenation-patterns/Android.mk ...
+[ 26% 49/186] including external/icu/icu4c/Android.mk ...
+[ 26% 50/186] including external/json-c/Android.mk ...
+[ 27% 51/186] including external/libaom/Android.mk ...
+[ 27% 52/186] including external/libncurses/Android.mk ...
+[ 28% 53/186] including external/libusb/Android.mk ...
+[ 29% 54/186] including external/libvpx/Android.mk ...
+[ 29% 55/186] including external/libwebsockets/Android.mk ...
+[ 30% 56/186] including external/ltp/Android.mk ...
+[ 30% 57/186] including external/markdown/Android.mk ...
+[ 31% 58/186] including external/mesa3d/Android.mk ...
+[ 31% 59/186] including external/nano/Android.mk ...
+[ 32% 60/186] including external/noto-fonts/emoji-compat-flatbuffers/Android.mk ...
+[ 32% 61/186] including external/proguard/Android.mk ...
+[ 33% 62/186] including external/robolectric-shadows/Android.mk ...
+[ 33% 63/186] including external/v4l2_codec2/tests/Android.mk ...
+[ 34% 64/186] including external/vim/Android.mk ...
+[ 34% 65/186] including external/vixl/Android.mk ...
+[ 35% 66/186] including external/vogar/Android.mk ...
+[ 36% 67/186] including external/vulkan-validation-layers/Android.mk ...
+[ 36% 68/186] including external/walt/android/WALT/app/src/main/jni/Android.mk ...
+[ 37% 69/186] including external/webrtc/Android.mk ...
+[ 37% 70/186] including external/wpa_supplicant_8/Android.mk ...
+[ 38% 71/186] including frameworks/av/camera/Android.mk ...
+[ 38% 72/186] including frameworks/av/media/Android.mk ...
+[ 39% 73/186] including frameworks/av/services/Android.mk ...
+[ 39% 74/186] including frameworks/base/Android.mk ...
+[ 40% 75/186] including frameworks/native/cmds/flatland/Android.mk ...
+[ 40% 76/186] including frameworks/opt/car/services/builtInServices/tests/Android.mk ...
+[ 41% 77/186] including frameworks/opt/net/wifi/libwifi_hal/Android.mk ...
+[ 41% 78/186] including frameworks/rs/Android.mk ...
+[ 42% 79/186] including hardware/broadcom/libbt/Android.mk ...
+[ 43% 80/186] including hardware/broadcom/wlan/bcmdhd/Android.mk ...
+[ 43% 81/186] including hardware/google/easel/amber/camera/Android.mk ...
+[ 44% 82/186] including hardware/google/gchips/Android.mk ...
+[ 44% 83/186] including hardware/google/graphics/common/Android.mk ...
+[ 45% 84/186] including hardware/google/graphics/gs101/libhwc2.1/Android.mk ...
+[ 45% 85/186] including hardware/google/graphics/gs201/libhwc2.1/Android.mk ...
+[ 46% 86/186] including hardware/interfaces/compatibility_matrices/Android.mk ...
+[ 46% 87/186] including hardware/interfaces/configstore/1.1/default/Android.mk ...
+[ 47% 88/186] including hardware/interfaces/graphics/composer/2.2/default/Android.mk ...
+[ 47% 89/186] including hardware/interfaces/keymaster/3.0/default/Android.mk ...
+[ 48% 90/186] including hardware/interfaces/media/1.0/xml/Android.mk ...
+[ 48% 91/186] including hardware/interfaces/soundtrigger/2.0/default/Android.mk ...
+[ 49% 92/186] including hardware/interfaces/soundtrigger/2.1/default/Android.mk ...
+[ 50% 93/186] including hardware/interfaces/tv/Android.mk ...
+[ 50% 94/186] including hardware/interfaces/wifi/1.6/default/Android.mk ...
+[ 51% 95/186] including hardware/interfaces/wifi/supplicant/1.1/vts/Android.mk ...
+[ 51% 96/186] including hardware/invensense/Android.mk ...
+[ 52% 97/186] including hardware/libhardware/Android.mk ...
+[ 52% 98/186] including hardware/libhardware_legacy/Android.mk ...
+[ 53% 99/186] including hardware/lineage/interfaces/wifi/1.0-legacy/Android.mk ...
+[ 53% 100/186] including hardware/qcom-caf/bt/Android.mk ...
+[ 54% 101/186] including hardware/qcom-caf/msm8953/Android.mk ...
+[ 54% 102/186] including hardware/qcom-caf/msm8996/Android.mk ...
+[ 55% 103/186] including hardware/qcom-caf/msm8998/Android.mk ...
+[ 55% 104/186] including hardware/qcom-caf/sdm660/Android.mk ...
+[ 56% 105/186] including hardware/qcom-caf/sdm845/Android.mk ...
+[ 56% 106/186] including hardware/qcom-caf/sm8150/Android.mk ...
+[ 57% 107/186] including hardware/qcom-caf/sm8250/Android.mk ...
+[ 58% 108/186] including hardware/qcom-caf/sm8350/Android.mk ...
+[ 58% 109/186] including hardware/qcom-caf/sm8450/Android.mk ...
+[ 59% 110/186] including hardware/qcom-caf/sm8550/Android.mk ...
+[ 59% 111/186] including hardware/qcom-caf/vr/Android.mk ...
+[ 60% 112/186] including hardware/qcom-caf/wlan/Android.mk ...
+[ 60% 113/186] including hardware/qcom/Android.mk ...
+[ 61% 114/186] including hardware/ril/libril/Android.mk ...
+[ 61% 115/186] including hardware/ril/reference-ril/Android.mk ...
+[ 62% 116/186] including hardware/ril/rild/Android.mk ...
+[ 62% 117/186] including hardware/synaptics/wlan/synadhd/Android.mk ...
+[ 63% 118/186] including kernel/google/gs201/private/google-modules/wlan/wcn6740/wlan/qcacld-3.0/Android.mk ...
+[ 63% 119/186] including kernel/google/gs201/private/gs-google/Android.mk ...
+[ 64% 120/186] including lineage-sdk/Android.mk ...
+[ 65% 121/186] including packages/apps/AudioFX/tests/Android.mk ...
+[ 65% 122/186] including packages/apps/Backgrounds/Android.mk ...
+[ 66% 123/186] including packages/apps/Camera2/tests/Android.mk ...
+[ 66% 124/186] including packages/apps/Car/SystemUI/tests/Android.mk ...
+[ 67% 125/186] including packages/apps/FMRadio/Android.mk ...
+[ 67% 126/186] including packages/apps/Messaging/tests/Android.mk ...
+[ 68% 127/186] including packages/apps/SetupWizard/tests/Android.mk ...
+[ 68% 128/186] including packages/apps/TV/common/tests/robotests/Android.mk ...
+[ 69% 129/186] including packages/apps/TV/tests/Android.mk ...
+[ 69% 130/186] including packages/apps/TV/tuner/tests/robotests/Android.mk ...
+[ 70% 131/186] including packages/apps/TV/tuner/tests/testing/Android.mk ...
+[ 70% 132/186] including packages/apps/TimeZoneData/Android.mk ...
+[ 71% 133/186] including packages/modules/Bluetooth/android/app/tests/Android.mk ...
+[ 72% 134/186] including packages/modules/Bluetooth/system/Android.mk ...
+[ 72% 135/186] including packages/overlays/Lineage/customizations/BlackTheme/Android.mk ...
+[ 73% 136/186] including packages/overlays/Lineage/customizations/NavigationBarNoHint/Android.mk ...
+[ 73% 137/186] including packages/overlays/Lineage/fonts/etc/Android.mk ...
+[ 74% 138/186] including packages/services/Car/Android.mk ...
+[ 74% 139/186] including platform_testing/libraries/audio-test-harness/tradefed/Android.mk ...
+[ 75% 140/186] including platform_testing/libraries/sts-common-util/sts-sdk/Android.mk ...
+[ 75% 141/186] including platform_testing/scripts/androidx-perf-setup/Android.mk ...
+[ 76% 142/186] including platform_testing/scripts/perf-load-setup/Android.mk ...
+[ 76% 143/186] including platform_testing/scripts/perf-setup/Android.mk ...
+[ 77% 144/186] including platform_testing/scripts/perfetto-setup/Android.mk ...
+[ 77% 145/186] including platform_testing/tests/bootdoa/Android.mk ...
+[ 78% 146/186] including prebuilts/asuite/acloud/linux-x86/Android.mk ...
+[ 79% 147/186] including prebuilts/ndk/Android.mk ...
+[ 79% 148/186] including prebuilts/runtime/Android.mk ...
+[ 80% 149/186] including prebuilts/sdk/Android.mk ...
+[ 80% 150/186] including system/chre/Android.mk ...
+[ 81% 151/186] including system/core/fastboot/Android.mk ...
+[ 81% 152/186] including system/core/init/Android.mk ...
+[ 82% 153/186] including system/core/rootdir/Android.mk ...
+[ 82% 154/186] including system/extras/Android.mk ...
+[ 83% 155/186] including system/libfmq/benchmarks/Android.mk ...
+[ 83% 156/186] including system/libhidl/vintfdata/Android.mk ...
+[ 84% 157/186] including system/libvintf/Android.mk ...
+[ 84% 158/186] including system/sepolicy/Android.mk ...
+[ 85% 159/186] including system/timezone/Android.mk ...
+[ 86% 160/186] including system/tools/hidl/build/Android.mk ...
+[ 86% 161/186] including system/tools/mkbootimg/gki/Android.mk ...
+[ 87% 162/186] including test/mlts/benchmark/Android.mk ...
+[ 87% 163/186] including test/vts-testcase/hal/neuralnetworks/V1_2/benchmark/java/Android.mk ...
+[ 88% 164/186] including test/vts-testcase/hal/neuralnetworks/V1_3/benchmark/java/Android.mk ...
+[ 88% 165/186] including test/vts-testcase/security/poc/target/Android.mk ...
+[ 89% 166/186] including test/vts/compilation_tools/vtsc/test/Android.mk ...
+[ 89% 167/186] including test/vts/utils/python/archive/Android.mk ...
+[ 90% 168/186] including tools/platform-compat/Android.mk ...
+[ 90% 169/186] including tools/test/connectivity/Android.mk ...
+[ 91% 170/186] including tools/test/graphicsbenchmark/Android.mk ...
+[ 91% 171/186] including tools/tradefederation/prebuilts/test_harness/Android.mk ...
+[ 92% 172/186] including vendor/google/oriole/Android.mk ...
+[ 93% 173/186] including vendor/lineage/bootanimation/Android.mk ...
+[ 93% 174/186] including vendor/lineage/charger/Android.mk ...
+[ 94% 175/186] including vendor/lineage/config/Android.mk ...
+[ 94% 176/186] including vendor/qcom/opensource/audio-hal/st-hal-ar/Android.mk ...
+[ 95% 177/186] including vendor/qcom/opensource/audio-hal/st-hal/Android.mk ...
+[ 95% 178/186] including vendor/qcom/opensource/data-ipa-cfg-mgr-legacy-um/ipanat/test/Android.mk ...
+[ 96% 179/186] including vendor/qcom/opensource/data-ipa-cfg-mgr/ipanat/test/Android.mk ...
+[ 96% 180/186] including vendor/qcom/opensource/dataservices/datatop/Android.mk ...
+[ 97% 181/186] including vendor/qcom/opensource/libfmjni/Android.mk ...
+[ 97% 182/186] including vendor/qcom/opensource/power/Android.mk ...
+[ 98% 183/186] including vendor/qcom/opensource/wfd-commonsys/Android.mk ...
+[ 98% 184/186] including /mnt/sdwd/android_build/out/pixel6_20/soong/late-lineage_oriole.mk ...
+[ 99% 185/186] finishing build rules ...
+[100% 186/186] writing build rules ...
+build/make/core/Makefile:72: warning: overriding commands for target `/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/vendor/etc/res/images/charger/battery_fail.png'
+build/make/core/base_rules.mk:533: warning: ignoring old commands for target `/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/vendor/etc/res/images/charger/battery_fail.png'
+build/make/core/Makefile:72: warning: overriding commands for target `/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/vendor/etc/res/images/charger/battery_scale.png'
+build/make/core/base_rules.mk:533: warning: ignoring old commands for target `/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/vendor/etc/res/images/charger/battery_scale.png'
+build/make/core/Makefile:72: warning: overriding commands for target `/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/vendor/etc/res/values/charger/animation.txt'
+build/make/core/base_rules.mk:533: warning: ignoring old commands for target `/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/vendor/etc/res/values/charger/animation.txt'
+No need to regenerate ninja file
+Starting ninja...
+[ 98% 187/190] Building Kernel Config
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[1]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  GEN     Makefile
+arch/arm64/configs/slider_gki_defconfig:796:warning: symbol value 'm' invalid for SUSPEND_DURING_VOICE_CALL
+arch/arm64/configs/slider_gki_defconfig:799:warning: override: reassigning to symbol CH_EXTENSION
+#
+# No change to .config
+#
+make[1]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+
+ninja: Missing `restat`? An output file is older than the most recent input:
+ output: /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/.config
+  input: /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ
+[ 98% 188/190] Building Kernel Image (Image.lz4)
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[1]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  GEN     Makefile
+  DESCEND  bpf/resolve_btfids
+  CALL    /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/scripts/atomic/check-atomics.sh
+  CALL    /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/scripts/checksyscalls.sh
+  CHK     include/generated/compile.h
+  CHK     kernel/kheaders_data.tar.xz
+-- KP version: 0.13.9 from /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/kernelpatch/lkm/../version
+-- KP_NEW_DCACHE_FLUSH: 1
+  CC      drivers/lsdriver/lsdriver_main.o
+  CC      drivers/lsdriver/arm64_encode/arm64_encode.o
+-- SukiSU-Ultra version: 40530 [v4.2.1-5e00f3cf@pixel6-builtin-susfs]
+-- KERNEL_VERSION: 5.10
+-- KERNEL_TYPE: GKI 2.0
+-- SukiSU-Ultra: using SUSFS_INLINE_HOOK
+-- KPM is enabled
+-- SukiSU-Ultra/compat: modern static_key_interface found
+
+-- SUSFS_VERSION: v2.4.0
+  CC      drivers/kernelsu/ksu_main.o
+In file included from ../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/lsdriver.c:20:
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/export_fun.h:30:35: warning: unknown sanitizer 'kcfi' ignored [-Wunknown-sanitizers]
+__attribute__((no_sanitize("cfi", "kcfi"))) static unsigned long generic_kallsyms_lookup_name(const char *name)
+                                  ^
+In file included from ../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/lsdriver.c:21:
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/inline_hook_frame.h:134:35: warning: unknown sanitizer 'kcfi' ignored [-Wunknown-sanitizers]
+__attribute__((no_sanitize("cfi", "kcfi"))) static int trampoline_patch(uint32_t *dst, const uint32_t *src)
+                                  ^
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/inline_hook_frame.h:188:35: warning: unknown sanitizer 'kcfi' ignored [-Wunknown-sanitizers]
+__attribute__((no_sanitize("cfi", "kcfi"))) static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr, uint32_t *insts, int count)
+                                  ^
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/inline_hook_frame.h:396:35: warning: unknown sanitizer 'kcfi' ignored [-Wunknown-sanitizers]
+__attribute__((no_sanitize("cfi", "kcfi"))) static int hook_patch_words(uint64_t addr, const uint32_t *insts, int count)
+                                  ^
+In file included from ../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/lsdriver.c:20:
+In file included from ../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/export_fun.h:22:
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/arm64_emulate/../arm64_reg.h:1149:13: warning: unused function 'print_el2_status' [-Wunused-function]
+static void print_el2_status(void)
+            ^
+In file included from ../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/lsdriver.c:20:
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/export_fun.h:453:14: warning: unused function 'execmem_alloc' [-Wunused-function]
+static void *execmem_alloc(void *fixed_address, size_t size)
+             ^
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/export_fun.h:516:13: warning: unused function 'execmem_free' [-Wunused-function]
+static void execmem_free(void *ptr)
+            ^
+In file included from ../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/lsdriver.c:36:
+In file included from ../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/break_point.h:620:
+../../../../../../../../../../home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/lsdriver/arm64_hwdbg.h:372:13: warning: unused function 'dump_perf_breakpoint_slots' [-Wunused-function]
+static void dump_perf_breakpoint_slots(void)
+            ^
+8 warnings generated.
+  AR      drivers/kernelsu/built-in.a
+  AR      drivers/lsdriver/built-in.a
+  AR      drivers/built-in.a
+  GEN     .version
+  CHK     include/generated/compile.h
+  UPD     include/generated/compile.h
+  CC      init/version.o
+  AR      init/built-in.a
+  GEN     .tmp_initcalls.lds
+  GEN     .tmp_symversions.lds
+  LTO     vmlinux.o
+  MODPOST vmlinux.symvers
+  MODINFO modules.builtin.modinfo
+  GEN     modules.builtin
+  LD      .tmp_vmlinux.btf
+  BTF     .btf.vmlinux.bin.o
+  LD      .tmp_vmlinux.kallsyms1
+  KSYMS   .tmp_vmlinux.kallsyms1.S
+  AS      .tmp_vmlinux.kallsyms1.S
+  LD      .tmp_vmlinux.kallsyms2
+  KSYMS   .tmp_vmlinux.kallsyms2.S
+  AS      .tmp_vmlinux.kallsyms2.S
+  LD      vmlinux
+  BTFIDS  vmlinux
+  SORTTAB vmlinux
+  SYSMAP  System.map
+  OBJCOPY arch/arm64/boot/Image
+  LZ4     arch/arm64/boot/Image.lz4
+make[1]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+Building DTBs
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[1]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+Building Kernel Modules
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[1]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  GEN     Makefile
+  DESCEND  bpf/resolve_btfids
+  CALL    /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/scripts/atomic/check-atomics.sh
+  CALL    /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/scripts/checksyscalls.sh
+  CHK     include/generated/compile.h
+  CHK     kernel/kheaders_data.tar.xz
+-- KP version: 0.13.9 from /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/kernelpatch/lkm/../version
+-- KP_NEW_DCACHE_FLUSH: 1
+-- SukiSU-Ultra version: 40530 [v4.2.1-5e00f3cf@pixel6-builtin-susfs]
+-- KERNEL_VERSION: 5.10
+-- KERNEL_TYPE: GKI 2.0
+-- SukiSU-Ultra: using SUSFS_INLINE_HOOK
+-- KPM is enabled
+-- SukiSU-Ultra/compat: modern static_key_interface found
+
+-- SUSFS_VERSION: v2.4.0
+  CC      drivers/kernelsu/ksu_main.o
+  AR      drivers/kernelsu/built-in.a
+  AR      drivers/built-in.a
+  GEN     .version
+  CHK     include/generated/compile.h
+  UPD     include/generated/compile.h
+  CC      init/version.o
+  AR      init/built-in.a
+  GEN     .tmp_initcalls.lds
+  GEN     .tmp_symversions.lds
+  LTO     vmlinux.o
+  MODPOST vmlinux.symvers
+  MODINFO modules.builtin.modinfo
+  GEN     modules.builtin
+  LD      .tmp_vmlinux.btf
+  BTF     .btf.vmlinux.bin.o
+  LD      .tmp_vmlinux.kallsyms1
+  KSYMS   .tmp_vmlinux.kallsyms1.S
+  AS      .tmp_vmlinux.kallsyms1.S
+  LD      .tmp_vmlinux.kallsyms2
+  KSYMS   .tmp_vmlinux.kallsyms2.S
+  AS      .tmp_vmlinux.kallsyms2.S
+  LD      vmlinux
+  BTFIDS  vmlinux
+  SORTTAB vmlinux
+  SYSMAP  System.map
+  MODPOST modules-only.symvers
+  GEN     Module.symvers
+make[1]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+Installing Kernel Modules
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[1]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL crypto/lzo-rle.ko
+  INSTALL crypto/lzo.ko
+  INSTALL drivers/block/zram/zcomp_cpu.ko
+  INSTALL drivers/block/zram/zcomp_eh.ko
+  INSTALL drivers/block/zram/zram.ko
+  INSTALL drivers/bts/bts.ko
+  INSTALL drivers/char/hw_random/exyswd-rng.ko
+  INSTALL drivers/clk/samsung/clk_exynos.ko
+  INSTALL drivers/clocksource/exynos_mct.ko
+  INSTALL drivers/cpufreq/exynos-acme.ko
+  INSTALL drivers/devfreq/google/arm-memlat-mon.ko
+  INSTALL drivers/devfreq/google/exynos_devfreq.ko
+  INSTALL drivers/devfreq/google/governor_memlat.ko
+  INSTALL drivers/devfreq/google/memlat-devfreq.ko
+  INSTALL drivers/dma-buf/heaps/samsung/samsung_dma_heap.ko
+  INSTALL drivers/dma/pl330.ko
+  INSTALL drivers/dma/samsung-dma.ko
+  INSTALL drivers/gpu/exynos/g2d/g2d.ko
+  INSTALL drivers/hwtracing/coresight/coresight-etm4x.ko
+  INSTALL drivers/hwtracing/coresight/coresight-funnel.ko
+  INSTALL drivers/hwtracing/coresight/coresight-replicator.ko
+  INSTALL drivers/hwtracing/coresight/coresight-tmc.ko
+  INSTALL drivers/hwtracing/coresight/coresight.ko
+  INSTALL drivers/i2c/busses/i2c-acpm.ko
+  INSTALL drivers/i2c/busses/i2c-exynos5.ko
+  INSTALL drivers/i2c/i2c-dev.ko
+  INSTALL drivers/iio/power/odpm.ko
+  INSTALL drivers/input/fingerprint/goodixfp.ko
+  INSTALL drivers/input/keycombo.ko
+  INSTALL drivers/input/keydebug.ko
+  INSTALL drivers/input/misc/vl53l1/stmvl53l1.ko
+  INSTALL drivers/iommu/samsung-iommu-group.ko
+  INSTALL drivers/iommu/samsung-secure-iova.ko
+  INSTALL drivers/iommu/samsung_iommu.ko
+  INSTALL drivers/kernelpatch/lkm/kernelpatch.ko
+  INSTALL drivers/media/dvb-frontends/a8293.ko
+  INSTALL drivers/media/dvb-frontends/af9033.ko
+  INSTALL drivers/media/dvb-frontends/ascot2e.ko
+  INSTALL drivers/media/dvb-frontends/atbm8830.ko
+  INSTALL drivers/media/dvb-frontends/au8522_common.ko
+  INSTALL drivers/media/dvb-frontends/au8522_decoder.ko
+  INSTALL drivers/media/dvb-frontends/au8522_dig.ko
+  INSTALL drivers/media/dvb-frontends/bcm3510.ko
+  INSTALL drivers/media/dvb-frontends/cx22700.ko
+  INSTALL drivers/media/dvb-frontends/cx22702.ko
+  INSTALL drivers/media/dvb-frontends/cx24110.ko
+  INSTALL drivers/media/dvb-frontends/cx24113.ko
+  INSTALL drivers/media/dvb-frontends/cx24116.ko
+  INSTALL drivers/media/dvb-frontends/cx24117.ko
+  INSTALL drivers/media/dvb-frontends/cx24120.ko
+  INSTALL drivers/media/dvb-frontends/cx24123.ko
+  INSTALL drivers/media/dvb-frontends/cxd2099.ko
+  INSTALL drivers/media/dvb-frontends/cxd2820r.ko
+  INSTALL drivers/media/dvb-frontends/cxd2841er.ko
+  INSTALL drivers/media/dvb-frontends/cxd2880/cxd2880.ko
+  INSTALL drivers/media/dvb-frontends/dib0070.ko
+  INSTALL drivers/media/dvb-frontends/dib0090.ko
+  INSTALL drivers/media/dvb-frontends/dib3000mb.ko
+  INSTALL drivers/media/dvb-frontends/dib3000mc.ko
+  INSTALL drivers/media/dvb-frontends/dib7000m.ko
+  INSTALL drivers/media/dvb-frontends/dib7000p.ko
+  INSTALL drivers/media/dvb-frontends/dib8000.ko
+  INSTALL drivers/media/dvb-frontends/dib9000.ko
+  INSTALL drivers/media/dvb-frontends/dibx000_common.ko
+  INSTALL drivers/media/dvb-frontends/drx39xyj/drx39xyj.ko
+  INSTALL drivers/media/dvb-frontends/drxd.ko
+  INSTALL drivers/media/dvb-frontends/drxk.ko
+  INSTALL drivers/media/dvb-frontends/ds3000.ko
+  INSTALL drivers/media/dvb-frontends/dvb-pll.ko
+  INSTALL drivers/media/dvb-frontends/ec100.ko
+  INSTALL drivers/media/dvb-frontends/helene.ko
+  INSTALL drivers/media/dvb-frontends/horus3a.ko
+  INSTALL drivers/media/dvb-frontends/isl6405.ko
+  INSTALL drivers/media/dvb-frontends/isl6421.ko
+  INSTALL drivers/media/dvb-frontends/isl6423.ko
+  INSTALL drivers/media/dvb-frontends/itd1000.ko
+  INSTALL drivers/media/dvb-frontends/ix2505v.ko
+  INSTALL drivers/media/dvb-frontends/l64781.ko
+  INSTALL drivers/media/dvb-frontends/lg2160.ko
+  INSTALL drivers/media/dvb-frontends/lgdt3305.ko
+  INSTALL drivers/media/dvb-frontends/lgdt330x.ko
+  INSTALL drivers/media/dvb-frontends/lgs8gl5.ko
+  INSTALL drivers/media/dvb-frontends/lgs8gxx.ko
+  INSTALL drivers/media/dvb-frontends/lnbh25.ko
+  INSTALL drivers/media/dvb-frontends/lnbh29.ko
+  INSTALL drivers/media/dvb-frontends/lnbp21.ko
+  INSTALL drivers/media/dvb-frontends/lnbp22.ko
+  INSTALL drivers/media/dvb-frontends/m88rs2000.ko
+  INSTALL drivers/media/dvb-frontends/mb86a16.ko
+  INSTALL drivers/media/dvb-frontends/mb86a20s.ko
+  INSTALL drivers/media/dvb-frontends/mn88443x.ko
+  INSTALL drivers/media/dvb-frontends/mn88472.ko
+  INSTALL drivers/media/dvb-frontends/mn88473.ko
+  INSTALL drivers/media/dvb-frontends/mt312.ko
+  INSTALL drivers/media/dvb-frontends/mt352.ko
+  INSTALL drivers/media/dvb-frontends/mxl5xx.ko
+  INSTALL drivers/media/dvb-frontends/nxt200x.ko
+  INSTALL drivers/media/dvb-frontends/nxt6000.ko
+  INSTALL drivers/media/dvb-frontends/or51132.ko
+  INSTALL drivers/media/dvb-frontends/or51211.ko
+  INSTALL drivers/media/dvb-frontends/s5h1409.ko
+  INSTALL drivers/media/dvb-frontends/s5h1411.ko
+  INSTALL drivers/media/dvb-frontends/s5h1420.ko
+  INSTALL drivers/media/dvb-frontends/s5h1432.ko
+  INSTALL drivers/media/dvb-frontends/s921.ko
+  INSTALL drivers/media/dvb-frontends/si2165.ko
+  INSTALL drivers/media/dvb-frontends/si21xx.ko
+  INSTALL drivers/media/dvb-frontends/sp2.ko
+  INSTALL drivers/media/dvb-frontends/sp8870.ko
+  INSTALL drivers/media/dvb-frontends/sp887x.ko
+  INSTALL drivers/media/dvb-frontends/stb0899.ko
+  INSTALL drivers/media/dvb-frontends/stb6000.ko
+  INSTALL drivers/media/dvb-frontends/stb6100.ko
+  INSTALL drivers/media/dvb-frontends/stv0288.ko
+  INSTALL drivers/media/dvb-frontends/stv0297.ko
+  INSTALL drivers/media/dvb-frontends/stv0299.ko
+  INSTALL drivers/media/dvb-frontends/stv0367.ko
+  INSTALL drivers/media/dvb-frontends/stv0900.ko
+  INSTALL drivers/media/dvb-frontends/stv090x.ko
+  INSTALL drivers/media/dvb-frontends/stv0910.ko
+  INSTALL drivers/media/dvb-frontends/stv6110.ko
+  INSTALL drivers/media/dvb-frontends/stv6110x.ko
+  INSTALL drivers/media/dvb-frontends/stv6111.ko
+  INSTALL drivers/media/dvb-frontends/tc90522.ko
+  INSTALL drivers/media/dvb-frontends/tda10021.ko
+  INSTALL drivers/media/dvb-frontends/tda10023.ko
+  INSTALL drivers/media/dvb-frontends/tda10048.ko
+  INSTALL drivers/media/dvb-frontends/tda1004x.ko
+  INSTALL drivers/media/dvb-frontends/tda10071.ko
+  INSTALL drivers/media/dvb-frontends/tda10086.ko
+  INSTALL drivers/media/dvb-frontends/tda18271c2dd.ko
+  INSTALL drivers/media/dvb-frontends/tda665x.ko
+  INSTALL drivers/media/dvb-frontends/tda8083.ko
+  INSTALL drivers/media/dvb-frontends/tda8261.ko
+  INSTALL drivers/media/dvb-frontends/tda826x.ko
+  INSTALL drivers/media/dvb-frontends/ts2020.ko
+  INSTALL drivers/media/dvb-frontends/tua6100.ko
+  INSTALL drivers/media/dvb-frontends/ves1820.ko
+  INSTALL drivers/media/dvb-frontends/ves1x93.ko
+  INSTALL drivers/media/dvb-frontends/zd1301_demod.ko
+  INSTALL drivers/media/dvb-frontends/zl10036.ko
+  INSTALL drivers/media/dvb-frontends/zl10039.ko
+  INSTALL drivers/media/dvb-frontends/zl10353.ko
+  INSTALL drivers/media/platform/exynos/mfc/exynos_mfc.ko
+  INSTALL drivers/media/platform/exynos/smfc/smfc.ko
+  INSTALL drivers/media/spi/cxd2880-spi.ko
+  INSTALL drivers/media/tuners/e4000.ko
+  INSTALL drivers/media/tuners/fc0011.ko
+  INSTALL drivers/media/tuners/fc0012.ko
+  INSTALL drivers/media/tuners/fc0013.ko
+  INSTALL drivers/media/tuners/fc2580.ko
+  INSTALL drivers/media/tuners/it913x.ko
+  INSTALL drivers/media/tuners/m88rs6000t.ko
+  INSTALL drivers/media/tuners/max2165.ko
+  INSTALL drivers/media/tuners/mc44s803.ko
+  INSTALL drivers/media/tuners/mt2060.ko
+  INSTALL drivers/media/tuners/mt2063.ko
+  INSTALL drivers/media/tuners/mt20xx.ko
+  INSTALL drivers/media/tuners/mt2131.ko
+  INSTALL drivers/media/tuners/mt2266.ko
+  INSTALL drivers/media/tuners/mxl301rf.ko
+  INSTALL drivers/media/tuners/mxl5005s.ko
+  INSTALL drivers/media/tuners/mxl5007t.ko
+  INSTALL drivers/media/tuners/qm1d1b0004.ko
+  INSTALL drivers/media/tuners/qm1d1c0042.ko
+  INSTALL drivers/media/tuners/qt1010.ko
+  INSTALL drivers/media/tuners/r820t.ko
+  INSTALL drivers/media/tuners/si2157.ko
+  INSTALL drivers/media/tuners/tda18212.ko
+  INSTALL drivers/media/tuners/tda18218.ko
+  INSTALL drivers/media/tuners/tda18250.ko
+  INSTALL drivers/media/tuners/tda18271.ko
+  INSTALL drivers/media/tuners/tda827x.ko
+  INSTALL drivers/media/tuners/tda8290.ko
+  INSTALL drivers/media/tuners/tda9887.ko
+  INSTALL drivers/media/tuners/tea5761.ko
+  INSTALL drivers/media/tuners/tea5767.ko
+  INSTALL drivers/media/tuners/tua9001.ko
+  INSTALL drivers/media/tuners/tuner-simple.ko
+  INSTALL drivers/media/tuners/tuner-types.ko
+  INSTALL drivers/media/tuners/tuner-xc2028.ko
+  INSTALL drivers/media/tuners/xc4000.ko
+  INSTALL drivers/media/tuners/xc5000.ko
+  INSTALL drivers/mfd/s2mpg10-mfd.ko
+  INSTALL drivers/mfd/s2mpg11-mfd.ko
+  INSTALL drivers/mfd/s2mpg1x-gpio-gs101.ko
+  INSTALL drivers/mfd/slg51000-core.ko
+  INSTALL drivers/misc/bbdpl/bcm47765.ko
+  INSTALL drivers/misc/eeprom/at24.ko
+  INSTALL drivers/misc/gsc-spi.ko
+  INSTALL drivers/misc/gvotable.ko
+  INSTALL drivers/misc/logbuffer.ko
+  INSTALL drivers/misc/sbb-mux/sbb-mux.ko
+  INSTALL drivers/misc/sscoredump/sscoredump.ko
+  INSTALL drivers/net/wireless/ath/ath.ko
+  INSTALL drivers/net/wireless/ath/ath9k/ath9k_common.ko
+  INSTALL drivers/net/wireless/ath/ath9k/ath9k_htc.ko
+  INSTALL drivers/net/wireless/ath/ath9k/ath9k_hw.ko
+  INSTALL drivers/pci/controller/dwc/pcie-exynos-core.ko
+  INSTALL drivers/pci/controller/dwc/pcie-exynos-gs101-rc-cal.ko
+  INSTALL drivers/phy/samsung/phy-exynos-mipi-dsim.ko
+  INSTALL drivers/perf/arm_dsu_pmu.ko
+  INSTALL drivers/phy/samsung/phy-exynos-mipi.ko
+  INSTALL drivers/phy/samsung/phy-exynos-usbdrd-super.ko
+  INSTALL drivers/pinctrl/pinctrl-slg51000.ko
+  INSTALL drivers/pinctrl/samsung/pinctrl-samsung-core.ko
+  INSTALL drivers/power/reset/debug-reboot.ko
+  INSTALL drivers/pps/clients/pps-gpio.ko
+  INSTALL drivers/pps/pps_core.ko
+  INSTALL drivers/regulator/max77826-gs-regulator.ko
+  INSTALL drivers/regulator/pmic_class.ko
+  INSTALL drivers/regulator/s2mpg10-powermeter.ko
+  INSTALL drivers/regulator/s2mpg10-regulator.ko
+  INSTALL drivers/regulator/s2mpg11-powermeter.ko
+  INSTALL drivers/regulator/s2mpg11-regulator.ko
+  INSTALL drivers/regulator/slg51000-regulator.ko
+  INSTALL drivers/rtc/rtc-s2mpg10.ko
+  INSTALL drivers/scsi/sg.ko
+  INSTALL drivers/scsi/ufs/ufs-exynos-core.ko
+  INSTALL drivers/scsi/ufs/ufs-pixel-fips140.ko
+  INSTALL drivers/soc/google/acpm/acpm_flexpmu_dbg.ko
+  INSTALL drivers/soc/google/acpm/acpm_mbox_test.ko
+  INSTALL drivers/soc/google/acpm/gs_acpm.ko
+  INSTALL drivers/soc/google/acpm/power_stats.ko
+  INSTALL drivers/soc/google/bcm_dbg.ko
+  INSTALL drivers/soc/google/boot_control/boot_control_sysfs.ko
+  INSTALL drivers/soc/google/cal-if/cmupmucal.ko
+  INSTALL drivers/soc/google/cpif/boot_device_spi.ko
+  INSTALL drivers/soc/google/cpif/cp_thermal_zone.ko
+  INSTALL drivers/soc/google/cpif/cpif.ko
+  INSTALL drivers/soc/google/cpif/cpif_page.ko
+  INSTALL drivers/soc/google/cpif/dit/exynos_dit.ko
+  INSTALL drivers/soc/google/cpif/shm_ipc.ko
+  INSTALL drivers/soc/google/dbgcore-dump.ko
+  INSTALL drivers/soc/google/debug/debug-snapshot-debug-kinfo.ko
+  INSTALL drivers/soc/google/debug/debug-snapshot-qd.ko
+  INSTALL drivers/soc/google/debug/debug-snapshot-sfrdump.ko
+  INSTALL drivers/soc/google/debug/dss.ko
+  INSTALL drivers/soc/google/debug/ehld.ko
+  INSTALL drivers/soc/google/debug/exynos-adv-tracer-s2d.ko
+  INSTALL drivers/soc/google/debug/exynos-adv-tracer.ko
+  INSTALL drivers/soc/google/debug/exynos-coresight-etm.ko
+  INSTALL drivers/soc/google/debug/exynos-coresight.ko
+  INSTALL drivers/soc/google/debug/exynos-debug-test.ko
+  INSTALL drivers/soc/google/debug/exynos-ecc-handler.ko
+  INSTALL drivers/soc/google/debug/itmon.ko
+  INSTALL drivers/soc/google/debug/pixel-boot-metrics.ko
+  INSTALL drivers/soc/google/debug/pixel-debug-test.ko
+  INSTALL drivers/soc/google/debug/sjtag-driver.ko
+  INSTALL drivers/soc/google/ect_parser.ko
+  INSTALL drivers/soc/google/eh/eh.ko
+  INSTALL drivers/soc/google/exynos-bcm_dbg-dump.ko
+  INSTALL drivers/soc/google/exynos-cpuhp.ko
+  INSTALL drivers/soc/google/exynos-cpupm.ko
+  INSTALL drivers/soc/google/exynos-pd-dbg.ko
+  INSTALL drivers/soc/google/exynos-dm.ko
+  INSTALL drivers/soc/google/exynos-pd.ko
+  INSTALL drivers/soc/google/exynos-pd_el3.ko
+  INSTALL drivers/soc/google/exynos-pm.ko
+  INSTALL drivers/soc/google/exynos-pmu-if.ko
+  INSTALL drivers/soc/google/exynos-seclog.ko
+  INSTALL drivers/soc/google/exynos_pm_qos.ko
+  INSTALL drivers/soc/google/gs-chipid.ko
+  INSTALL drivers/soc/google/gsa/gsa.ko
+  INSTALL drivers/soc/google/gsa/gsa_gsc.ko
+  INSTALL drivers/soc/google/hardlockup-debug.ko
+  INSTALL drivers/soc/google/hardlockup-watchdog.ko
+  INSTALL drivers/soc/google/kernel-top.ko
+  INSTALL drivers/soc/google/pixel_stat/mm/pixel_stat_mm.ko
+  INSTALL drivers/soc/google/pixel_stat/pixel_stat_sysfs.ko
+  INSTALL drivers/soc/google/pt/slc_acpm.ko
+  INSTALL drivers/soc/google/pt/slc_dummy.ko
+  INSTALL drivers/soc/google/pt/slc_pmon.ko
+  INSTALL drivers/soc/google/pt/slc_pt.ko
+  INSTALL drivers/soc/google/s2mpu/s2mpu.ko
+  INSTALL drivers/soc/google/sysrq-hook.ko
+  INSTALL drivers/soc/google/vh/kernel/cgroup/vh_cgroup.ko
+  INSTALL drivers/soc/google/vh/kernel/fs/vh_fs.ko
+  INSTALL drivers/soc/google/vh/kernel/i2c/vh_i2c.ko
+  INSTALL drivers/soc/google/vh/kernel/metrics/pixel_metrics.ko
+  INSTALL drivers/soc/google/vh/kernel/mm/vh_mm.ko
+  INSTALL drivers/soc/google/vh/kernel/pixel_em/pixel_em.ko
+  INSTALL drivers/soc/google/vh/kernel/sched/sched_tp.ko
+  INSTALL drivers/soc/google/vh/kernel/sched/vh_preemptirq_long.ko
+  INSTALL drivers/soc/google/vh/kernel/sched/vh_sched.ko
+  INSTALL drivers/soc/google/vh/kernel/systrace.ko
+  INSTALL drivers/soc/google/vh/kernel/thermal/vh_thermal.ko
+  INSTALL drivers/spi/spi-s3c64xx.ko
+  INSTALL drivers/spi/spidev.ko
+  INSTALL drivers/thermal/google/google_bcl.ko
+  INSTALL drivers/thermal/google/gs101_spmic_thermal.ko
+  INSTALL drivers/thermal/samsung/gpu_cooling.ko
+  INSTALL drivers/thermal/samsung/gs_thermal.ko
+  INSTALL drivers/trusty/trusty-ipc.ko
+  INSTALL drivers/trusty/trusty-core.ko
+  INSTALL drivers/trusty/trusty-irq.ko
+  INSTALL drivers/trusty/trusty-log.ko
+  INSTALL drivers/trusty/trusty-test.ko
+  INSTALL drivers/trusty/trusty-virtio.ko
+  INSTALL drivers/tty/serial/exynos_tty.ko
+  INSTALL drivers/usb/dwc3/dwc3-exynos-usb.ko
+  INSTALL drivers/usb/gadget/function/usb_f_dm.ko
+  INSTALL drivers/usb/gadget/function/usb_f_dm1.ko
+  INSTALL drivers/usb/gadget/function/usb_f_etr_miu.ko
+  INSTALL drivers/usb/gadget/function/usb_f_rndis.ko
+  INSTALL drivers/usb/host/xhci-exynos.ko
+  INSTALL drivers/usb/typec/tcpm/google/bc_max77759.ko
+  INSTALL drivers/usb/typec/tcpm/google/max77759_contaminant.ko
+  INSTALL drivers/usb/typec/tcpm/google/max77759_helper.ko
+  INSTALL drivers/usb/typec/tcpm/google/slg46826.ko
+  INSTALL drivers/usb/typec/tcpm/google/tcpci_fusb307.ko
+  INSTALL drivers/usb/typec/tcpm/google/tcpci_max77759.ko
+  INSTALL drivers/usb/typec/tcpm/google/usb_psy.ko
+  INSTALL drivers/usb/typec/tcpm/google/usbc_cooling_dev.ko
+  INSTALL drivers/watchdog/s3c2410_wdt.ko
+  INSTALL drivers/watchdog/softdog.ko
+  INSTALL mm/zsmalloc.ko
+  INSTALL net/core/pktgen.ko
+  INSTALL sound/soc/codecs/snd-soc-max98357a.ko
+  INSTALL sound/soc/codecs/snd-soc-rl6231.ko
+  INSTALL sound/soc/codecs/snd-soc-rt5682-i2c.ko
+  INSTALL sound/soc/codecs/snd-soc-rt5682.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[1]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+Building and Installing External Kernel Modules
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/audiometrics'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/audiometrics CONFIG_AUDIOMETRICS=m W=1 modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/amplifiers/audiometrics/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/audiometrics'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/audiometrics'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/audiometrics CONFIG_AUDIOMETRICS=m W=1 modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/amplifiers/audiometrics/audiometrics.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/audiometrics'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs35l41'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/cs35l41 CONFIG_SND_SOC_CS35L41=m CONFIG_SND_SOC_CS35L41_SPI=m CONFIG_SND_SOC_CS35L41_I2C=m CONFIG_SND_SOC_WM_ADSP=m ccflags-y='-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs35l41/include/' W=1 modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/amplifiers/cs35l41/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs35l41'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs35l41'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/cs35l41 CONFIG_SND_SOC_CS35L41=m CONFIG_SND_SOC_CS35L41_SPI=m CONFIG_SND_SOC_CS35L41_I2C=m CONFIG_SND_SOC_WM_ADSP=m ccflags-y='-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs35l41/include/' W=1 modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/amplifiers/cs35l41/snd-soc-cs35l41-i2c.ko
+  INSTALL ../google-modules/amplifiers/cs35l41/snd-soc-cs35l41-spi.ko
+  INSTALL ../google-modules/amplifiers/cs35l41/snd-soc-cs35l41.ko
+  INSTALL ../google-modules/amplifiers/cs35l41/snd-soc-wm-adsp.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs35l41'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs40l25'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/cs40l25 CONFIG_HAPTICS_CS40L2X=m CONFIG_SND_SOC_CS40L2X=m ccflags-y='-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs40l25/include/' W=1 modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/amplifiers/cs40l25/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs40l25'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs40l25'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/cs40l25 CONFIG_HAPTICS_CS40L2X=m CONFIG_SND_SOC_CS40L2X=m ccflags-y='-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs40l25/include/' W=1 modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/amplifiers/cs40l25/haptics-cs40l2x.ko
+  INSTALL ../google-modules/amplifiers/cs40l25/snd_soc_cs40l2x.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/cs40l25'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/drv2624'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/drv2624 CONFIG_INPUT_DRV2624_HAPTICS=m W=1 modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/amplifiers/drv2624/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/drv2624'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/drv2624'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/amplifiers/drv2624 CONFIG_INPUT_DRV2624_HAPTICS=m W=1 modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/amplifiers/drv2624/drv2624.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/amplifiers/drv2624'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/aoc CONFIG_AOC_DRIVER=m CONFIG_WC_MBOX=m CONFIG_AOC_CHAR_DRIVER=m CONFIG_AOC_CHAN_DRIVER=m CONFIG_AOC_CONTROL_DRIVER=m CONFIG_AOC_UWB_DRIVER=m  W=1 modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/aoc/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/aoc CONFIG_AOC_DRIVER=m CONFIG_WC_MBOX=m CONFIG_AOC_CHAR_DRIVER=m CONFIG_AOC_CHAN_DRIVER=m CONFIG_AOC_CONTROL_DRIVER=m CONFIG_AOC_UWB_DRIVER=m  W=1 modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/aoc/aoc_channel_dev.ko
+  INSTALL ../google-modules/aoc/aoc_char_dev.ko
+  INSTALL ../google-modules/aoc/aoc_core.ko
+  INSTALL ../google-modules/aoc/aoc_control_dev.ko
+  INSTALL ../google-modules/aoc/aoc_uwb_platform_drv.ko
+  INSTALL ../google-modules/aoc/aoc_uwb_service_dev.ko
+  INSTALL ../google-modules/aoc/mailbox-wc.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/alsa'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/aoc/alsa W=1 CONFIG_AOC_DRIVER=m -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc_ipc -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc KBUILD_EXTRA_SYMBOLS=/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/aoc/Module.symvers modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/aoc/alsa/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/alsa'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/alsa'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/aoc/alsa W=1 CONFIG_AOC_DRIVER=m -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc_ipc -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc KBUILD_EXTRA_SYMBOLS=/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/aoc/Module.symvers modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/aoc/alsa/aoc_alsa_dev.ko
+  INSTALL ../google-modules/aoc/alsa/aoc_alsa_dev_util.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/alsa'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/usb'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/aoc/usb W=1 CONFIG_AOC_DRIVER=m EXTRA_CFLAGS="-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc_ipc -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/usb/host -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/sound/usb" KBUILD_EXTRA_SYMBOLS="/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/aoc/Module.symvers /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/aoc/alsa/Module.symvers" modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/aoc/usb/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/usb'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/usb'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/aoc/usb W=1 CONFIG_AOC_DRIVER=m EXTRA_CFLAGS="-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc_ipc -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/aoc -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/drivers/usb/host -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/sound/usb" KBUILD_EXTRA_SYMBOLS="/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/aoc/Module.symvers /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/aoc/alsa/Module.symvers" modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/aoc/usb/aoc_usb_driver.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/aoc/usb'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bluetooth/broadcom'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/bluetooth/broadcom W=1 CONFIG_NITROUS=m modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/bluetooth/broadcom/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bluetooth/broadcom'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bluetooth/broadcom'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/bluetooth/broadcom W=1 CONFIG_NITROUS=m modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/bluetooth/broadcom/nitrous.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bluetooth/broadcom'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bms'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/bms W=1 CONFIG_GOOGLE_BMS=m  CONFIG_GOOGLE_BATTERY=m  CONFIG_GOOGLE_CHARGER=m  CONFIG_GOOGLE_CPM=m  CONFIG_GOOGLE_BEE=m  CONFIG_GOOGLE_DUAL_BATT_GAUGE=m  CONFIG_GOOGLE_DOCK=m  CONFIG_USB_OVERHEAT_MITIGATION=m  CONFIG_PMIC_MAX77729=m  CONFIG_UIC_MAX77729=m  CONFIG_CHARGER_MAX77729=m  CONFIG_CHARGER_MAX77759=m  CONFIG_MAXQ_MAX77759=m  CONFIG_CHARGER_P9221=m  CONFIG_MAX1720X_BATTERY=m  CONFIG_MAX_M5=m  CONFIG_PCA9468=m  CONFIG_MAX20339=m  \
+	EXTRA_CFLAGS="-DDYNAMIC_DEBUG_MODULE -DCONFIG_GOOGLE_BMS_MODULE -DCONFIG_GOOGLE_BATTERY_MODULE -DCONFIG_GOOGLE_CHARGER_MODULE -DCONFIG_GOOGLE_CPM_MODULE -DCONFIG_GOOGLE_BEE_MODULE -DCONFIG_GOOGLE_DUAL_BATT_GAUGE_MODULE -DCONFIG_GOOGLE_DOCK_MODULE -DCONFIG_USB_OVERHEAT_MITIGATION_MODULE -DCONFIG_PMIC_MAX77729_MODULE -DCONFIG_UIC_MAX77729_MODULE -DCONFIG_CHARGER_MAX77729_MODULE -DCONFIG_CHARGER_MAX77759_MODULE -DCONFIG_MAXQ_MAX77759_MODULE -DCONFIG_CHARGER_P9221_MODULE -DCONFIG_MAX1720X_BATTERY_MODULE -DCONFIG_MAX_M5_MODULE -DCONFIG_PCA9468_MODULE -DCONFIG_MAX20339_MODULE" \
+	modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/bms/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bms'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bms'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/bms W=1 CONFIG_GOOGLE_BMS=m  CONFIG_GOOGLE_BATTERY=m  CONFIG_GOOGLE_CHARGER=m  CONFIG_GOOGLE_CPM=m  CONFIG_GOOGLE_BEE=m  CONFIG_GOOGLE_DUAL_BATT_GAUGE=m  CONFIG_GOOGLE_DOCK=m  CONFIG_USB_OVERHEAT_MITIGATION=m  CONFIG_PMIC_MAX77729=m  CONFIG_UIC_MAX77729=m  CONFIG_CHARGER_MAX77729=m  CONFIG_CHARGER_MAX77759=m  CONFIG_MAXQ_MAX77759=m  CONFIG_CHARGER_P9221=m  CONFIG_MAX1720X_BATTERY=m  CONFIG_MAX_M5=m  CONFIG_PCA9468=m  CONFIG_MAX20339=m  modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/bms/google-battery.ko
+  INSTALL ../google-modules/bms/google-bms.ko
+  INSTALL ../google-modules/bms/google-charger.ko
+  INSTALL ../google-modules/bms/google-cpm.ko
+  INSTALL ../google-modules/bms/google_dock.ko
+  INSTALL ../google-modules/bms/google_dual_batt_gauge.ko
+  INSTALL ../google-modules/bms/max1720x-battery.ko
+  INSTALL ../google-modules/bms/max20339.ko
+  INSTALL ../google-modules/bms/max77729-pmic.ko
+  INSTALL ../google-modules/bms/max77729_charger.ko
+  INSTALL ../google-modules/bms/max77729_uic.ko
+  INSTALL ../google-modules/bms/max77759_charger.ko
+  INSTALL ../google-modules/bms/overheat_mitigation.ko
+  INSTALL ../google-modules/bms/p9221.ko
+  INSTALL ../google-modules/bms/pca9468.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/bms'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/display/samsung'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/display/samsung W=1 CONFIG_DRM_SAMSUNG=m CONFIG_DRM_SAMSUNG_DECON=y CONFIG_DRM_SAMSUNG_DPP=y CONFIG_DRM_SAMSUNG_DSI=y CONFIG_DRM_SAMSUNG_WB=y CONFIG_DRM_SAMSUNG_TUI=y CONFIG_DRM_PANEL_SAMSUNG_COMMON=m CONFIG_DRM_PANEL_SAMSUNG_EMUL=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC2=m CONFIG_DRM_PANEL_SAMSUNG_S6E3FC3=m CONFIG_DRM_PANEL_SAMSUNG_S6E3FC3_P10=m CONFIG_DRM_PANEL_SAMSUNG_SOFEF01=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC3=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC3_C10=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC4=m CONFIG_DRM_PANEL_BOE_NT37290=m EXTRA_CFLAGS="-DCONFIG_DRM_SAMSUNG_DECON=1 -DCONFIG_DRM_SAMSUNG_DPP=1 -DCONFIG_DRM_SAMSUNG_DSI=1 -DCONFIG_DRM_SAMSUNG_WB=1 -DCONFIG_DRM_SAMSUNG_TUI=1 -DDYNAMIC_DEBUG_MODULE=1 -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/display/include -Werror" modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/display/samsung/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/display/samsung'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/display/samsung'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/display/samsung W=1 CONFIG_DRM_SAMSUNG=m CONFIG_DRM_SAMSUNG_DECON=y CONFIG_DRM_SAMSUNG_DPP=y CONFIG_DRM_SAMSUNG_DSI=y CONFIG_DRM_SAMSUNG_WB=y CONFIG_DRM_SAMSUNG_TUI=y CONFIG_DRM_PANEL_SAMSUNG_COMMON=m CONFIG_DRM_PANEL_SAMSUNG_EMUL=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC2=m CONFIG_DRM_PANEL_SAMSUNG_S6E3FC3=m CONFIG_DRM_PANEL_SAMSUNG_S6E3FC3_P10=m CONFIG_DRM_PANEL_SAMSUNG_SOFEF01=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC3=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC3_C10=m CONFIG_DRM_PANEL_SAMSUNG_S6E3HC4=m CONFIG_DRM_PANEL_BOE_NT37290=m EXTRA_CFLAGS="-DCONFIG_DRM_SAMSUNG_DECON=1 -DCONFIG_DRM_SAMSUNG_DPP=1 -DCONFIG_DRM_SAMSUNG_DSI=1 -DCONFIG_DRM_SAMSUNG_WB=1 -DCONFIG_DRM_SAMSUNG_TUI=1 -DDYNAMIC_DEBUG_MODULE=1 -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/display/include -Werror" modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/display/samsung/exynos-drm.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-boe-nt37290.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-drv.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-emul.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-s6e3fc3-p10.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-s6e3fc3.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-s6e3hc2.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-s6e3hc3-c10.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-s6e3hc3.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-s6e3hc4.ko
+  INSTALL ../google-modules/display/samsung/panel/panel-samsung-sofef01.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/display/samsung'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/edgetpu/abrolhos/drivers/edgetpu'
+fatal: not a git repository: '/.git'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/edgetpu/abrolhos/drivers/edgetpu W=1 CONFIG_ABROLHOS=m modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/edgetpu/abrolhos/drivers/edgetpu/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/edgetpu/abrolhos/drivers/edgetpu'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/edgetpu/abrolhos/drivers/edgetpu'
+fatal: not a git repository: '/.git'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/edgetpu/abrolhos/drivers/edgetpu W=1 CONFIG_ABROLHOS=m modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/edgetpu/abrolhos/drivers/edgetpu/abrolhos.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/edgetpu/abrolhos/drivers/edgetpu'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_kbase'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/gpu/mali_kbase W=1   CONFIG_MALI_MIDGARD=m   CONFIG_MALI_GATOR_SUPPORT=y   CONFIG_MALI_DMA_FENCE=n   CONFIG_MALI_ARBITER_SUPPORT=n   CONFIG_MALI_ARBITRATION=n   CONFIG_MALI_ARBITER_MODULES=n   CONFIG_MALI_GPU_POWER_MODULES=n   CONFIG_MALI_PARTITION_MANAGER=n   CONFIG_MALI_REAL_HW=y   CONFIG_MALI_GEM5_BUILD=n   CONFIG_MALI_DEVFREQ=n   CONFIG_MALI_MIDGARD_DVFS=y   CONFIG_MALI_DMA_BUF_MAP_ON_DEMAND=n   CONFIG_MALI_DMA_BUF_LEGACY_COMPAT=n   CONFIG_MALI_EXPERT=y   CONFIG_MALI_CORESTACK=n   CONFIG_MALI_2MB_ALLOC=n   CONFIG_MALI_PWRSOFT_765=n   CONFIG_MALI_MEMORY_FULLY_BACKED=n   CONFIG_MALI_JOB_DUMP=n   CONFIG_MALI_NO_MALI=n   CONFIG_MALI_ERROR_INJECT=n   CONFIG_MALI_HW_ERRATA_1485982_NOT_AFFECTED=n   CONFIG_MALI_HW_ERRATA_1485982_USE_CLOCK_ALTERNATIVE=n   CONFIG_MALI_PRFCNT_SET_PRIMARY=n   CONFIG_MALI_PRFCNT_SET_SECONDARY=n   CONFIG_MALI_PRFCNT_SET_TERTIARY=n   CONFIG_MALI_PRFCNT_SET_SELECT_VIA_DEBUG_FS=n   CONFIG_MALI_DEBUG=n   CONFIG_MALI_MIDGARD_ENABLE_TRACE=n   CONFIG_MALI_SYSTEM_TRACE=n   CONFIG_MALI_FENCE_DEBUG=n   CONFIG_MALI_KUTF=n   CONFIG_MALI_KUTF_IRQ_TEST=n   CONFIG_MALI_KUTF_CLK_RATE_TRACE=n   CONFIG_MALI_KUTF_MGM_INTEGRATION_TEST=n   CONFIG_MALI_XEN=n   CONFIG_MALI_PIXEL_GPU_QOS=y   CONFIG_MALI_PIXEL_GPU_BTS=y   CONFIG_MALI_PIXEL_GPU_THERMAL=y   CONFIG_MALI_PIXEL_GPU_SECURE_RENDERING=y CONFIG_MALI_PLATFORM_NAME="pixel" EXTRA_CFLAGS="  -DCONFIG_MALI_MIDGARD=1   -DCONFIG_MALI_GATOR_SUPPORT=1               -DCONFIG_MALI_REAL_HW=1       -DCONFIG_MALI_MIDGARD_DVFS=1       -DCONFIG_MALI_EXPERT=1                                               -DCONFIG_MALI_PIXEL_GPU_QOS=1   -DCONFIG_MALI_PIXEL_GPU_BTS=1   -DCONFIG_MALI_PIXEL_GPU_THERMAL=1   -DCONFIG_MALI_PIXEL_GPU_SECURE_RENDERING=1 -DCONFIG_MALI_PLATFORM_NAME="pixel"" KBUILD_EXTRA_SYMBOLS="" modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/gpu/mali_kbase/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_kbase'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_kbase'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/gpu/mali_kbase W=1   CONFIG_MALI_MIDGARD=m   CONFIG_MALI_GATOR_SUPPORT=y   CONFIG_MALI_DMA_FENCE=n   CONFIG_MALI_ARBITER_SUPPORT=n   CONFIG_MALI_ARBITRATION=n   CONFIG_MALI_ARBITER_MODULES=n   CONFIG_MALI_GPU_POWER_MODULES=n   CONFIG_MALI_PARTITION_MANAGER=n   CONFIG_MALI_REAL_HW=y   CONFIG_MALI_GEM5_BUILD=n   CONFIG_MALI_DEVFREQ=n   CONFIG_MALI_MIDGARD_DVFS=y   CONFIG_MALI_DMA_BUF_MAP_ON_DEMAND=n   CONFIG_MALI_DMA_BUF_LEGACY_COMPAT=n   CONFIG_MALI_EXPERT=y   CONFIG_MALI_CORESTACK=n   CONFIG_MALI_2MB_ALLOC=n   CONFIG_MALI_PWRSOFT_765=n   CONFIG_MALI_MEMORY_FULLY_BACKED=n   CONFIG_MALI_JOB_DUMP=n   CONFIG_MALI_NO_MALI=n   CONFIG_MALI_ERROR_INJECT=n   CONFIG_MALI_HW_ERRATA_1485982_NOT_AFFECTED=n   CONFIG_MALI_HW_ERRATA_1485982_USE_CLOCK_ALTERNATIVE=n   CONFIG_MALI_PRFCNT_SET_PRIMARY=n   CONFIG_MALI_PRFCNT_SET_SECONDARY=n   CONFIG_MALI_PRFCNT_SET_TERTIARY=n   CONFIG_MALI_PRFCNT_SET_SELECT_VIA_DEBUG_FS=n   CONFIG_MALI_DEBUG=n   CONFIG_MALI_MIDGARD_ENABLE_TRACE=n   CONFIG_MALI_SYSTEM_TRACE=n   CONFIG_MALI_FENCE_DEBUG=n   CONFIG_MALI_KUTF=n   CONFIG_MALI_KUTF_IRQ_TEST=n   CONFIG_MALI_KUTF_CLK_RATE_TRACE=n   CONFIG_MALI_KUTF_MGM_INTEGRATION_TEST=n   CONFIG_MALI_XEN=n   CONFIG_MALI_PIXEL_GPU_QOS=y   CONFIG_MALI_PIXEL_GPU_BTS=y   CONFIG_MALI_PIXEL_GPU_THERMAL=y   CONFIG_MALI_PIXEL_GPU_SECURE_RENDERING=y CONFIG_MALI_PLATFORM_NAME="pixel" modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/gpu/mali_kbase/mali_kbase.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_kbase'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_pixel'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/gpu/mali_pixel W=1 EXTRA_CFLAGS="-I../google-modules/gpu/mali_pixel -I../google-modules/gpu/mali_pixel/../common/include" CONFIG_MALI_MEMORY_GROUP_MANAGER=m CONFIG_MALI_PRIORITY_CONTROL_MANAGER=m CONFIG_MALI_PROTECTED_MEMORY_ALLOCATOR=m CONFIG_MALI_PIXEL_STATS=m   modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/gpu/mali_pixel/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_pixel'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_pixel'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/gpu/mali_pixel modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/gpu/mali_pixel/mali_pixel.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/gpu/mali_pixel'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/lwis'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/lwis W=1 CONFIG_LWIS=m modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/lwis/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/lwis'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/lwis'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/lwis W=1 CONFIG_LWIS=m modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/lwis/lwis.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/lwis'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/nfc'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/nfc CONFIG_NFC_ST21NFC=m CONFIG_NFC_ST21NFC_NO_CRYSTAL=y CONFIG_ESE_ST54=m CONFIG_ESE_ST33=m W=1 modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/nfc/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/nfc'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/nfc'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/nfc CONFIG_NFC_ST21NFC=m CONFIG_NFC_ST21NFC_NO_CRYSTAL=y CONFIG_ESE_ST54=m CONFIG_ESE_ST33=m W=1 modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/nfc/ese/st33spi.ko
+  INSTALL ../google-modules/nfc/ese/st54spi.ko
+  INSTALL ../google-modules/nfc/st21nfc.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/nfc'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/power/reset'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/power/reset CONFIG_POWER_RESET_EXYNOS=m KBUILD_EXTRA_SYMBOLS=/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/bms/Module.symvers modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/power/reset/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/power/reset'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/power/reset'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/power/reset CONFIG_POWER_RESET_EXYNOS=m KBUILD_EXTRA_SYMBOLS=/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/bms/Module.symvers modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/power/reset/exynos-reboot.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/power/reset'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/common'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/touch/common \
+CONFIG_TOUCHSCREEN_TBN=m CONFIG_TOUCHSCREEN_HEATMAP=m CONFIG_TOUCHSCREEN_OFFLOAD=m CONFIG_GOOG_TOUCH_INTERFACE=m \
+EXTRA_CFLAGS="-DDYNAMIC_DEBUG_MODULE -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common/include -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/display" \
+modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/touch/common/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/common'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/common'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/touch/common \
+CONFIG_TOUCHSCREEN_TBN=m CONFIG_TOUCHSCREEN_HEATMAP=m CONFIG_TOUCHSCREEN_OFFLOAD=m CONFIG_GOOG_TOUCH_INTERFACE=m \
+EXTRA_CFLAGS="-DDYNAMIC_DEBUG_MODULE -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common/include -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/display" \
+modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/touch/common/goog_touch_interface.ko
+  INSTALL ../google-modules/touch/common/heatmap.ko
+  INSTALL ../google-modules/touch/common/touch_bus_negotiator.ko
+  INSTALL ../google-modules/touch/common/touch_offload.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/common'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/fts/ftm5'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/touch/fts/ftm5 \
+CONFIG_TOUCHSCREEN_FTS=m \
+EXTRA_CFLAGS="-DDYNAMIC_DEBUG_MODULE -DCONFIG_TOUCHSCREEN_TBN -DCONFIG_TOUCHSCREEN_HEATMAP -DCONFIG_TOUCHSCREEN_OFFLOAD -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/display -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common/include" \
+KBUILD_EXTRA_SYMBOLS="/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/touch/common/Module.symvers" \
+modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/touch/fts/ftm5/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/fts/ftm5'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/fts/ftm5'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/touch/fts/ftm5 \
+CONFIG_TOUCHSCREEN_FTS=m \
+EXTRA_CFLAGS="-DDYNAMIC_DEBUG_MODULE -DCONFIG_TOUCHSCREEN_TBN -DCONFIG_TOUCHSCREEN_HEATMAP -DCONFIG_TOUCHSCREEN_OFFLOAD -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/display -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common/include" \
+KBUILD_EXTRA_SYMBOLS="/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/touch/common/Module.symvers" \
+modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/touch/fts/ftm5/ftm5.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/fts/ftm5'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/sec'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/touch/sec \
+CONFIG_TOUCHSCREEN_SEC_TS=m \
+EXTRA_CFLAGS="-DDYNAMIC_DEBUG_MODULE -DCONFIG_TOUCHSCREEN_TBN -DCONFIG_TOUCHSCREEN_HEATMAP -DCONFIG_TOUCHSCREEN_OFFLOAD -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/display -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common/include" \
+KBUILD_EXTRA_SYMBOLS="/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/touch/common/Module.symvers" \
+modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/touch/sec/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/sec'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/sec'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/touch/sec \
+CONFIG_TOUCHSCREEN_SEC_TS=m \
+EXTRA_CFLAGS="-DDYNAMIC_DEBUG_MODULE -DCONFIG_TOUCHSCREEN_TBN -DCONFIG_TOUCHSCREEN_HEATMAP -DCONFIG_TOUCHSCREEN_OFFLOAD -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/display -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common -I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/touch/common/include" \
+KBUILD_EXTRA_SYMBOLS="/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/touch/common/Module.symvers" \
+modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/touch/sec/sec_touch.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/touch/sec'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/uwb/kernel'
+*** Building Android in /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/uwb/kernel
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/uwb/kernel modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+*** Building Android in /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/uwb/kernel
+  MODPOST ../google-modules/uwb/kernel/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/uwb/kernel'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/uwb/kernel'
+*** Building Android in /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ/../google-modules/uwb/kernel
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/uwb/kernel modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/uwb/kernel/drivers/net/ieee802154/dw3000.ko
+  INSTALL ../google-modules/uwb/kernel/net/mcps802154/mcps802154.ko
+  INSTALL ../google-modules/uwb/kernel/net/mcps802154/mcps802154_region_fira.ko
+  INSTALL ../google-modules/uwb/kernel/net/mcps802154/mcps802154_region_nfcc_coex.ko
+  INSTALL ../google-modules/uwb/kernel/net/mcps802154/mcps802154_region_pctt.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/uwb/kernel'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/video/gchips'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/video/gchips \
+CONFIG_BIGOCEAN=m CONFIG_SLC_PARTITION_MANAGER=m CONFIG_DEBUG_FS=m \
+EXTRA_CFLAGS="-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/video/gchips/include" \
+modules
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  MODPOST ../google-modules/video/gchips/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/video/gchips'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/video/gchips'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/video/gchips \
+CONFIG_BIGOCEAN=m CONFIG_SLC_PARTITION_MANAGER=m CONFIG_DEBUG_FS=m \
+EXTRA_CFLAGS="-I/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/video/gchips/include" \
+modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/video/gchips/bigocean.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/video/gchips'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/wlan/bcmdhd4389'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google M=../google-modules/wlan/bcmdhd4389 modules BCMDHD_ROOT=/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/wlan/bcmdhd4389
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google/../google-modules/wlan/bcmdhd4389/Kbuild:33: : ** out-of-tree Kbuild BCMDHD_ROOT=/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/wlan/bcmdhd4389**
+  MODPOST ../google-modules/wlan/bcmdhd4389/Module.symvers
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/wlan/bcmdhd4389'
+make: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/wlan/bcmdhd4389'
+/home/void/lineageos/pixel6_20/prebuilts/build-tools/linux-x86/bin/make INSTALL_MOD_STRIP=1 M=../google-modules/wlan/bcmdhd4389 -C /home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google modules_install
+make[1]: Entering directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make[2]: Entering directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+  INSTALL ../google-modules/wlan/bcmdhd4389/bcmdhd4389.ko
+  DEPMOD  5.10.157-android13-8-gca30f3b4bef6-abogki440974771-4k
+make[2]: Leaving directory '/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/KERNEL_OBJ'
+make[1]: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/gs-google'
+make: Leaving directory '/home/void/lineageos/pixel6_20/kernel/google/gs201/private/google-modules/wlan/bcmdhd4389'
+depmod: WARNING: could not open modules.order at /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/PACKAGING/depmod_vendor_intermediates/lib/modules/0.0: No such file or directory
+depmod: WARNING: could not open modules.builtin at /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/PACKAGING/depmod_vendor_intermediates/lib/modules/0.0: No such file or directory
+depmod: WARNING: could not open modules.order at /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/PACKAGING/depmod_vendor_ramdisk_fragment-stage-dlkm_intermediates/lib/modules/0.0: No such file or directory
+depmod: WARNING: could not open modules.builtin at /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/obj/PACKAGING/depmod_vendor_ramdisk_fragment-stage-dlkm_intermediates/lib/modules/0.0: No such file or directory
+[ 99% 189/190] Prebuilt:  (/mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/kernel)
+[100% 190/190] Target boot image: /mnt/sdwd/android_build/out/pixel6_20/target/product/oriole/boot.img
+
+[0;32m#### build completed successfully (08:20 (mm:ss)) ####[00m

@@ -1,0 +1,41 @@
+======================================================
+ wxshadow R^X shadow 补丁回归
+======================================================
+=== [0] 准备测试二进制 ===
+/tmp/wxshadow_test: 1 file pushed, 0 skipped. 363.0 MB/s (4012480 bytes in 0.011s)
+  ✅ 测试二进制就绪
+=== [1] 服务健康 ===
+  ✅ health ok
+=== [2] wxshadow.status ===
+  ✅ cap_patch=true
+  ✅ cap_read_hide=true
+=== [3] 启动测试进程 ===
+  ✅ PID=10232 CODE=0x7ec2d7f000
+=== [4] patch (NOP) ===
+  ✅ patch status=0
+=== [5] wxshadow.list + 懒安装能力 ===
+  ✅ list 1 页
+  ✅ cap_gup_hide=true (follow_page_pte 已装)
+  ✅ cap_fork_safe=true (dup_mmap 已装)
+=== [6] 读隐藏 ===
+  ✅ driver 直读看到补丁 (1f2003d5)
+  ✅ GUP 读到原文 (400580d2)
+=== [7] fork 保护 ===
+  ✅ fork+reap
+  ✅ fork 后父进程仍 1 页（PROTECTION_PAGE 已忽略）
+  ✅ fork 后直读仍补丁 (1f2003d5)
+=== [8] mprotect ===
+  ✅ mprotect 完成
+  ✅ mprotect 后 list 空（mmu_notifier 拆页）
+=== [9] dmesg 无 Bad page/rss/panic ===
+  ✅ 无 bad page/rss/panic
+=== [10] exit ===
+  ✅ 进程已退出
+=== [11] 运行时开关 enable 0/1 ===
+  ✅ enable 0
+  ✅ enable 1
+
+======================================================
+ 结果: 20 通过, 0 失败
+ 🎉 全部通过
+======================================================

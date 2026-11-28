@@ -2,6 +2,8 @@
 #ifndef INLINE_HOOK_FRAME_H
 #define INLINE_HOOK_FRAME_H
 #include <linux/kernel.h>
+#include <linux/kprobes.h>
+#include <linux/rculist.h>
 #include <linux/errno.h>
 #include <linux/string.h>
 #include <linux/types.h>
@@ -30,7 +32,7 @@ bti只限制br/blr间接跳
 paciasp指令包含bti功能
 内核函数90%以上都包含paciasp指令，部分用bti
 
-2026/08/05 OnePlus 13 比较关键死机原因：
+2026/08/05 OnePlus 13 ：
 目标函数入口已经存在其他模块安装的 kprobe。ARM64 kprobe 会把被探测指令替换为 BRK #4，
 并把被替换前的真实原指令保存在 struct kprobe::opcode 中。
 inline hook 安装时，hook_save_orig_insts() 把目标入口现场的 BRK #4 当成普通原指令保存，
@@ -43,19 +45,37 @@ kprobe 异常处理按当前跳板 PC 调用 get_kprobe() 时找不到对应 str
 查找现有 struct kprobe，从 probe->opcode 取出真实原指令，只替换 tramp_code[] 中的回放副本；
 saved_inst[] 继续保留目标入口的 BRK 现场，供卸载 inline hook 时恢复kprobe替换的brk
 
+2026/11/17 OnePlus 16：
+这里修复了我很早就想到的paciasp/pacibsp和bti安全特性问题
+秉承者运行没问题就不动的原则，一直没有管，由于新hook函数越来越多导致因这个崩溃
+我使用了一个极其精妙设计新思路!
+把hook的函数统一patch 为bti jc +长跳转解决全部
+
+原函数入口正常函数序言:
+    patch 为 bti: 在调用者br/blr进入下拥有合法落点，调用者b/bl进bti不会触发硬件同步异常Branch Target Exception
+    hook回放区: 顺序执行会回放原始函数序言，不顺序不回放直接回上层
+    所以正常序言patch bti完美运行
+原函数入口bti:
+    patch为 bti: 刚好符合，语义完全没变，正常运行
+    hook回放区: 顺序执行会回放原入口bti,由于不是间接跳所以不触发Branch Target Exception panic,不顺序不回放直接回上层
+    所以入口bti patch bti完美运行
+原函数入口paciasp/pacibsp:
+    patch为 bti: 刚好符合paciasp/pacibsp兼任的隐式 bti 落点,正常运行
+    hook回放区: 顺序执行会回放paciasp/pacibsp生成签名，原函数结尾AUTIASP/AUTIBSP认证签名,由于不顺序执行下不签名也不认证所以不触发PAC Fail exception，不顺序不回放直接回上层
+    所以入口paciasp/pacibsp patch bti完美运行，
 */
 
-#define HOOK_STUB_WORDS     4
+#define HOOK_STUB_WORDS     5
 #define HOOK_STUB_BYTES     (HOOK_STUB_WORDS * 4)
 #define HOOK_METADATA_BYTES 32
 #define HOOK_REGS_BYTES     272
 #define HOOK_FRAME_BYTES    (HOOK_METADATA_BYTES + HOOK_REGS_BYTES)
 
-#define TRAMP_WORDS             124
+#define TRAMP_WORDS             126
 #define TRAMP_BYTES             (TRAMP_WORDS * 4)
 #define TRAMP_SLOT_COUNT        32
 #define TRAMP_REPLAY_INST_INDEX 57
-#define TRAMP_RET_TO_ORIG_INDEX 61
+#define TRAMP_RET_TO_ORIG_INDEX 62
 #define TRAMP_RET_SLOT_INDEX    116
 #define TRAMP_WORK_SLOT_INDEX   118
 #define TRAMP_BRANCH_SLOT_INDEX 120
@@ -91,8 +111,6 @@ struct hook_entry
 
 // 槽位指针同时记录占用状态，并供卸载全部 hook 时找到保存的原始指令。
 static struct hook_entry *g_slot_entries[TRAMP_SLOT_COUNT];
-// get_kprobe 未导出，首次需要时通过 kallsyms 解析并缓存其精确函数签名。
-static struct kprobe *(*fn_get_kprobe)(void *addr);
 
 // 分配并获取一个槽位
 static int slot_alloc(struct hook_entry *entry, uint32_t **trampoline_out)
@@ -113,7 +131,7 @@ static void slot_free(int index)
 }
 
 // patch预留代码段
-static int trampoline_patch(uint32_t *dst, const uint32_t *src)
+__attribute__((no_sanitize("cfi", "kcfi"))) static int trampoline_patch(uint32_t *dst, const uint32_t *src)
 {
     if (!fn_aarch64_insn_patch_text) return -ENOENT;
 
@@ -126,9 +144,10 @@ static int trampoline_patch(uint32_t *dst, const uint32_t *src)
 static void hook_save_orig_insts(uint64_t addr, uint32_t *insts, int count)
 {
     // AArch64指令天然4字节对齐，这里逐条READ_ONCE保存入口被覆盖的指令word。
-    for (int i = 0; i < count; i++) insts[i] = READ_ONCE(*(uint32_t *)(uintptr_t)(addr + i * 4));
+    for (int i = 0; i < count; i++) insts[i] = READ_ONCE(*(uint32_t *)(addr + i * 4));
 }
 
+// ADR/ADRP、立即数分支、literal load/prefetch 按跳板 PC 原地单条重编码，超出各自范围或无法保持语义时拒绝安装。
 // 条件分支先跳到本槽近端 B 跳板，保持寄存器/NZCV 和原分支语义；不使用 scratch 寄存器。
 static int hook_relocate_cond_branch(uint64_t source_addr, uint64_t replay_addr,
                                     uint32_t *insts, int count, int index,
@@ -165,50 +184,75 @@ static int hook_relocate_cond_branch(uint64_t source_addr, uint64_t replay_addr,
     }
 }
 
-// ADR/ADRP 和条件分支按实际 PC 重定位；B/BL 及 literal load 仍拒绝安装。
-static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr, uint32_t *insts, int count)
+// Keep local near branch islands while relocating replay instructions.
+__attribute__((no_sanitize("cfi", "kcfi"))) static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr, uint32_t *insts, int count)
 {
     if (!insts || count <= 0 || count > HOOK_STUB_WORDS) return -EINVAL;
 
     // 由统一编码器生成 BRK #4 的指令
     // ARM64 kprobe 用 BRK #4 替换被探测指令，原指令保存在 struct kprobe::opcode。
     uint32_t kprobe_brk_inst;
-    int ret = arm64_encode_brk(4U, &kprobe_brk_inst);
-    if (ret) return ret;
+    {
+        int ret = arm64_encode_brk(4U, &kprobe_brk_inst);
+        if (ret) return ret;
+    }
 
     for (int i = 0; i < count; i++)
     {
-        struct arm64_decoded_instruction decoded;
         uint64_t source_pc = source_addr + i * sizeof(uint32_t);
-        uint64_t replay_pc = replay_addr + i * sizeof(uint32_t);
 
         // saved_inst[] 保留目标入口的真实现场；这里只解包 tramp_code[] 中的回放副本，
         // 避免把 kprobe 的 BRK 搬到跳板后因跳板地址不在 kprobe 表中而触发未处理异常。
         if (insts[i] == kprobe_brk_inst)
         {
-            struct kprobe *probe;
-            // 保存从 struct kprobe::opcode 读取的原指令，即目标地址被 BRK #4 替换前的指令。
-            uint32_t original_inst = 0;
-            bool resolved = false;
-
             // kallsyms 解析内部会临时注册 kprobe，可能调度，不能放在下面的禁抢占区间中。
+            // get_kprobe 未导出，首次需要时通过 kallsyms 解析并缓存其精确函数签名。
+            static struct kprobe *(*fn_get_kprobe)(void *addr);
             if (!fn_get_kprobe) fn_get_kprobe = (void *)generic_kallsyms_lookup_name("get_kprobe");
             if (!fn_get_kprobe)
             {
                 ls_log_always_tag("hook", "get_kprobe symbol not found for source=0x%llx\n", (unsigned long long)source_pc);
                 return -ENOENT;
             }
-
-            // get_kprobe 返回 kprobe 哈希表中的活动对象。禁抢占覆盖查表、现场复核和
-            // opcode 复制全过程；恢复抢占前复制出原指令，之后不再解引用 probe。
-            preempt_disable();
-            probe = fn_get_kprobe((void *)(uintptr_t)source_pc);
-            // 同时校验表项地址和目标现场仍为 BRK #4，拒绝使用已变化或不匹配的表项。
-            if (probe && probe->addr == (kprobe_opcode_t *)(uintptr_t)source_pc && READ_ONCE(*(uint32_t *)(uintptr_t)source_pc) == kprobe_brk_inst)
+            // 只用于识别同一地址的聚合 probe，不调用这个内核分发函数。
+            static int (*fn_aggr_pre_handler)(struct kprobe *probe, struct pt_regs *regs);
+            if (!fn_aggr_pre_handler) fn_aggr_pre_handler = (void *)generic_kallsyms_lookup_name("aggr_pre_handler");
+            if (!fn_aggr_pre_handler)
             {
-                original_inst = READ_ONCE(probe->opcode);
-                resolved = true;
+                //这个失败无关紧要记录输出，继续安装
+                ls_log_always_tag("hook", "aggr_pre_handler symbol not found for source=0x%llx; entry handlers only\n", (unsigned long long)source_pc);
             }
+
+            // 保存从 struct kprobe::opcode 读取的原指令，即目标地址被 BRK #4 替换前的指令。
+            uint32_t original_inst = 0;
+            bool resolved = false;
+            preempt_disable();
+            rcu_read_lock();
+            {
+                struct kprobe *probe = fn_get_kprobe((void *)source_pc);
+                // 同时校验表项地址和目标现场仍为 BRK #4，拒绝使用已变化或不匹配的表项。
+                if (probe && probe->addr == (kprobe_opcode_t *)source_pc && READ_ONCE(*(uint32_t *)source_pc) == kprobe_brk_inst)
+                {
+                    original_inst = READ_ONCE(probe->opcode);
+                    resolved = true;
+                    if (fn_aggr_pre_handler && READ_ONCE(probe->pre_handler) == fn_aggr_pre_handler)
+                    {
+                        // 聚合入口只是内核分发器；继续列出启用子 probe 的回调，才能看到实际处理函数及模块。
+                        ls_log_always_tag("hook", "kprobe target=%ps dispatcher=%ps\n", (void *)source_pc, (void *)fn_aggr_pre_handler);
+                        struct kprobe *child;
+                        list_for_each_entry_rcu(child, &probe->list, list)
+                        {
+                            if (READ_ONCE(child->flags) & KPROBE_FLAG_DISABLED) continue;
+                            ls_log_always_tag("hook", "kprobe target=%ps pre_handler=%ps post_handler=%ps\n", (void *)source_pc, (void *)READ_ONCE(child->pre_handler), (void *)READ_ONCE(child->post_handler));
+                        }
+                    }
+                    else
+                    {
+                        ls_log_always_tag("hook", "kprobe target=%ps pre_handler=%ps post_handler=%ps\n", (void *)source_pc, (void *)READ_ONCE(probe->pre_handler), (void *)READ_ONCE(probe->post_handler));
+                    }
+                }
+            }
+            rcu_read_unlock();
             preempt_enable();
 
             if (!resolved)
@@ -223,19 +267,22 @@ static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr
                 return -ELOOP;
             }
 
-            ls_log_always_tag("hook", "resolved kprobe BRK source=0x%llx opcode=%08x\n", (unsigned long long)source_pc, original_inst);
             // 只替换回放副本；e->saved_inst[] 仍保存 BRK 现场，卸载时按原现场恢复。
             insts[i] = original_inst;
         }
 
-        // 对解包后的真实原指令继续执行既有 ADR/ADRP relocation 和不支持指令检查。
-        enum arm64_decode_status decode_status = arm64_decode_instruction(insts[i], &decoded);
-        if (decode_status != ARM64_DECODE_OK)
+        // 对解包后的真实原指令继续执行 PC 相对指令重定位和不支持指令检查。
+        struct arm64_decoded_instruction decoded;
         {
-            ls_log_always_tag("hook", "instruction cannot be replayed status=%u addr=0x%llx inst=%08x\n", decode_status, (unsigned long long)source_pc, insts[i]);
-            return -EOPNOTSUPP;
+            enum arm64_decode_status decode_status = arm64_decode_instruction(insts[i], &decoded);
+            if (decode_status != ARM64_DECODE_OK)
+            {
+                ls_log_always_tag("hook", "instruction cannot be replayed status=%u addr=0x%llx inst=%08x\n", decode_status, (unsigned long long)source_pc, insts[i]);
+                return -EOPNOTSUPP;
+            }
         }
 
+        uint64_t replay_pc = replay_addr + i * sizeof(uint32_t);
         switch (decoded.instruction_class)
         {
         case ARM64_INSTRUCTION_CLASS_DATA_PROCESSING_IMMEDIATE:
@@ -255,48 +302,88 @@ static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr
             break;
         }
         case ARM64_INSTRUCTION_CLASS_BRANCH_EXCEPTION_SYSTEM:
+        {
             // B/BL/B.cond/CBZ/CBNZ/TBZ/TBNZ 等立即数分支使用当前PC计算目标，不能原样搬到跳板回放区，
             // 否则会基于 replay_pc 跳到错误地址；只有完成目标重定位后才能安全回放。
-            // BR/BLR 等寄存器间接跳转不依赖当前PC，回放前寄存器现场已恢复，可以保留原指令执行。
+            // BR/BLR 的目标由寄存器给出，仍保留原指令；此处不修正被入口长跳覆盖的 X16 或寄存器内的目标地址。
+            /*
+            B 是同函数内部的跳转，也是正常尾调用，也可能被hook了
+            B/BL 为 [-128 MiB, +128 MiB - 4]，B.cond/CBZ/CBNZ 为 [-1 MiB, +1 MiB - 4]，TBZ/TBNZ 为 [-32 KiB, +32 KiB - 4]。
+
+            */
+            uint64_t target = source_pc + decoded.offset;
+            uint64_t target_offset = target - source_addr;
+            // 跳入被覆盖区时改跳对应回放指令，不能落入已 patch 的入口；覆盖区末尾仍跳回原函数。
+            if (target_offset < (uint64_t)count * sizeof(uint32_t)) target = replay_addr + target_offset;
+
+            int status;
             switch (decoded.instruction)
             {
             case ARM64_INST_B:
-                // 无条件立即数跳转B出现在函数入口被覆盖区时，正常函数序言绝对不可能出现这种指令，进来立马无条件立即数跳
-                // 出现就说明目标入口已经被其他代码、ftrace或厂商插桩改写为跳板。
-                // B使用当前PC计算目标，原样搬到回放区会跳到错误地址，因此拒绝安装。然后也是暂时不做适配和重编码
+                status = arm64_encode_b(replay_pc, target, &insts[i]);
+                break;
             case ARM64_INST_BL:
-                // 无条件带链接立即数跳转BL，同样依赖当前PC；正常函数会出现这种情况，然后也是暂时不做适配
-                ls_log_always_tag("hook", "pc-relative instruction cannot be replayed addr=0x%llx inst=%08x\n", (unsigned long long)source_pc, insts[i]);
-                return -EOPNOTSUPP;
+                status = arm64_encode_bl(replay_pc, target, &insts[i]);
+                break;
             case ARM64_INST_B_COND:
             case ARM64_INST_CBZ:
             case ARM64_INST_CBNZ:
             case ARM64_INST_TBZ:
             case ARM64_INST_TBNZ:
-            {
-                int status = hook_relocate_cond_branch(source_addr, replay_addr, insts, count, i, &decoded);
-                if (status) return status;
-                continue;
-            }
+                status = hook_relocate_cond_branch(source_addr, replay_addr, insts, count, i, &decoded);
+                break;
             default:
                 continue;
             }
+            if (status)
+            {
+                ls_log_always_tag("hook", "branch relocation failed source=0x%llx replay=0x%llx target=0x%llx inst=%08x status=%d\n", (unsigned long long)source_pc, (unsigned long long)replay_pc, (unsigned long long)target, insts[i], status);
+                return status;
+            }
+            break;
+        }
         case ARM64_INSTRUCTION_CLASS_LOAD_STORE:
+        {
+            // 普通寄存器基址/栈基址 load/store 可以原样回放；literal load / prefetch 按原数据地址重编码。
+            enum arm64_encode_load_store_kind kind = ARM64_ENCODE_LS_GPR32;
+            uint32_t access_bytes = decoded.operand_width / 8;
             switch (decoded.instruction)
             {
             case ARM64_INST_LDR_GPR_LITERAL:
+                kind = decoded.operand_width == 64 ? ARM64_ENCODE_LS_GPR64 : ARM64_ENCODE_LS_GPR32;
+                break;
             case ARM64_INST_LDRSW_LITERAL:
+                kind = ARM64_ENCODE_LS_LDRSW;
+                access_bytes = sizeof(uint32_t); // LDRSW 读取 4 字节后符号扩展到 64 位，不是读取 8 字节。
+                break;
             case ARM64_INST_LDR_FP_SIMD_LITERAL:
+                kind = decoded.operand_width == 128 ? ARM64_ENCODE_LS_SIMD128 : decoded.operand_width == 64 ? ARM64_ENCODE_LS_FP64 : ARM64_ENCODE_LS_FP32;
+                break;
             case ARM64_INST_PRFM_LITERAL:
-                /*
-            PC 相对 literal load / prefetch也是暂时不支持重编码
-            普通寄存器基址/栈基址 load/store可以原样回放
-            */
-                ls_log_always_tag("hook", "pc-relative instruction cannot be replayed addr=0x%llx inst=%08x\n", (unsigned long long)source_pc, insts[i]);
-                return -EOPNOTSUPP;
+                access_bytes = 0; // PRFM 只保留预取地址及操作字段，不读取字面量的内容。
+                break;
             default:
                 continue;
             }
+            uint64_t target = source_pc + decoded.offset;
+            /*
+            literal 指向数据而不是执行位置，不能像分支那样映射到已重编码的回放指令。
+            若读取范围与入口覆盖区重叠（包含从区外跨入），安装后会读到 patch 数据，直接拒绝。
+            保持原数据地址并单条编码，范围为 [-1 MiB, +1 MiB - 4]
+            */
+            if (access_bytes && (target - source_addr < (uint64_t)count * sizeof(uint32_t) || source_addr - target < access_bytes))
+            {
+                ls_log_always_tag("hook", "literal load overlaps patched entry source=0x%llx target=0x%llx bytes=%u inst=%08x\n", (unsigned long long)source_pc, (unsigned long long)target, access_bytes, insts[i]);
+                return -EOPNOTSUPP;
+            }
+            int status = decoded.instruction == ARM64_INST_PRFM_LITERAL ? arm64_encode_prfm_literal(decoded.immediate, replay_pc, target, &insts[i]) : arm64_encode_ldr_literal(kind, decoded.rt, replay_pc, target, &insts[i]);
+            if (status)
+            {
+                ls_log_always_tag("hook", "literal relocation failed source=0x%llx replay=0x%llx target=0x%llx inst=%08x status=%d\n", (unsigned long long)source_pc, (unsigned long long)replay_pc, (unsigned long long)target, insts[i], status);
+                return status;
+            }
+            break;
+        }
         default:
             continue;
         }
@@ -306,14 +393,14 @@ static int hook_relocate_replay_insts(uint64_t source_addr, uint64_t replay_addr
 }
 
 // 批量 patch 一段 AArch64 指令；aarch64_insn_patch_text 内部负责 stop_machine 同步。
-static int hook_patch_words(uint64_t addr, const uint32_t *insts, int count)
+__attribute__((no_sanitize("cfi", "kcfi"))) static int hook_patch_words(uint64_t addr, const uint32_t *insts, int count)
 {
     if (!fn_aarch64_insn_patch_text) return -ENOENT;
 
     if (count <= 0 || count > HOOK_STUB_WORDS) return -EINVAL;
 
     void *addrs[HOOK_STUB_WORDS];
-    for (int i = 0; i < count; i++) addrs[i] = (void *)(uintptr_t)(addr + i * 4);
+    for (int i = 0; i < count; i++) addrs[i] = (void *)(addr + i * 4);
 
     return fn_aarch64_insn_patch_text(addrs, (uint32_t *)insts, count);
 }
@@ -353,9 +440,9 @@ static void trampoline_build(uint32_t *buf, const uint32_t saved_inst[HOOK_STUB_
         0x9104C3E9, // [17] add x9, sp, #304
         0xF9008FE9, // [18] str x9, [sp, #280]     < pt_regs.sp
 
-        // 保存原始PC。RET_SLOT里存 target_addr + 16，减16得到被hook覆盖的入口地址
+        // 保存原始PC。RET_SLOT里存 target_addr + 20，减20得到被hook覆盖的入口地址
         0x58000C29, // [19] ldr x9, [pc, #0x184]  < RET_SLOT
-        0xD1004129, // [20] sub x9, x9, #16        < pt_regs.pc = target_addr
+        0xD1005129, // [20] sub x9, x9, #20        < pt_regs.pc = target_addr
         0xF90093E9, // [21] str x9, [sp, #288]     < pt_regs.pc
 
         // 保存NZCV条件标志到 pt_regs.pstate。这里不是完整PSTATE，只保留本跳板能恢复的NZCV位
@@ -370,16 +457,16 @@ static void trampoline_build(uint32_t *buf, const uint32_t saved_inst[HOOK_STUB_
 
         // work_fn返回值只决定后续是否继续原函数；无论返回什么，后面都会恢复保存现场
         0xF100041F, // [28] cmp x0, #1
-        0x54000440, // [29] b.eq [63]
+        0x54000460, // [29] b.eq [64]
 
         // 返回0时，如果 work_fn 改了 pt_regs.pc，不执行原指令，直接走动态PC路径
         0x58000AC9, // [30] ldr x9, [pc, #0x158]  < RET_SLOT
-        0xD1004129, // [31] sub x9, x9, #16
+        0xD1005129, // [31] sub x9, x9, #20
         0xF94093EA, // [32] ldr x10, [sp, #288]    < work_fn 修改后的 pt_regs.pc
         0xEB09015F, // [33] cmp x10, x9
-        0x54000721, // [34] b.ne [91]              < pc 被修改，走动态pc路径
+        0x54000741, // [34] b.ne [92]              < pc 被修改，走动态pc路径
 
-        // 返回0且PC没改：恢复 regs->sp / regs->pstate / regs[0..30]，回放被覆盖的4条指令，再ret跳回原函数
+        // 返回0且PC没改：恢复 regs->sp / regs->pstate / regs[0..30]，回放被覆盖的5条指令，再ret跳回原函数
         // x16暂存pt_regs基址，x17暂存最终SP；切回SP后再恢复原x16/x17，避免破坏原始指令现场
         0x910083F0, // [35] add x16, sp, #32       < synthetic pt_regs 基指针
         0xF9407E11, // [36] ldr x17, [x16, #248]   < 恢复目标sp
@@ -407,78 +494,74 @@ static void trampoline_build(uint32_t *buf, const uint32_t saved_inst[HOOK_STUB_
         0x00000000, // [58] replay_inst[1]  <动态填
         0x00000000, // [59] replay_inst[2]  <动态填
         0x00000000, // [60] replay_inst[3]  <动态填
-        0x580006F0, // [61] ldr x16, [pc, #0xDC] < RET_SLOT
-        0xD65F0200, // [62] ret x16              < 跳回 target_addr + 16
+        0x00000000, // [61] replay_inst[4]  <动态填
+        0x580006D0, // [62] ldr x16, [pc, #0xD8] < RET_SLOT
+        0xD65F0200, // [63] ret x16              < 跳回 target_addr + 20
 
         // 返回1时，不继续执行原函数；但仍先检查PC是否被改，改了就按新的regs->pc跳走
-        0x580006A9, // [63] ldr x9, [pc, #0xD4]   < RET_SLOT
-        0xD1004129, // [64] sub x9, x9, #16
-        0xF94093EA, // [65] ldr x10, [sp, #288]    < work_fn 修改后的 pt_regs.pc
-        0xEB09015F, // [66] cmp x10, x9
-        0x54000301, // [67] b.ne [91]              < pc 被修改，走动态pc路径
+        0x58000689, // [64] ldr x9, [pc, #0xD0]   < RET_SLOT
+        0xD1005129, // [65] sub x9, x9, #20
+        0xF94093EA, // [66] ldr x10, [sp, #288]    < work_fn 修改后的 pt_regs.pc
+        0xEB09015F, // [67] cmp x10, x9
+        0x54000301, // [68] b.ne [92]              < pc 被修改，走动态pc路径
 
         // 返回1且PC没改：恢复 regs->sp / regs->pstate / regs[0..30] 后 ret x30
-        0x910083F0, // [68] add x16, sp, #32
-        0xF9407E11, // [69] ldr x17, [x16, #248]
-        0xF9408609, // [70] ldr x9, [x16, #264]
-        0xD51B4209, // [71] msr nzcv, x9
-        0xF9407A1E, // [72] ldr x30, [x16, #240]
-        0xA94E761C, // [73] ldp x28, x29, [x16, #224]
-        0xA94D6E1A, // [74] ldp x26, x27, [x16, #208]
-        0xA94C6618, // [75] ldp x24, x25, [x16, #192]
-        0xA94B5E16, // [76] ldp x22, x23, [x16, #176]
-        0xA94A5614, // [77] ldp x20, x21, [x16, #160]
-        0xA9494E12, // [78] ldp x18, x19, [x16, #144]
-        0xA9473E0E, // [79] ldp x14, x15, [x16, #112]
-        0xA946360C, // [80] ldp x12, x13, [x16, #96]
-        0xA9452E0A, // [81] ldp x10, x11, [x16, #80]
-        0xA9442608, // [82] ldp x8, x9, [x16, #64]
-        0xA9431E06, // [83] ldp x6, x7, [x16, #48]
-        0xA9421604, // [84] ldp x4, x5, [x16, #32]
-        0xA9410E02, // [85] ldp x2, x3, [x16, #16]
-        0xA9400600, // [86] ldp x0, x1, [x16]
-        0x9100023F, // [87] mov sp, x17
-        0xF9404611, // [88] ldr x17, [x16, #136]
-        0xF9404210, // [89] ldr x16, [x16, #128]
-        0xD65F03C0, // [90] ret x30
+        0x910083F0, // [69] add x16, sp, #32
+        0xF9407E11, // [70] ldr x17, [x16, #248]
+        0xF9408609, // [71] ldr x9, [x16, #264]
+        0xD51B4209, // [72] msr nzcv, x9
+        0xF9407A1E, // [73] ldr x30, [x16, #240]
+        0xA94E761C, // [74] ldp x28, x29, [x16, #224]
+        0xA94D6E1A, // [75] ldp x26, x27, [x16, #208]
+        0xA94C6618, // [76] ldp x24, x25, [x16, #192]
+        0xA94B5E16, // [77] ldp x22, x23, [x16, #176]
+        0xA94A5614, // [78] ldp x20, x21, [x16, #160]
+        0xA9494E12, // [79] ldp x18, x19, [x16, #144]
+        0xA9473E0E, // [80] ldp x14, x15, [x16, #112]
+        0xA946360C, // [81] ldp x12, x13, [x16, #96]
+        0xA9452E0A, // [82] ldp x10, x11, [x16, #80]
+        0xA9442608, // [83] ldp x8, x9, [x16, #64]
+        0xA9431E06, // [84] ldp x6, x7, [x16, #48]
+        0xA9421604, // [85] ldp x4, x5, [x16, #32]
+        0xA9410E02, // [86] ldp x2, x3, [x16, #16]
+        0xA9400600, // [87] ldp x0, x1, [x16]
+        0x9100023F, // [88] mov sp, x17
+        0xF9404611, // [89] ldr x17, [x16, #136]
+        0xF9404210, // [90] ldr x16, [x16, #128]
+        0xD65F03C0, // [91] ret x30
 
         // 动态PC路径：work_fn修改了 regs->pc，恢复现场后跳到新的PC
         // x17暂存pt_regs基址，x16承载最终跳转目标，x15暂存最终SP；最后使用 ret x16 兼容BTI场景
-        0x910083F1, // [91] add x17, sp, #32       < synthetic pt_regs 基指针
-        0xF9408230, // [92] ldr x16, [x17, #256]   < 动态pc 目标地址
-        0xF9407E2F, // [93] ldr x15, [x17, #248]   < 恢复目标sp
-        0xF9408629, // [94] ldr x9, [x17, #264]
-        0xD51B4209, // [95] msr nzcv, x9
-        0xF9407A3E, // [96] ldr x30, [x17, #240]
-        0xA94E763C, // [97] ldp x28, x29, [x17, #224]
-        0xA94D6E3A, // [98] ldp x26, x27, [x17, #208]
-        0xA94C6638, // [99] ldp x24, x25, [x17, #192]
-        0xA94B5E36, // [100] ldp x22, x23, [x17, #176]
-        0xA94A5634, // [101] ldp x20, x21, [x17, #160]
-        0xA9494E32, // [102] ldp x18, x19, [x17, #144]
-        0xF9403A2E, // [103] ldr x14, [x17, #112]
-        0xA946362C, // [104] ldp x12, x13, [x17, #96]
-        0xA9452E2A, // [105] ldp x10, x11, [x17, #80]
-        0xA9442628, // [106] ldp x8, x9, [x17, #64]
-        0xA9431E26, // [107] ldp x6, x7, [x17, #48]
-        0xA9421624, // [108] ldp x4, x5, [x17, #32]
-        0xA9410E22, // [109] ldp x2, x3, [x17, #16]
-        0xA9400620, // [110] ldp x0, x1, [x17]
-        0x910001FF, // [111] mov sp, x15
-        0xF9403E2F, // [112] ldr x15, [x17, #120]
-        0xF9404631, // [113] ldr x17, [x17, #136]
-        0xD65F0200, // [114] ret x16              < 跳到修改后的 pt_regs.pc
-        0xD503201F, // [115] nop                  < 保持后面的64位数据槽8字节对齐
+        0x910083F1, // [92] add x17, sp, #32       < synthetic pt_regs 基指针
+        0xF9408230, // [93] ldr x16, [x17, #256]   < 动态pc 目标地址
+        0xF9407E2F, // [94] ldr x15, [x17, #248]   < 恢复目标sp
+        0xF9408629, // [95] ldr x9, [x17, #264]
+        0xD51B4209, // [96] msr nzcv, x9
+        0xF9407A3E, // [97] ldr x30, [x17, #240]
+        0xA94E763C, // [98] ldp x28, x29, [x17, #224]
+        0xA94D6E3A, // [99] ldp x26, x27, [x17, #208]
+        0xA94C6638, // [100] ldp x24, x25, [x17, #192]
+        0xA94B5E36, // [101] ldp x22, x23, [x17, #176]
+        0xA94A5634, // [102] ldp x20, x21, [x17, #160]
+        0xA9494E32, // [103] ldp x18, x19, [x17, #144]
+        0xF9403A2E, // [104] ldr x14, [x17, #112]
+        0xA946362C, // [105] ldp x12, x13, [x17, #96]
+        0xA9452E2A, // [106] ldp x10, x11, [x17, #80]
+        0xA9442628, // [107] ldp x8, x9, [x17, #64]
+        0xA9431E26, // [108] ldp x6, x7, [x17, #48]
+        0xA9421624, // [109] ldp x4, x5, [x17, #32]
+        0xA9410E22, // [110] ldp x2, x3, [x17, #16]
+        0xA9400620, // [111] ldp x0, x1, [x17]
+        0x910001FF, // [112] mov sp, x15
+        0xF9403E2F, // [113] ldr x15, [x17, #120]
+        0xF9404631, // [114] ldr x17, [x17, #136]
+        0xD65F0200, // [115] ret x16              < 跳到修改后的 pt_regs.pc
 
         // 数据槽统一放末尾，跳走后永远不会顺序执行到这里
-        0x00000000, // [116] RET_SLOT low32       < target_addr + 16
+        0x00000000, // [116] RET_SLOT low32       < target_addr + 20
         0x00000000, // [117] RET_SLOT high32
         0x00000000, // [118] WORK_SLOT low32      < work_fn
         0x00000000, // [119] WORK_SLOT high32
-        0xD503201F, // [120..123] 每条回放指令各有一个近端条件分支 B 跳板
-        0xD503201F,
-        0xD503201F,
-        0xD503201F,
     };
 
     /*
@@ -490,7 +573,7 @@ static void trampoline_build(uint32_t *buf, const uint32_t saved_inst[HOOK_STUB_
     BUILD_BUG_ON(offsetof(struct pt_regs, pc) != 256);
     BUILD_BUG_ON(offsetof(struct pt_regs, pstate) != 264);
     BUILD_BUG_ON(offsetof(struct pt_regs, orig_x0) != HOOK_REGS_BYTES);
-    // 被覆盖的4个word回放完后，必须紧跟跳回原函数后续地址的ldr/ret序列。
+    // 被覆盖的5个word回放完后，必须紧跟跳回原函数后续地址的ldr/ret序列。
     BUILD_BUG_ON(TRAMP_RET_TO_ORIG_INDEX != TRAMP_REPLAY_INST_INDEX + HOOK_STUB_WORDS);
     BUILD_BUG_ON(TRAMP_BRANCH_SLOT_INDEX + HOOK_STUB_WORDS > TRAMP_WORDS);
 
@@ -502,14 +585,11 @@ static void trampoline_build(uint32_t *buf, const uint32_t saved_inst[HOOK_STUB_
     __builtin_memcpy(&buf[TRAMP_WORK_SLOT_INDEX], &work_fn, sizeof(uint64_t));
 
     // 内核环境里memcpy()可能被架构、内存访问检查(KASAN)，边界检查(FORTIFY)、插桩(instrumentation) 等机制包装或替换
-    // 直接使用__builtin_memcpy做纯数据拷贝绕过部分内核检查/插桩
 }
 
 // 安装单条hook
 static int hook_entry_install(struct hook_entry *e)
 {
-    int ret, slot;
-
     if (e->installed) return 0;
 
     // 查符号地址
@@ -526,63 +606,71 @@ static int hook_entry_install(struct hook_entry *e)
 
     // 保存入口即将被覆盖的原始指令。
     hook_save_orig_insts(e->target_addr, e->saved_inst, HOOK_STUB_WORDS);
-    ls_log_always_tag("hook", "original %s: 0x%llx: %08x %08x %08x %08x\n", e->target_sym ? e->target_sym : "<addr>", e->target_addr, e->saved_inst[0], e->saved_inst[1], e->saved_inst[2], e->saved_inst[3]);
+    const char *target_name = "<addr>";
+    if (e->target_sym) target_name = e->target_sym;
+    ls_log_always_tag("hook", "original %s: 0x%llx: %08x %08x %08x %08x %08x\n", target_name, e->target_addr, e->saved_inst[0], e->saved_inst[1], e->saved_inst[2], e->saved_inst[3], e->saved_inst[4]);
 
     // 分配并获取一个槽位
-    slot = slot_alloc(e, &e->trampoline);
+    int slot = slot_alloc(e, &e->trampoline);
     if (slot < 0) return -ENOSPC;
     e->slot_index = slot;
 
-    // return_addr = handler + 16(跳过被我们覆盖的4条指令)
+    // return_addr = handler + 20(跳过被我们覆盖的5条指令)
     uint64_t return_addr = e->target_addr + HOOK_STUB_BYTES;
 
     // 填充跳板，
-    uint32_t tramp_code[TRAMP_WORDS];
-    trampoline_build(tramp_code, e->saved_inst, (uint64_t)e->work_fn, return_addr);
-    //再只对回放区中的 ADR/ADRP 重编码。
-    ret = hook_relocate_replay_insts(e->target_addr, (uint64_t)e->trampoline + TRAMP_REPLAY_INST_INDEX * sizeof(uint32_t), &tramp_code[TRAMP_REPLAY_INST_INDEX], HOOK_STUB_WORDS);
-    if (ret)
     {
-        slot_free(slot);
-        e->slot_index = -1;
-        e->trampoline = NULL;
-        return ret;
+        uint32_t tramp_code[TRAMP_WORDS];
+        trampoline_build(tramp_code, e->saved_inst, (uint64_t)e->work_fn, return_addr);
+        // 只对回放区中的 PC 相对指令重编码，saved_inst 保留原指令供卸载恢复。
+        int ret = hook_relocate_replay_insts(e->target_addr, (uint64_t)e->trampoline + TRAMP_REPLAY_INST_INDEX * sizeof(uint32_t), &tramp_code[TRAMP_REPLAY_INST_INDEX], HOOK_STUB_WORDS);
+        if (ret)
+        {
+            slot_free(slot);
+            e->slot_index = -1;
+            e->trampoline = NULL;
+            return ret;
+        }
+
+        // 写到预留代码段槽位
+        ret = trampoline_patch(e->trampoline, tramp_code);
+        if (ret)
+        {
+            slot_free(slot);
+            e->slot_index = -1;
+            e->trampoline = NULL;
+            return ret;
+        }
     }
 
-    // 写到预留代码段槽位
-    ret = trampoline_patch(e->trampoline, tramp_code);
-    if (ret)
-    {
-        slot_free(slot);
-        e->slot_index = -1;
-        e->trampoline = NULL;
-        return ret;
-    }
-
-    // 编码入口ret跳板
+    // 编码固定入口 BTI JC + ret 长跳转，原始入口指令统一在回放区执行。
     uint32_t hook_code[HOOK_STUB_WORDS];
-    ret = arm64_emit_abs_jump((uint64_t)e->trampoline, 16, hook_code, HOOK_STUB_WORDS);
-    if (ret)
     {
-        slot_free(slot);
-        e->slot_index = -1;
-        e->trampoline = NULL;
-        return ret;
+        int ret = arm64_emit_bti_abs_jump((uint64_t)e->trampoline, 16, hook_code, HOOK_STUB_WORDS);
+        if (ret)
+        {
+            slot_free(slot);
+            e->slot_index = -1;
+            e->trampoline = NULL;
+            return ret;
+        }
     }
 
     // patch 目标函数入口；失败时恢复原始指令，避免半安装状态。
-    ret = hook_patch_words(e->target_addr, hook_code, HOOK_STUB_WORDS);
-    if (ret)
     {
-        hook_patch_words(e->target_addr, e->saved_inst, HOOK_STUB_WORDS);
-        slot_free(slot);
-        e->slot_index = -1;
-        e->trampoline = NULL;
-        return ret;
+        int ret = hook_patch_words(e->target_addr, hook_code, HOOK_STUB_WORDS);
+        if (ret)
+        {
+            hook_patch_words(e->target_addr, e->saved_inst, HOOK_STUB_WORDS);
+            slot_free(slot);
+            e->slot_index = -1;
+            e->trampoline = NULL;
+            return ret;
+        }
     }
 
     e->installed = true;
-    ls_log_always_tag("hook", "installed %s: target=0x%llx trampoline=0x%llx slot=%d work=0x%llx return=0x%llx hook=%08x %08x %08x %08x\n", e->target_sym ? e->target_sym : "<addr>", e->target_addr, (uint64_t)e->trampoline, e->slot_index, (uint64_t)e->work_fn, return_addr, hook_code[0], hook_code[1], hook_code[2], hook_code[3]);
+    ls_log_always_tag("hook", "installed %s: target=0x%llx trampoline=0x%llx slot=%d work=0x%llx return=0x%llx hook=%08x %08x %08x %08x %08x\n", target_name, e->target_addr, (uint64_t)e->trampoline, e->slot_index, (uint64_t)e->work_fn, return_addr, hook_code[0], hook_code[1], hook_code[2], hook_code[3], hook_code[4]);
     return 0;
 }
 
